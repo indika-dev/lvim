@@ -7,6 +7,9 @@ M.config = function()
   end
   lvim.plugins = {
     {
+      "Shatur/neovim-ayu",
+    },
+    {
       "rose-pine/neovim",
       as = "rose-pine",
       config = function()

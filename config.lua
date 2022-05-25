@@ -51,25 +51,6 @@ lvim.builtin.global_statusline = false -- set true to use global statusline
 lvim.builtin.dressing = { active = false } -- enable to override vim.ui.input and vim.ui.select with telescope
 lvim.builtin.refactoring = { active = false } -- enable to use refactoring.nvim code_actions
 
-local user = os.getenv "USER"
-if user and user == "abz" then
-  lvim.builtin.custom_web_devicons = true
-  lvim.use_icons = false -- only set to false if you know what are you doing
-  lvim.builtin.sell_your_soul_to_devil = { active = true, prada = false }
-  lvim.lsp.document_highlight = false
-  lvim.builtin.csv_support = true
-  lvim.builtin.async_tasks.active = true
-  lvim.builtin.dap.active = true
-  lvim.builtin.sql_integration.active = true
-  vim.g.instant_username = user
-  lvim.builtin.collaborative_editing.active = true
-  lvim.builtin.file_browser.active = true
-  lvim.builtin.global_statusline = true
-  lvim.builtin.dressing.active = true
-  lvim.builtin.fancy_wild_menu.active = true
-  lvim.builtin.refactoring.active = true
-  require("lvim.lsp.manager").setup("prosemd_lsp", {})
-end
 lvim.lsp.diagnostics.virtual_text = false -- remove this line if you want to see inline errors
 lvim.builtin.latex = {
   view_method = "skim", -- change to zathura if you are on linux
@@ -82,7 +63,30 @@ if lvim.builtin.cursorline.active then
   lvim.lsp.document_highlight = false
 end
 lvim.lsp.code_lens_refresh = true
-require("user.builtin").config()
+
+local user = os.getenv "USER"
+if user and user == "stefan" then
+  lvim.lsp.document_highlight = false
+  lvim.builtin.csv_support = true
+  lvim.builtin.async_tasks.active = true
+  lvim.builtin.dap.active = true
+  lvim.builtin.sql_integration.active = true
+  vim.g.instant_username = user
+  lvim.builtin.file_browser.active = true
+  lvim.builtin.global_statusline = true
+  lvim.builtin.dressing.active = true
+  lvim.builtin.refactoring.active = true
+  -- require("lvim.lsp.manager").setup("prosemd_lsp", {})
+  require("user.builtin").config()
+end
+
+-- Dashboard
+-- =========================================i^
+lvim.builtin.alpha.mode = "dashboard" -- "custom"
+if lvim.builtin.alpha.mode == "custom" then
+  local alpha_opts = require("user.dashboard").config()
+  lvim.builtin.alpha["custom"] = { config = alpha_opts }
+end
 
 -- StatusLine
 -- =========================================
@@ -120,8 +124,8 @@ require("user.plugins").config()
 
 -- Autocommands
 -- =========================================
-require("user.autocommands").config()
+-- require("user.autocommands").config()
 
 -- Additional keybindings
 -- =========================================
-require("user.keybindings").config()
+-- require("user.keybindings").config()
