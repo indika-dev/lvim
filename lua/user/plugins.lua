@@ -10,6 +10,15 @@ M.config = function()
       "Shatur/neovim-ayu",
       config = function()
         require("user.theme").ayu()
+        require("ayu").setup {
+          mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
+          overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+        }
+        require("lualine").setup {
+          options = {
+            theme = "ayu",
+          },
+        }
         vim.cmd [[colorscheme ayu-mirage]]
       end,
       cond = function()
@@ -20,8 +29,14 @@ M.config = function()
     {
       "rose-pine/neovim",
       as = "rose-pine",
+      tag = "v1.*",
       config = function()
-        require("user.theme").rose_pine()
+        require("lualine").setup {
+          options = {
+            ---@usage 'rose-pine' | 'rose-pine-alt'
+            theme = "rose-pine",
+          },
+        }
         vim.cmd [[colorscheme rose-pine]]
       end,
       cond = function()
@@ -56,7 +71,29 @@ M.config = function()
     {
       "rebelot/kanagawa.nvim",
       config = function()
-        require("user.theme").kanagawa()
+        require("kanagawa").setup {
+          undercurl = true, -- enable undercurls
+          commentStyle = "NONE",
+          functionStyle = "NONE",
+          keywordStyle = "italic",
+          statementStyle = "italic",
+          typeStyle = "NONE",
+          variablebuiltinStyle = "italic",
+          specialReturn = true, -- special highlight for the return keyword
+          specialException = true, -- special highlight for exception handling keywords
+          dimInactive = lvim.builtin.global_statusline, -- dim inactive window `:h hl-NormalNC`
+          globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
+          transparent = lvim.transparent_window,
+          colors = { sumiInk1b = "#1b1b23" },
+          overrides = {
+            diffRemoved = { fg = "#E46876" },
+          },
+        }
+        require("lualine").setup {
+          options = {
+            theme = "kanagawa",
+          },
+        }
         vim.cmd [[colorscheme kanagawa]]
       end,
       cond = function()
