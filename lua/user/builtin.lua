@@ -201,9 +201,9 @@ M.config = function()
 
   -- Dashboard
   -- =========================================
-  lvim.builtin.alpha.mode = "custom"
-  local alpha_opts = require("user.dashboard").config()
-  lvim.builtin.alpha["custom"] = { config = alpha_opts }
+  -- lvim.builtin.alpha.mode = "custom"
+  -- local alpha_opts = require("user.dashboard").config()
+  -- lvim.builtin.alpha["custom"] = { config = alpha_opts }
 
   -- LSP
   -- =========================================
@@ -290,6 +290,7 @@ M.config = function()
       error = kind.icons.error,
     },
   }
+  lvim.builtin.nvimtree.side = "left"
   lvim.builtin.nvimtree.icons = kind.nvim_tree_icons
   lvim.builtin.nvimtree.on_config_done = function(_)
     lvim.builtin.which_key.mappings["e"] = { "<cmd>NvimTreeToggle<CR>", " Explorer" }

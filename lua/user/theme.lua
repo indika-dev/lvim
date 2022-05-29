@@ -31,6 +31,13 @@ M.tokyonight = function()
   end
 end
 
+M.ayu = function()
+  require("ayu").setup {
+    mirage = true,
+    overrides = {},
+  }
+end
+
 M.rose_pine = function()
   require("rose-pine").setup {
     ---@usage 'main'|'moon'

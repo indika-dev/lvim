@@ -1,7 +1,7 @@
 -- Neovim
 -- =========================================
-lvim.format_on_save = false
-lvim.leader = " "
+lvim.format_on_save = true
+lvim.leader = "space"
 lvim.colorscheme = "pablo"
 lvim.debug = false
 vim.lsp.set_log_level "warn"
@@ -68,7 +68,7 @@ local user = os.getenv "USER"
 if user and user == "stefan" then
   lvim.lsp.document_highlight = false
   lvim.builtin.csv_support = true
-  lvim.builtin.async_tasks.active = true
+  lvim.builtin.async_tasks = { active = true } -- enable/disable async tasks
   lvim.builtin.dap.active = true
   lvim.builtin.sql_integration.active = true
   vim.g.instant_username = user
@@ -76,6 +76,8 @@ if user and user == "stefan" then
   lvim.builtin.global_statusline = true
   lvim.builtin.dressing.active = true
   lvim.builtin.refactoring.active = true
+  lvim.builtin.fancy_statusline = { active = true } -- enable/disable fancy statusline
+  lvim.lsp.diagnostics.virtual_text = true -- remove this line if you want to see inline errors
   -- require("lvim.lsp.manager").setup("prosemd_lsp", {})
   require("user.builtin").config()
 end
@@ -90,9 +92,104 @@ end
 
 -- StatusLine
 -- =========================================
-if lvim.builtin.fancy_statusline.active then
-  require("user.lualine").config()
+-- if lvim.builtin.fancy_statusline.active then
+local components = require "lvim.core.lualine.components"
+-- lvim.builtin.lualine.style = "lvim"
+
+local mode = function()
+  local mod = vim.fn.mode()
+  local _time = os.date "*t"
+  local selector = math.floor(_time.hour / 8) + 1
+  local normal_icons = {
+    "  ",
+    "  ",
+    "  ",
+  }
+  if mod == "n" or mod == "no" or mod == "nov" then
+    return normal_icons[selector]
+  elseif mod == "i" or mod == "ic" or mod == "ix" then
+    local insert_icons = {
+      "  ",
+      "  ",
+      "  ",
+    }
+    return insert_icons[selector]
+  elseif mod == "V" or mod == "v" or mod == "vs" or mod == "Vs" or mod == "cv" then
+    local verbose_icons = {
+      " 勇",
+      "  ",
+      "  ",
+    }
+    return verbose_icons[selector]
+  elseif mod == "c" or mod == "ce" then
+    local command_icons = {
+      "  ",
+      "  ",
+      "  ",
+    }
+
+    return command_icons[selector]
+  elseif mod == "r" or mod == "rm" or mod == "r?" or mod == "R" or mod == "Rc" or mod == "Rv" or mod == "Rv" then
+    local replace_icons = {
+      "  ",
+      "  ",
+      "  ",
+    }
+    return replace_icons[selector]
+  end
+  return normal_icons[selector]
 end
+
+local mode_map = {
+  ["n"] = "NORMAL",
+  ["no"] = "O-PENDING",
+  ["nov"] = "O-PENDING",
+  ["noV"] = "O-PENDING",
+  ["no�"] = "O-PENDING",
+  ["niI"] = "NORMAL",
+  ["niR"] = "NORMAL",
+  ["niV"] = "NORMAL",
+  ["nt"] = "NORMAL",
+  ["v"] = "VISUAL",
+  ["vs"] = "VISUAL",
+  ["V"] = "V-LINE",
+  ["Vs"] = "V-LINE",
+  ["�"] = "V-BLOCK",
+  ["�s"] = "V-BLOCK",
+  ["s"] = "SELECT",
+  ["S"] = "S-LINE",
+  ["�"] = "S-BLOCK",
+  ["i"] = "INSERT",
+  ["ic"] = "INSERT",
+  ["ix"] = "INSERT",
+  ["R"] = "REPLACE",
+  ["Rc"] = "REPLACE",
+  ["Rx"] = "REPLACE",
+  ["Rv"] = "V-REPLACE",
+  ["Rvc"] = "V-REPLACE",
+  ["Rvx"] = "V-REPLACE",
+  ["c"] = "COMMAND",
+  ["cv"] = "EX",
+  ["ce"] = "EX",
+  ["r"] = "REPLACE",
+  ["rm"] = "MORE",
+  ["r?"] = "CONFIRM",
+  ["!"] = "SHELL",
+  ["t"] = "TERMINAL",
+}
+lvim.builtin.lualine.sections.lualine_a = {
+  function()
+    return mode()
+    -- return mode_map[vim.fn.mode()] or "__"
+  end,
+}
+lvim.builtin.lualine.sections.lualine_y = {
+  -- components.location,
+  function()
+    return require("user.lsp_kind").icons.clock .. os.date "%H:%M"
+  end,
+}
+-- end
 
 -- Debugging
 -- =========================================

@@ -166,7 +166,19 @@ M.config = function()
     vim.g.neovide_cursor_trail_length = 0.05
     vim.g.neovide_cursor_antialiasing = true
     vim.g.neovide_remember_window_size = true
-    vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+    -- vim.g.neovide_cursor_vfx_mode = ''
+    -- command -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
+    -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
+    -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
+    -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
+    vim.o.guifont = "FiraCode Nerd Font:h12"
+    -- vim.o.guifont ="GoMono NF:h16"
+    -- vim.o.guifont ="FuraCode NF:h16"
+    -- vim.o.guifont ="Hack Nerd Font:h16"
+    -- vim.o.guifont ="NotoSansMono Nerd Font:h16"
+    -- vim.o.guifont ="SaucecodePro Nerd Font:h16"
+    -- vim.o.guifont ="UbuntuMonoDerivativePowerline Nerd Font:h16"
+    -- vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
   end
 
   if vim.g.nvui then

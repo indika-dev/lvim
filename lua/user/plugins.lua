@@ -8,6 +8,14 @@ M.config = function()
   lvim.plugins = {
     {
       "Shatur/neovim-ayu",
+      config = function()
+        require("user.theme").ayu()
+        vim.cmd [[colorscheme ayu-mirage]]
+      end,
+      cond = function()
+        local _time = os.date "*t"
+        return _time.hour >= 9 and _time.hour < 21
+      end,
     },
     {
       "rose-pine/neovim",
@@ -21,30 +29,30 @@ M.config = function()
         return (_time.hour >= 1 and _time.hour < 9)
       end,
     },
-    {
-      "abzcoding/tokyonight.nvim",
-      branch = "feat/local",
-      config = function()
-        require("user.theme").tokyonight()
-        vim.cmd [[colorscheme tokyonight]]
-      end,
-      cond = function()
-        local _time = os.date "*t"
-        return _time.hour >= 9 and _time.hour < 17
-      end,
-    },
-    {
-      "catppuccin/nvim",
-      as = "catppuccin",
-      config = function()
-        require("user.theme").catppuccin()
-        vim.cmd [[colorscheme catppuccin]]
-      end,
-      cond = function()
-        local _time = os.date "*t"
-        return (_time.hour >= 17 and _time.hour < 21)
-      end,
-    },
+    -- {
+    --   "abzcoding/tokyonight.nvim",
+    --   branch = "feat/local",
+    --   config = function()
+    --     require("user.theme").tokyonight()
+    --     vim.cmd [[colorscheme tokyonight]]
+    --   end,
+    --   cond = function()
+    --     local _time = os.date "*t"
+    --     return _time.hour >= 9 and _time.hour < 17
+    --   end,
+    -- },
+    -- {
+    --   "catppuccin/nvim",
+    --   as = "catppuccin",
+    --   config = function()
+    --     require("user.theme").catppuccin()
+    --     vim.cmd [[colorscheme catppuccin]]
+    --   end,
+    --   cond = function()
+    --     local _time = os.date "*t"
+    --     return (_time.hour >= 17 and _time.hour < 21)
+    --   end,
+    -- },
     {
       "rebelot/kanagawa.nvim",
       config = function()
@@ -431,13 +439,13 @@ M.config = function()
         require("user.filetype").config()
       end,
     },
-    {
-      "abzcoding/nvim-mini-file-icons",
-      config = function()
-        require("user.dev_icons").set_icon()
-      end,
-      disable = lvim.use_icons or not lvim.builtin.custom_web_devicons,
-    },
+    -- {
+    --   "abzcoding/nvim-mini-file-icons",
+    --   config = function()
+    --     require("user.dev_icons").set_icon()
+    --   end,
+    --   disable = lvim.use_icons or not lvim.builtin.custom_web_devicons,
+    -- },
     {
       "nvim-telescope/telescope-live-grep-raw.nvim",
     },
