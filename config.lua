@@ -76,7 +76,7 @@ if user and user == "stefan" then
   lvim.builtin.global_statusline = true
   lvim.builtin.dressing.active = true
   lvim.builtin.refactoring.active = true
-  lvim.builtin.fancy_statusline = { active = true } -- enable/disable fancy statusline
+  lvim.builtin.fancy_statusline = { active = false } -- enable/disable fancy statusline
   lvim.lsp.diagnostics.virtual_text = true -- remove this line if you want to see inline errors
   -- require("lvim.lsp.manager").setup("prosemd_lsp", {})
   require("user.builtin").config()

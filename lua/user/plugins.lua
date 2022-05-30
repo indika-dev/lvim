@@ -7,26 +7,6 @@ M.config = function()
   end
   lvim.plugins = {
     {
-      "Shatur/neovim-ayu",
-      config = function()
-        require("user.theme").ayu()
-        require("ayu").setup {
-          mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
-          overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
-        }
-        require("lualine").setup {
-          options = {
-            theme = "ayu",
-          },
-        }
-        vim.cmd [[colorscheme ayu-mirage]]
-      end,
-      cond = function()
-        local _time = os.date "*t"
-        return _time.hour >= 9 and _time.hour < 21
-      end,
-    },
-    {
       "rose-pine/neovim",
       as = "rose-pine",
       tag = "v1.*",
@@ -42,6 +22,25 @@ M.config = function()
       cond = function()
         local _time = os.date "*t"
         return (_time.hour >= 1 and _time.hour < 9)
+      end,
+    },
+    {
+      "Shatur/neovim-ayu",
+      config = function()
+        require("ayu").setup {
+          mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
+          overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+        }
+        require("lualine").setup {
+          options = {
+            theme = "ayu",
+          },
+        }
+        vim.cmd [[colorscheme ayu-mirage]]
+      end,
+      cond = function()
+        local _time = os.date "*t"
+        return _time.hour >= 9 and _time.hour < 21
       end,
     },
     -- {
@@ -464,7 +463,7 @@ M.config = function()
           ["*"] = vim.tbl_extend(
             "force",
             require("distant.settings").chip_default(),
-            { mode = "ssh" } -- use SSH mode by default
+            { mode = "ssh" }-- use SSH mode by default
           ),
         }
       end,
