@@ -45,8 +45,7 @@ M.config = function()
   vim.wo.foldmethod = "expr"
   vim.wo.foldexpr = "nvim_treesitter#foldexpr()"
   vim.wo.foldlevel = 4
-  vim.wo.foldtext =
-    [[substitute(getline(v:foldstart),'\\t',repeat('\ ',&tabstop),'g').'...'.trim(getline(v:foldend)) . ' (' . (v:foldend - v:foldstart + 1) . ' lines)']]
+  vim.wo.foldtext = [[substitute(getline(v:foldstart),'\\t',repeat('\ ',&tabstop),'g').'...'.trim(getline(v:foldend)) . ' (' . (v:foldend - v:foldstart + 1) . ' lines)']]
   vim.wo.foldnestmax = 3
   vim.wo.foldminlines = 1
   vim.opt.guifont = "FiraCode Nerd Font:h13"
@@ -171,7 +170,7 @@ M.config = function()
     -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
     -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
     -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
-    vim.o.guifont = "FiraCode Nerd Font:h12"
+    vim.o.guifont = "FiraCode NF:h12"
     -- vim.o.guifont ="GoMono NF:h16"
     -- vim.o.guifont ="FuraCode NF:h16"
     -- vim.o.guifont ="Hack Nerd Font:h16"

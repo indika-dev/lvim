@@ -17,10 +17,10 @@ if #launcher_path == 0 then
   )[1]
 end
 if vim.fn.has "mac" == 1 then
-  WORKSPACE_PATH = home .. "/workspace/"
+  WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
   CONFIG = "mac"
 elseif vim.fn.has "unix" == 1 then
-  WORKSPACE_PATH = home .. "/workspace/"
+  WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
   CONFIG = "linux"
 else
   print "Unsupported system"
@@ -45,11 +45,11 @@ local workspace_dir = WORKSPACE_PATH .. project_name
 -- cd ~/.config/lvim/.java-debug/
 -- ./mvnw clean install
 local bundles = vim.fn.glob(
-  home .. "/.config/lvim/.java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
+  home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
 )
 if #bundles == 0 then
   bundles = vim.fn.glob(
-    home .. "/.config/lvim/.java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar",
+    home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar",
     1,
     1
   )
@@ -60,9 +60,9 @@ end
 -- cd ~/.config/lvim/vscode-java-test
 -- npm install
 -- npm run build-plugin
-local extra_bundles = vim.split(vim.fn.glob(home .. "/.config/lvim/.vscode-java-test/server/*.jar"), "\n")
+local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
 if #extra_bundles == 0 then
-  extra_bundles = vim.fn.glob(home .. "/.config/lvim/.vscode-java-test/server/*.jar", 1, 1)
+  extra_bundles = vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar", 1, 1)
 end
 vim.list_extend(bundles, extra_bundles)
 
