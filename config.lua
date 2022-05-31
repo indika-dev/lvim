@@ -308,10 +308,10 @@ lvim.plugins = {
     "GustavoKatel/telescope-asynctasks.nvim",
     disable = not lvim.custom.async_tasks.active,
   },
-  -- {
-  -- 	"sindrets/diffview.nvim",
-  -- 	event = "BufRead",
-  -- },
+  {
+    "sindrets/diffview.nvim",
+    event = "BufRead",
+  },
   {
     "folke/zen-mode.nvim",
     config = function()
@@ -319,6 +319,41 @@ lvim.plugins = {
         -- your configuration comes here
         -- or leave it empty to use the default settings
         -- refer to the configuration section below
+      }
+    end,
+  },
+  {
+    "sidebar-nvim/sidebar.nvim",
+    requires = { "sidebar-nvim/sections-dap" },
+    config = function()
+      require("sidebar-nvim").setup {
+        disable_default_keybindings = 0,
+        bindings = {
+          ["q"] = function()
+            require("sidebar-nvim").close()
+          end,
+        },
+        open = false,
+        side = "right",
+        initial_width = 35,
+        hide_statusline = true,
+        update_interval = 1000,
+        sections = { "todos", "git", "diagnostics", "containers", require "dap-sidebar-nvim.breakpoints" },
+        section_separator = { "", "-----", "" },
+        containers = {
+          icon = "",
+          attach_shell = "/usr/bin/sh",
+          use_podman = true,
+          show_all = true,
+          interval = 5000,
+        },
+        datetime = { icon = "", format = "%a %b %d, %H:%M", clocks = { { name = "local" } } },
+        todos = { icon = "", ignored_paths = { "~" } },
+        dap = {
+          breakpoints = {
+            icon = require("user.lsp_kind").icons.exit,
+          },
+        },
       }
     end,
   },
@@ -393,7 +428,6 @@ lvim.plugins = {
       }
     end,
   },
-  { "sindrets/diffview.nvim", event = "BufRead" },
   {
     "rcarriga/nvim-dap-ui",
     config = function()
