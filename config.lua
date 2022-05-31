@@ -19,9 +19,9 @@ vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,
 lvim.log.level = "warn"
 lvim.format_on_save = true
 local _time = os.date "*t"
-if (_time.hour >= 1 and _time.hour < 9) then
+if _time.hour >= 1 and _time.hour < 9 then
   lvim.colorscheme = "rose-pine"
-elseif (_time.hour >= 9 and _time.hour < 21) then
+elseif _time.hour >= 9 and _time.hour < 21 then
   lvim.colorscheme = "ayu-mirage"
 else
   lvim.colorscheme = "kanagawa"
@@ -67,8 +67,6 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 -- lvim.builtin.dashboard.active = true
 lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
-lvim.builtin.nvimtree.side = "left"
-lvim.builtin.nvimtree.show_icons.git = 0
 lvim.builtin.dap.active = true
 lvim.builtin.notify.active = true
 lvim.builtin.treesitter.rainbow.enable = false
@@ -117,8 +115,8 @@ lvim.builtin.treesitter.highlight.enabled = true
 --   }
 -- }
 lvim.format_on_save = true
-local formatters = require("lvim.lsp.null-ls.formatters")
-formatters.setup({
+local formatters = require "lvim.lsp.null-ls.formatters"
+formatters.setup {
   {
     command = "stylua",
     filetypes = { "lua" },
@@ -153,10 +151,10 @@ formatters.setup({
   -- filetypes = { "javascript", "javascriptreact" },
   -- , "typescript", "typescriptreact" },
   -- },
-})
+}
 
-local linters = require("lvim.lsp.null-ls.linters")
-linters.setup({
+local linters = require "lvim.lsp.null-ls.linters"
+linters.setup {
   {
     command = "shellcheck",
     args = { "--severity", "warning" },
@@ -186,27 +184,31 @@ linters.setup({
     },
     filetypes = { "java" },
   },
-})
+}
+
+lvim.custom = {
+  metals = {
+    active = false, -- enable/disable nvim-metals for scala development
+    fallbackScalaVersion = "2.13.7",
+    serverVersion = "0.10.9+271-a8bb69f6-SNAPSHOT",
+  },
+  async_tasks = {
+    active = true,
+  },
+}
 
 -- Debugging
 -- =========================================
 if lvim.builtin.dap.active then
-  lvim.custom = {
-    metals = {
-      active = false, -- enable/disable nvim-metals for scala development
-      fallbackScalaVersion = "2.13.7",
-      serverVersion = "0.10.9+271-a8bb69f6-SNAPSHOT",
-    }
-  }
   require("user.dap").config()
 end
 
-local code_actions = require("lvim.lsp.null-ls.code_actions")
-code_actions.setup({
+local code_actions = require "lvim.lsp.null-ls.code_actions"
+code_actions.setup {
   {
     name = "proselint",
   },
-})
+}
 
 -- Additional Plugins
 lvim.plugins = {
@@ -271,10 +273,40 @@ lvim.plugins = {
     run = "cargo install --locked code-minimap",
     -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
     config = function()
-      vim.cmd("let g:minimap_width = 10")
-      vim.cmd("let g:minimap_auto_start = 0")
-      vim.cmd("let g:minimap_auto_start_win_enter = 0")
+      vim.cmd [[
+        let g:minimap_width = 10
+        let g:minimap_auto_start = 0
+        let g:minimap_auto_start_win_enter = 0
+      ]]
     end,
+  },
+  {
+    "skywind3000/asynctasks.vim",
+    requires = { "skywind3000/asyncrun.vim" },
+    setup = function()
+      vim.cmd [[
+          let g:asyncrun_open = 8
+          let g:asynctask_template = '~/.config/lvim/task_template.ini'
+          let g:asynctasks_extra_config = ['~/.config/lvim/tasks.ini']
+        ]]
+      lvim.builtin.which_key.mappings["m"] = {
+        name = " Make",
+        f = { "<cmd>AsyncTask file-build<cr>", "File" },
+        p = { "<cmd>AsyncTask project-build<cr>", "Project" },
+        e = { "<cmd>AsyncTaskEdit<cr>", "Edit" },
+        l = { "<cmd>AsyncTaskList<cr>", "List" },
+      }
+      lvim.builtin.which_key.mappings["r"] = {
+        name = " Run",
+        f = { "<cmd>AsyncTask file-run<cr>", "File" },
+        p = { "<cmd>AsyncTask project-run<cr>", "Project" },
+      }
+    end,
+    disable = not lvim.custom.async_tasks.active,
+  },
+  {
+    "GustavoKatel/telescope-asynctasks.nvim",
+    disable = not lvim.custom.async_tasks.active,
   },
   -- {
   -- 	"sindrets/diffview.nvim",
@@ -283,11 +315,11 @@ lvim.plugins = {
   {
     "folke/zen-mode.nvim",
     config = function()
-      require("zen-mode").setup({
+      require("zen-mode").setup {
         -- your configuration comes here
         -- or leave it empty to use the default settings
         -- refer to the configuration section below
-      })
+      }
     end,
   },
   {
@@ -303,7 +335,7 @@ lvim.plugins = {
     "kevinhwang91/nvim-bqf",
     event = { "BufRead", "BufNew" },
     config = function()
-      require("bqf").setup({
+      require("bqf").setup {
         auto_enable = true,
         preview = {
           win_height = 12,
@@ -322,21 +354,21 @@ lvim.plugins = {
             extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", "> " },
           },
         },
-      })
+      }
     end,
   },
   {
     "nvim-telescope/telescope-project.nvim",
     event = "BufWinEnter",
     setup = function()
-      vim.cmd([[packadd telescope.nvim]])
+      vim.cmd [[packadd telescope.nvim]]
     end,
   },
   {
     "karb94/neoscroll.nvim",
     event = "WinScrolled",
     config = function()
-      require("neoscroll").setup({
+      require("neoscroll").setup {
         -- All these keys will be mapped to their corresponding default scrolling animation
         mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
         hide_cursor = true, -- Hide cursor while scrolling
@@ -347,7 +379,7 @@ lvim.plugins = {
         easing_function = nil, -- Default easing function
         pre_hook = nil, -- Function to run before the scrolling animation starts
         post_hook = nil, -- Function to run after the scrolling animation ends
-      })
+      }
     end,
   },
   {
@@ -355,13 +387,13 @@ lvim.plugins = {
     event = "BufReadPre", -- this will only start session saving when an actual file was opened
     module = "persistence",
     config = function()
-      require("persistence").setup({
-        dir = vim.fn.expand(vim.fn.stdpath("config") .. "/session/"),
+      require("persistence").setup {
+        dir = vim.fn.expand(vim.fn.stdpath "config" .. "/session/"),
         options = { "buffers", "curdir", "tabpages", "winsize" },
-      })
+      }
     end,
   },
-  { "sindrets/diffview.nvim", event = "BufRead", },
+  { "sindrets/diffview.nvim", event = "BufRead" },
   {
     "rcarriga/nvim-dap-ui",
     config = function()
@@ -423,7 +455,6 @@ if vim.g.nvui then
   -- vim.cmd [[NvuiToggleFrameless]]
   vim.cmd [[NvuiOpacity 0.99]]
 end
-
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- lvim.autocommands.custom_groups = {
