@@ -39,6 +39,7 @@ M.config = function()
     local dropdown = require("telescope.themes").get_dropdown(opts)
     require("telescope").extensions.neoclip.default(dropdown)
   end
+
   local whk_status, whk = pcall(require, "which-key")
   if not whk_status then
     return

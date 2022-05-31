@@ -1,228 +1,433 @@
--- Neovim
--- =========================================
-lvim.format_on_save = true
-lvim.leader = "space"
-lvim.colorscheme = "pablo"
-lvim.debug = false
-vim.lsp.set_log_level "warn"
+--[[
+lvim is the global options object
+
+Linters should be
+filled in as strings with either
+a global executable or a path to
+an executable
+]]
+-- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
+
+-- set fonts for GUIs
+-- vim.o.guifont = "JetBrainsMono NF:h14"
+-- vim.o.guifont = "CaskaydiaCove NF:h12"
+
+-- configure auto-session plugin
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
+
+-- general
 lvim.log.level = "warn"
--- vim.o.conceallevel = 2 -- uncomment if you want to see concealed text
-require("user.neovim").config()
-
--- Customization
--- =========================================
-lvim.builtin.sell_your_soul_to_devil = { active = false, prada = false } -- if you want microsoft to abuse your soul
-lvim.builtin.lastplace = { active = false } -- change to false if you are jumping to future
-lvim.builtin.tabnine = { active = true } -- change to false if you don't like tabnine
-lvim.builtin.persistence = { active = true } -- change to false if you don't want persistence
-lvim.builtin.presence = { active = false } -- change to true if you want discord presence
-lvim.builtin.orgmode = { active = false } -- change to true if you want orgmode.nvim
-lvim.builtin.dap.active = false -- change this to enable/disable debugging
-lvim.builtin.fancy_statusline = { active = true } -- enable/disable fancy statusline
-lvim.builtin.fancy_wild_menu = { active = false } -- enable/disable cmp-cmdline
-lvim.builtin.fancy_diff = { active = false } -- enable/disable fancier git diff
-lvim.builtin.lua_dev = { active = true } -- change this to enable/disable folke/lua_dev
-lvim.builtin.test_runner = { active = true } -- change this to enable/disable vim-test, ultest
-lvim.builtin.cheat = { active = true } -- enable cheat.sh integration
-lvim.builtin.sql_integration = { active = false } -- use sql integration
-lvim.builtin.smooth_scroll = "cinnamon" -- for smoth scrolling, can be "cinnamon", "neoscroll" or ""
-lvim.builtin.neoclip = { active = true, enable_persistent_history = false }
-lvim.builtin.nonumber_unfocus = false -- diffrentiate between focused and non focused windows
-lvim.builtin.custom_web_devicons = false -- install https://github.com/Nguyen-Hoang-Nam/mini-file-icons
-lvim.builtin.harpoon = { active = true } -- use the harpoon plugin
-lvim.builtin.remote_dev = { active = false } -- enable/disable remote development
-lvim.builtin.cursorline = { active = false } -- use a bit fancier cursorline
-lvim.builtin.motion_provider = "hop" -- change this to use different motion providers ( hop or lightspeed )
-lvim.builtin.hlslens = { active = false } -- enable/disable hlslens
-lvim.builtin.csv_support = false -- enable/disable csv support
-lvim.builtin.sidebar = { active = false } -- enable/disable sidebar
-lvim.builtin.async_tasks = { active = false } -- enable/disable async tasks
-lvim.builtin.metals = {
-  active = false, -- enable/disable nvim-metals for scala development
-  fallbackScalaVersion = "2.13.7",
-  serverVersion = "0.10.9+271-a8bb69f6-SNAPSHOT",
-}
-lvim.builtin.collaborative_editing = { active = false } -- enable/disable collaborative editing
-lvim.builtin.file_browser = { active = false } -- enable/disable telescope file browser
-lvim.builtin.sniprun = { active = false } -- enable/disable sniprun
-lvim.builtin.tag_provider = "symbols-outline" -- change this to use different tag providers ( symbols-outline or vista )
-lvim.builtin.editorconfig = { active = true } -- enable/disable editorconfig
-lvim.builtin.global_statusline = false -- set true to use global statusline
-lvim.builtin.dressing = { active = false } -- enable to override vim.ui.input and vim.ui.select with telescope
-lvim.builtin.refactoring = { active = false } -- enable to use refactoring.nvim code_actions
-
-lvim.lsp.diagnostics.virtual_text = false -- remove this line if you want to see inline errors
-lvim.builtin.latex = {
-  view_method = "skim", -- change to zathura if you are on linux
-  preview_exec = "/Applications/Skim.app/Contents/SharedSupport/displayline", -- change this to zathura as well
-  rtl_support = true, -- if you want to use xelatex, it's a bit slower but works very well for RTL langs
-}
-lvim.builtin.notify.active = true
-lvim.lsp.automatic_servers_installation = false
-if lvim.builtin.cursorline.active then
-  lvim.lsp.document_highlight = false
+lvim.format_on_save = true
+local _time = os.date "*t"
+if (_time.hour >= 1 and _time.hour < 9) then
+  lvim.colorscheme = "rose-pine"
+elseif (_time.hour >= 9 and _time.hour < 21) then
+  lvim.colorscheme = "ayu-mirage"
+else
+  lvim.colorscheme = "kanagawa"
 end
-lvim.lsp.code_lens_refresh = true
+vim.opt.relativenumber = true
 
-local user = os.getenv "USER"
-if user and user == "stefan" then
-  lvim.lsp.document_highlight = false
-  lvim.builtin.csv_support = true
-  lvim.builtin.async_tasks = { active = true } -- enable/disable async tasks
-  lvim.builtin.dap.active = true
-  lvim.builtin.sql_integration.active = true
-  vim.g.instant_username = user
-  lvim.builtin.file_browser.active = true
-  lvim.builtin.global_statusline = true
-  lvim.builtin.dressing.active = true
-  lvim.builtin.refactoring.active = true
-  lvim.builtin.fancy_statusline = { active = false } -- enable/disable fancy statusline
-  lvim.lsp.diagnostics.virtual_text = true -- remove this line if you want to see inline errors
-  -- require("lvim.lsp.manager").setup("prosemd_lsp", {})
-  require("user.builtin").config()
-end
+-- keymappings [view all the defaults by pressing <leader>Lk]
+lvim.leader = "space"
+-- add your own keymapping
+lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
+-- unmap a default keymapping
+-- lvim.keys.normal_mode["<C-Up>"] = ""
+-- edit a default keymapping
+-- lvim.keys.normal_mode["<C-q>"] = ":q<cr>"
 
--- Dashboard
--- =========================================i^
-lvim.builtin.alpha.mode = "dashboard" -- "custom"
-if lvim.builtin.alpha.mode == "custom" then
-  local alpha_opts = require("user.dashboard").config()
-  lvim.builtin.alpha["custom"] = { config = alpha_opts }
-end
-
--- StatusLine
--- =========================================
--- if lvim.builtin.fancy_statusline.active then
-local components = require "lvim.core.lualine.components"
--- lvim.builtin.lualine.style = "lvim"
-
-local mode = function()
-  local mod = vim.fn.mode()
-  local _time = os.date "*t"
-  local selector = math.floor(_time.hour / 8) + 1
-  local normal_icons = {
-    "  ",
-    "  ",
-    "  ",
-  }
-  if mod == "n" or mod == "no" or mod == "nov" then
-    return normal_icons[selector]
-  elseif mod == "i" or mod == "ic" or mod == "ix" then
-    local insert_icons = {
-      "  ",
-      "  ",
-      "  ",
-    }
-    return insert_icons[selector]
-  elseif mod == "V" or mod == "v" or mod == "vs" or mod == "Vs" or mod == "cv" then
-    local verbose_icons = {
-      " 勇",
-      "  ",
-      "  ",
-    }
-    return verbose_icons[selector]
-  elseif mod == "c" or mod == "ce" then
-    local command_icons = {
-      "  ",
-      "  ",
-      "  ",
-    }
-
-    return command_icons[selector]
-  elseif mod == "r" or mod == "rm" or mod == "r?" or mod == "R" or mod == "Rc" or mod == "Rv" or mod == "Rv" then
-    local replace_icons = {
-      "  ",
-      "  ",
-      "  ",
-    }
-    return replace_icons[selector]
-  end
-  return normal_icons[selector]
-end
-
-local mode_map = {
-  ["n"] = "NORMAL",
-  ["no"] = "O-PENDING",
-  ["nov"] = "O-PENDING",
-  ["noV"] = "O-PENDING",
-  ["no�"] = "O-PENDING",
-  ["niI"] = "NORMAL",
-  ["niR"] = "NORMAL",
-  ["niV"] = "NORMAL",
-  ["nt"] = "NORMAL",
-  ["v"] = "VISUAL",
-  ["vs"] = "VISUAL",
-  ["V"] = "V-LINE",
-  ["Vs"] = "V-LINE",
-  ["�"] = "V-BLOCK",
-  ["�s"] = "V-BLOCK",
-  ["s"] = "SELECT",
-  ["S"] = "S-LINE",
-  ["�"] = "S-BLOCK",
-  ["i"] = "INSERT",
-  ["ic"] = "INSERT",
-  ["ix"] = "INSERT",
-  ["R"] = "REPLACE",
-  ["Rc"] = "REPLACE",
-  ["Rx"] = "REPLACE",
-  ["Rv"] = "V-REPLACE",
-  ["Rvc"] = "V-REPLACE",
-  ["Rvx"] = "V-REPLACE",
-  ["c"] = "COMMAND",
-  ["cv"] = "EX",
-  ["ce"] = "EX",
-  ["r"] = "REPLACE",
-  ["rm"] = "MORE",
-  ["r?"] = "CONFIRM",
-  ["!"] = "SHELL",
-  ["t"] = "TERMINAL",
-}
-lvim.builtin.lualine.sections.lualine_a = {
-  function()
-    return mode()
-    -- return mode_map[vim.fn.mode()] or "__"
-  end,
-}
-lvim.builtin.lualine.sections.lualine_y = {
-  -- components.location,
-  function()
-    return require("user.lsp_kind").icons.clock .. os.date "%H:%M"
-  end,
-}
+-- Change Telescope navigation to use j and k for navigation and n and p for history in both input and normal mode.
+-- lvim.builtin.telescope.on_config_done = function()
+--   local actions = require "telescope.actions"
+--   -- for input mode
+--   lvim.builtin.telescope.defaults.mappings.i["<C-j>"] = actions.move_selection_next
+--   lvim.builtin.telescope.defaults.mappings.i["<C-k>"] = actions.move_selection_previous
+--   lvim.builtin.telescope.defaults.mappings.i["<C-n>"] = actions.cycle_history_next
+--   lvim.builtin.telescope.defaults.mappings.i["<C-p>"] = actions.cycle_history_prev
+--   -- for normal mode
+--   lvim.builtin.telescope.defaults.mappings.n["<C-j>"] = actions.move_selection_next
+--   lvim.builtin.telescope.defaults.mappings.n["<C-k>"] = actions.move_selection_previous
 -- end
+
+-- Use which-key to add extra bindings with the leader-key prefix
+-- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+-- lvim.builtin.which_key.mappings["t"] = {
+--   name = "+Trouble",
+--   r = { "<cmd>Trouble lsp_references<cr>", "References" },
+--   f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
+--   d = { "<cmd>Trouble lsp_document_diagnostics<cr>", "Diagnostics" },
+--   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
+--   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
+--   w = { "<cmd>Trouble lsp_workspace_diagnostics<cr>", "Diagnostics" },
+-- }
+
+-- TODO: User Config for predefined plugins
+-- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
+-- lvim.builtin.dashboard.active = true
+lvim.builtin.alpha.mode = "dashboard"
+lvim.builtin.terminal.active = true
+lvim.builtin.nvimtree.side = "left"
+lvim.builtin.nvimtree.show_icons.git = 0
+lvim.builtin.dap.active = true
+lvim.builtin.notify.active = true
+lvim.builtin.treesitter.rainbow.enable = true
+
+-- if you don't want all the parsers change this to a table of the ones you want
+-- lvim.builtin.treesitter.ensure_installed = "maintained"
+lvim.builtin.treesitter.ignore_install = { "haskell" }
+lvim.builtin.treesitter.highlight.enabled = true
+
+-- generic LSP settings
+-- you can set a custom on_attach function that will be used for all the language servers
+-- See <https://github.com/neovim/nvim-lspconfig#keybindings-and-completion>
+-- lvim.lsp.on_attach_callback = function(client, bufnr)
+--   local function buf_set_option(...)
+--     vim.api.nvim_buf_set_option(bufnr, ...)
+--   end
+--   --Enable completion triggered by <c-x><c-o>
+--   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
+-- end
+-- you can overwrite the null_ls setup table (useful for setting the root_dir function)
+-- lvim.lsp.null_ls.setup = {
+--   root_dir = require("lspconfig").util.root_pattern("Makefile", ".git", "node_modules"),
+-- }
+-- or if you need something more advanced
+-- lvim.lsp.null_ls.setup.root_dir = function(fname)
+--   if vim.bo.filetype == "javascript" then
+--     return require("lspconfig/util").root_pattern("Makefile", ".git", "node_modules")(fname)
+--       or require("lspconfig/util").path.dirname(fname)
+--   elseif vim.bo.filetype == "php" then
+--     return require("lspconfig/util").root_pattern("Makefile", ".git", "composer.json")(fname) or vim.fn.getcwd()
+--   else
+--     return require("lspconfig/util").root_pattern("Makefile", ".git")(fname) or require("lspconfig/util").path.dirname(fname)
+--   end
+-- end
+
+-- set a formatter if you want to override the default lsp one (if it exists)
+-- lvim.lang.python.formatters = {
+--   {
+--     exe = "black",
+--   }
+-- }
+-- set an additional linter
+-- lvim.lang.python.linters = {
+--   {
+--     exe = "flake8",
+--   }
+-- }
+lvim.format_on_save = true
+local formatters = require("lvim.lsp.null-ls.formatters")
+formatters.setup({
+  {
+    command = "stylua",
+    filetypes = { "lua" },
+  },
+  {
+    command = "uncrustify",
+    filetypes = { "java" },
+  },
+  { command = "shfmt", filetypes = { "sh" } },
+  -- { command = "yamlfmt", args = { "/dev/stdin" }, filetypes = { "yaml", "yml" } },
+  {
+    command = "prettier",
+    filetypes = {
+      "html",
+      "json",
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact",
+      "yaml",
+      "yml",
+    },
+  },
+  -- {
+  -- 	command = "eslint",
+  -- 	args = { "--fix" },
+  -- 	filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+  -- },
+  -- {
+  -- 	name = "standardjs",
+  -- 	args = { "--fix" },
+  -- filetypes = { "javascript", "javascriptreact" },
+  -- , "typescript", "typescriptreact" },
+  -- },
+})
+
+local linters = require("lvim.lsp.null-ls.linters")
+linters.setup({
+  {
+    command = "shellcheck",
+    args = { "--severity", "warning" },
+    filetypes = { "sh" },
+  },
+  {
+    command = "luacheck",
+    filetypes = { "lua" },
+  },
+  {
+    command = "yamllint",
+    filetypes = { "yaml", "yml" },
+  },
+  {
+    command = "eslint",
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+  },
+  {
+    name = "semgrep",
+    args = {
+      "--config",
+      "/home/stefan/workspace/semgrep-rules/java/lang/correctness/",
+      "--config",
+      "/home/stefan/workspace/semgrep-rules/java/lang/security/",
+      "--config",
+      "/home/stefan/workspace/semgrep-rules/java/log4j/security/",
+    },
+    filetypes = { "java" },
+  },
+})
 
 -- Debugging
 -- =========================================
 if lvim.builtin.dap.active then
+  lvim.custom = {
+    metals = {
+      active = false, -- enable/disable nvim-metals for scala development
+      fallbackScalaVersion = "2.13.7",
+      serverVersion = "0.10.9+271-a8bb69f6-SNAPSHOT",
+    }
+  }
   require("user.dap").config()
 end
 
--- Language Specific
--- =========================================
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, {
-  "clangd",
-  "dockerls",
-  "gopls",
-  "jdtls",
-  "pyright",
-  "r_language_server",
-  "rust_analyzer",
-  "sumneko_lua",
-  "taplo",
-  "texlab",
-  "tsserver",
-  "yamlls",
+local code_actions = require("lvim.lsp.null-ls.code_actions")
+code_actions.setup({
+  {
+    name = "proselint",
+  },
 })
-require("user.null_ls").config()
 
 -- Additional Plugins
--- =========================================
-require("user.plugins").config()
+lvim.plugins = {
+  {
+    "rose-pine/neovim",
+    as = "rose-pine",
+    tag = "v1.*",
+  },
+  {
+    "Shatur/neovim-ayu",
+    config = function()
+      require("ayu").setup {
+        mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
+        overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+      }
+    end,
+  },
+  {
+    "rebelot/kanagawa.nvim",
+    config = function()
+      require("kanagawa").setup {
+        undercurl = true, -- enable undercurls
+        commentStyle = "NONE",
+        functionStyle = "NONE",
+        keywordStyle = "italic",
+        statementStyle = "italic",
+        typeStyle = "NONE",
+        variablebuiltinStyle = "italic",
+        specialReturn = true, -- special highlight for the return keyword
+        specialException = true, -- special highlight for exception handling keywords
+        dimInactive = lvim.builtin.global_statusline, -- dim inactive window `:h hl-NormalNC`
+        globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
+        transparent = lvim.transparent_window,
+        colors = { sumiInk1b = "#1b1b23" },
+        overrides = {
+          diffRemoved = { fg = "#E46876" },
+        },
+      }
+    end,
+  },
+  {
+    "folke/trouble.nvim",
+    cmd = "TroubleToggle",
+  },
+  {
+    "ChristianChiarulli/nvcode-color-schemes.vim",
+    opt = true,
+    config = function()
+      vim.g.nvcode_termcolors = 256
+    end,
+  },
+  {
+    "kaicataldo/material.vim",
+    opt = true,
+    config = function()
+      vim.g.material_branch = "main"
+      vim.g.material_theme_style = "default-community" -- deafualt,palenight, ocean, lighter, darker, default-community
+    end,
+  },
+  {
+    "wfxr/minimap.vim",
+    run = "cargo install --locked code-minimap",
+    -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
+    config = function()
+      vim.cmd("let g:minimap_width = 10")
+      vim.cmd("let g:minimap_auto_start = 0")
+      vim.cmd("let g:minimap_auto_start_win_enter = 0")
+    end,
+  },
+  -- {
+  -- 	"sindrets/diffview.nvim",
+  -- 	event = "BufRead",
+  -- },
+  {
+    "folke/zen-mode.nvim",
+    config = function()
+      require("zen-mode").setup({
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      })
+    end,
+  },
+  {
+    "vim-pandoc/vim-pandoc",
+  },
+  {
+    "vim-pandoc/vim-pandoc-syntax",
+  },
+  {
+    "dhruvasagar/vim-table-mode",
+  },
+  {
+    "kevinhwang91/nvim-bqf",
+    event = { "BufRead", "BufNew" },
+    config = function()
+      require("bqf").setup({
+        auto_enable = true,
+        preview = {
+          win_height = 12,
+          win_vheight = 12,
+          delay_syntax = 80,
+          border_chars = { "┃", "┃", "━", "━", "┏", "┓", "┗", "┛", "█" },
+        },
+        func_map = {
+          vsplit = "",
+          ptogglemode = "z,",
+          stoggleup = "",
+        },
+        filter = {
+          fzf = {
+            action_for = { ["ctrl-s"] = "split" },
+            extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", "> " },
+          },
+        },
+      })
+    end,
+  },
+  {
+    "nvim-telescope/telescope-project.nvim",
+    event = "BufWinEnter",
+    setup = function()
+      vim.cmd([[packadd telescope.nvim]])
+    end,
+  },
+  {
+    "karb94/neoscroll.nvim",
+    event = "WinScrolled",
+    config = function()
+      require("neoscroll").setup({
+        -- All these keys will be mapped to their corresponding default scrolling animation
+        mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
+        hide_cursor = true, -- Hide cursor while scrolling
+        stop_eof = true, -- Stop at <EOF> when scrolling downwards
+        use_local_scrolloff = false, -- Use the local scope of scrolloff instead of the global scope
+        respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+        cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+        easing_function = nil, -- Default easing function
+        pre_hook = nil, -- Function to run before the scrolling animation starts
+        post_hook = nil, -- Function to run after the scrolling animation ends
+      })
+    end,
+  },
+  {
+    "folke/persistence.nvim",
+    event = "BufReadPre", -- this will only start session saving when an actual file was opened
+    module = "persistence",
+    config = function()
+      require("persistence").setup({
+        dir = vim.fn.expand(vim.fn.stdpath("config") .. "/session/"),
+        options = { "buffers", "curdir", "tabpages", "winsize" },
+      })
+    end,
+  },
+  { "sindrets/diffview.nvim", event = "BufRead", },
+  {
+    "rcarriga/nvim-dap-ui",
+    config = function()
+      require("dapui").setup()
+    end,
+    ft = { "python", "rust", "go" },
+    event = "BufReadPost",
+    requires = { "mfussenegger/nvim-dap" },
+    disable = not lvim.builtin.dap.active,
+  },
+}
 
--- Autocommands
--- =========================================
--- require("user.autocommands").config()
+if vim.g.neovide then
+  vim.g.neovide_cursor_animation_length = 0.01
+  vim.g.neovide_cursor_trail_length = 0.05
+  vim.g.neovide_cursor_antialiasing = true
+  vim.g.neovide_remember_window_size = true
+  -- vim.g.neovide_cursor_vfx_mode = ''
+  -- command -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
+  -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
+  -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
+  -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
+  vim.o.guifont = "FiraCode NF:h12"
+  -- vim.o.guifont ="GoMono NF:h16"
+  -- vim.o.guifont ="FuraCode NF:h16"
+  -- vim.o.guifont ="Hack Nerd Font:h16"
+  -- vim.o.guifont ="NotoSansMono Nerd Font:h16"
+  -- vim.o.guifont ="SaucecodePro Nerd Font:h16"
+  -- vim.o.guifont ="UbuntuMonoDerivativePowerline Nerd Font:h16"
+  -- vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+end
 
--- Additional keybindings
--- =========================================
--- require("user.keybindings").config()
+if vim.g.nvui then
+  -- Configure nvui here
+  vim.cmd [[NvuiCmdFontFamily FiraCode Nerd Font]]
+  vim.cmd [[set linespace=1]]
+  vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+  vim.cmd [[NvuiPopupMenuDefaultIconFg white]]
+  vim.cmd [[NvuiCmdBg #1e2125]]
+  vim.cmd [[NvuiCmdFg #abb2bf]]
+  vim.cmd [[NvuiCmdBigFontScaleFactor 1.0]]
+  vim.cmd [[NvuiCmdPadding 10]]
+  vim.cmd [[NvuiCmdCenterXPos 0.5]]
+  vim.cmd [[NvuiCmdTopPos 0.0]]
+  vim.cmd [[NvuiCmdFontSize 20.0]]
+  vim.cmd [[NvuiCmdBorderWidth 5]]
+  vim.cmd [[NvuiPopupMenuIconFg variable #56b6c2]]
+  vim.cmd [[NvuiPopupMenuIconFg function #c678dd]]
+  vim.cmd [[NvuiPopupMenuIconFg method #c678dd]]
+  vim.cmd [[NvuiPopupMenuIconFg field #d19a66]]
+  vim.cmd [[NvuiPopupMenuIconFg property #d19a66]]
+  vim.cmd [[NvuiPopupMenuIconFg module white]]
+  vim.cmd [[NvuiPopupMenuIconFg struct #e5c07b]]
+  vim.cmd [[NvuiCaretExtendTop 15]]
+  vim.cmd [[NvuiCaretExtendBottom 8]]
+  vim.cmd [[NvuiTitlebarFontSize 12]]
+  vim.cmd [[NvuiTitlebarFontFamily Arial]]
+  vim.cmd [[NvuiCursorAnimationDuration 0.1]]
+  -- vim.cmd [[NvuiToggleFrameless]]
+  vim.cmd [[NvuiOpacity 0.99]]
+end
+
+
+-- Autocommands (https://neovim.io/doc/user/autocmd.html)
+-- lvim.autocommands.custom_groups = {
+--   { "BufWinEnter", "*.lua", "setlocal ts=8 sw=8" },
+-- }
+
+-- vim.cmd("source ~/.vimrc")

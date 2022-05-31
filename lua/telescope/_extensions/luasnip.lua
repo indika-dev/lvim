@@ -123,12 +123,12 @@ local luasnip_fn = function(opts)
           display = make_display,
 
           ordinal = entry.ft
-            .. " "
-            .. filter_null(entry.context.trigger)
-            .. " "
-            .. filter_null(entry.context.name)
-            .. " "
-            .. filter_description(entry.context.name, entry.context.description),
+              .. " "
+              .. filter_null(entry.context.trigger)
+              .. " "
+              .. filter_null(entry.context.name)
+              .. " "
+              .. filter_description(entry.context.name, entry.context.description),
 
           preview_command = function(_, bufnr)
             local snippet = get_docstring(luasnip, entry.ft, entry.context)
@@ -160,9 +160,9 @@ local luasnip_fn = function(opts)
         else
           print(
             "Snippet '"
-              .. selection.value.context.name
-              .. "'"
-              .. "was selected, but LuaSnip.expandable() returned false"
+            .. selection.value.context.name
+            .. "'"
+            .. "was selected, but LuaSnip.expandable() returned false"
           )
         end
       end)

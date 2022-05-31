@@ -1,7 +1,7 @@
-local user_tex = require("user.tex").config()
+-- local user_tex = require("user.tex").config()
 
-local opts = {
-  setup = user_tex,
-}
+-- local opts = {
+--  setup = user_tex,
+-- }
 
-require("lvim.lsp.manager").setup("texlab", opts)
+-- require("lvim.lsp.manager").setup("texlab", opts)

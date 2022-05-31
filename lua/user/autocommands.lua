@@ -168,8 +168,8 @@ M.make_run = function()
         "n",
         "<leader>r",
         "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='python "
-          .. vim.fn.expand "%"
-          .. ";read',count=2,direction='float'})<CR>"
+        .. vim.fn.expand "%"
+        .. ";read',count=2,direction='float'})<CR>"
       )
       vim.keymap.set(
         "n",

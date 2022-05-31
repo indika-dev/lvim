@@ -28,6 +28,7 @@ local function testing()
   end
   return nil
 end
+
 local function using_session()
   return (vim.g.using_persistence ~= nil)
 end
@@ -304,10 +305,9 @@ M.config = function()
       local fname = vim.fn.expand "%:p"
       local ftype = vim.fn.expand "%:e"
       local cwd = vim.api.nvim_call_function("getcwd", {})
-      if
-        string.find(fname, "term") ~= nil
-        and string.find(fname, "lazygit;#toggleterm") ~= nil
-        and (vim.fn.has "linux" == 1 or vim.fn.has "mac" == 1)
+      if string.find(fname, "term") ~= nil
+          and string.find(fname, "lazygit;#toggleterm") ~= nil
+          and (vim.fn.has "linux" == 1 or vim.fn.has "mac" == 1)
       then
         local git_repo_cmd = io.popen 'git remote get-url origin | tr -d "\n"'
         local git_repo = git_repo_cmd:read "*a"
@@ -508,6 +508,7 @@ M.config = function()
         end
         return string.format("%.1f%s", size, sufixes[i])
       end
+
       local file = vim.fn.expand "%:p"
       if string.len(file) == 0 then
         return ""

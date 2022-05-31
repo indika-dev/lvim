@@ -7,6 +7,7 @@ M.config = function()
     result = result:gsub("/", path_sep)
     return result
   end
+
   local join_path = require("lvim.utils").join_paths
 
   local status_ok, dap = pcall(require, "dap")
@@ -224,7 +225,7 @@ M.config = function()
   dap.configurations.c = dap.configurations.cpp
   dap.configurations.rust = dap.configurations.cpp
 
-  if lvim.builtin.metals.active then
+  if lvim.custom.metals.active then
     dap.configurations.scala = {
       {
         type = "scala",
