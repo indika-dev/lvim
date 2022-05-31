@@ -326,6 +326,10 @@ lvim.plugins = {
     "sidebar-nvim/sidebar.nvim",
     requires = { "sidebar-nvim/sections-dap" },
     config = function()
+      lvim.builtin.which_key.mappings["S"] = {
+        "<cmd>SidebarNvimToggle<CR>",
+        require("user.lsp_kind").cmp_kind.Struct .. "Sidebar",
+      }
       require("sidebar-nvim").setup {
         disable_default_keybindings = 0,
         bindings = {
