@@ -15,7 +15,7 @@ an executable
 -- configure auto-session plugin
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 
-require("user.scheduler").config()
+-- require("user.scheduler").config()
 
 -- general
 lvim.log.level = "warn"
@@ -123,10 +123,10 @@ formatters.setup {
     command = "stylua",
     filetypes = { "lua" },
   },
-  {
-    command = "uncrustify",
-    filetypes = { "java" },
-  },
+  -- {
+  --   command = "uncrustify",
+  --   filetypes = { "java" },
+  -- },
   { command = "shfmt", filetypes = { "sh" } },
   -- { command = "yamlfmt", args = { "/dev/stdin" }, filetypes = { "yaml", "yml" } },
   {
@@ -174,18 +174,18 @@ linters.setup {
     command = "eslint",
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
   },
-  {
-    name = "semgrep",
-    args = {
-      "--config",
-      "/home/stefan/workspace/semgrep-rules/java/lang/correctness/",
-      "--config",
-      "/home/stefan/workspace/semgrep-rules/java/lang/security/",
-      "--config",
-      "/home/stefan/workspace/semgrep-rules/java/log4j/security/",
-    },
-    filetypes = { "java" },
-  },
+  -- {
+  --   name = "semgrep",
+  --   args = {
+  --     "--config",
+  --     "/home/stefan/workspace/semgrep-rules/java/lang/correctness/",
+  --     "--config",
+  --     "/home/stefan/workspace/semgrep-rules/java/lang/security/",
+  --     "--config",
+  --     "/home/stefan/workspace/semgrep-rules/java/log4j/security/",
+  --   },
+  --   filetypes = { "java" },
+  -- },
 }
 
 lvim.custom = {
@@ -476,6 +476,9 @@ lvim.plugins = {
         options = { "buffers", "curdir", "tabpages", "winsize" },
       }
     end,
+  },
+  {
+    "mfussenegger/nvim-jdtls",
   },
   {
     "rcarriga/nvim-dap-ui",

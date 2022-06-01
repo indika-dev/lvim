@@ -106,6 +106,20 @@ local config = {
       },
       configuration = {
         updateBuildConfiguration = "interactive",
+        runtimes = {
+          {
+            name = "JavaSE-8",
+            path = "/home/stefan/.local/lib/jvm-8/",
+          },
+          {
+            name = "JavaSE-11",
+            path = "/home/stefan/.local/lib/jvm-11/",
+          },
+          {
+            name = "JavaSE-17",
+            path = "/home/stefan/.local/lib/jvm-17/",
+          },
+        }
       },
       maven = {
         downloadSources = true,
@@ -219,6 +233,10 @@ local vmappings = {
 
 which_key.register(mappings, opts)
 which_key.register(vmappings, vopts)
+
+if lvim.builtin.which_key.on_config_done then
+  lvim.builtin.which_key.on_config_done(which_key)
+end
 
 vim.cmd [[setlocal shiftwidth=2]]
 vim.cmd [[setlocal tabstop=2]]
