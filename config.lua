@@ -362,10 +362,50 @@ lvim.plugins = {
     end,
   },
   {
+    "ThePrimeagen/refactoring.nvim",
+    ft = { "typescript", "javascript", "lua", "c", "cpp", "go", "python", "java", "php" },
+    event = "BufRead",
+    config = function()
+      require("telescope").load_extension("refactoring")
+      -- remap to open the Telescope refactoring menu in visual mode
+      vim.api.nvim_set_keymap(
+        "v",
+        "<leader>rr",
+        "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
+        { noremap = true }
+      )
+      -- prompt for a refactor to apply when the remap is triggered
+      -- vim.api.nvim_set_keymap(
+      --   "v",
+      --   "<leader>rr",
+      --   "<Cmd>lua require('refactoring').select_refactor()<CR>",
+      --   { noremap = true, silent = true, expr = false }
+      -- )
+      require("refactoring").setup({
+        -- prompt for return type
+        prompt_func_return_type = {
+          go = true,
+          cpp = true,
+          c = true,
+          java = true,
+        },
+        -- prompt for function parameters
+        prompt_func_param_type = {
+          go = true,
+          cpp = true,
+          c = true,
+          java = true,
+        },
+      })
+    end,
+  },
+  {
     "vim-pandoc/vim-pandoc",
+    disable = true,
   },
   {
     "vim-pandoc/vim-pandoc-syntax",
+    disable = true,
   },
   {
     "dhruvasagar/vim-table-mode",
@@ -420,6 +460,9 @@ lvim.plugins = {
         post_hook = nil, -- Function to run after the scrolling animation ends
       }
     end,
+    cond = function()
+      return not vim.g.neovide and not vim.g.nvui
+    end
   },
   {
     "folke/persistence.nvim",
@@ -441,6 +484,57 @@ lvim.plugins = {
     event = "BufReadPost",
     requires = { "mfussenegger/nvim-dap" },
     disable = not lvim.builtin.dap.active,
+  },
+  {
+    "AckslD/nvim-neoclip.lua",
+    requires = { { 'tami5/sqlite.lua', module = 'sqlite' }, },
+    config = function()
+      require('neoclip').setup({
+        history = 1000,
+        enable_persistent_history = false,
+        length_limit = 1048576,
+        continuous_sync = false,
+        db_path = vim.fn.stdpath("data") .. "/databases/neoclip.sqlite3",
+        filter = nil,
+        preview = true,
+        default_register = '"',
+        default_register_macros = 'q',
+        enable_macro_history = true,
+        content_spec_column = false,
+        on_paste = {
+          set_reg = false,
+        },
+        on_replay = {
+          set_reg = false,
+        },
+        keys = {
+          telescope = {
+            i = {
+              select = '<cr>',
+              paste = '<c-p>',
+              paste_behind = '<c-k>',
+              replay = '<c-q>', -- replay a macro
+              delete = '<c-d>', -- delete an entry
+              custom = {},
+            },
+            n = {
+              select = '<cr>',
+              paste = 'p',
+              paste_behind = 'P',
+              replay = 'q',
+              delete = 'd',
+              custom = {},
+            },
+          },
+          fzf = {
+            select = 'default',
+            paste = 'ctrl-p',
+            paste_behind = 'ctrl-k',
+            custom = {},
+          },
+        },
+      })
+    end,
   },
 }
 
