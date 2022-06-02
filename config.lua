@@ -18,7 +18,7 @@ vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,
 -- require("user.scheduler").config()
 
 -- general
-lvim.log.level = "warn"
+lvim.log.level = "debug"
 lvim.format_on_save = true
 local _time = os.date "*t"
 if _time.hour >= 1 and _time.hour < 9 then
@@ -75,6 +75,10 @@ lvim.builtin.treesitter.rainbow.enable = false
 
 -- if you don't want all the parsers change this to a table of the ones you want
 -- lvim.builtin.treesitter.ensure_installed = "maintained"
+lvim.builtin.treesitter.ensure_installed = {
+  "bash", "css", "dockerfile", "embedded_template",
+  "erlang", "go", "gomod", "gowork", "graphql", "html", "java", "javascript", "jsdoc", "json", "lua", "make", "markdown",
+  "php", "python", "ruby", "rust", "scala", "scheme", "scss", "sparql", "toml", "tsx", "typescript", "vim", "vue", "yaml" }
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
 
@@ -479,6 +483,7 @@ lvim.plugins = {
   },
   {
     "mfussenegger/nvim-jdtls",
+    ft = "java",
   },
   {
     "rcarriga/nvim-dap-ui",

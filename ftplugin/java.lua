@@ -1,4 +1,6 @@
 -- credit: https://github.com/ChristianChiarulli/nvim
+vim.cmd('echomsg "SUCCESS!"')
+vim.cmd("packadd jdtls")
 local status_ok, jdtls = pcall(require, "jdtls")
 if not status_ok then
   return
@@ -7,11 +9,11 @@ end
 -- Determine OS
 local home = os.getenv "HOME"
 local launcher_path = vim.fn.glob(
-  home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar"
+  home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar"
 )
 if #launcher_path == 0 then
   launcher_path = vim.fn.glob(
-    home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar",
+    home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
     1,
     1
   )[1]
@@ -28,7 +30,7 @@ end
 
 -- Find root of project
 local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }
-local root_dir = require("jdtls.setup").find_root(root_markers)
+local root_dir = jdtls.setup.find_root(root_markers)
 if root_dir == "" then
   return
 end
@@ -44,26 +46,27 @@ local workspace_dir = WORKSPACE_PATH .. project_name
 -- git clone git@github.com:microsoft/java-debug.git ~/.config/lvim/.java-debug
 -- cd ~/.config/lvim/.java-debug/
 -- ./mvnw clean install
-local bundles = vim.fn.glob(
+
+local bundles = vim.split(vim.fn.glob(
   home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
-)
-if #bundles == 0 then
-  bundles = vim.fn.glob(
-    home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar",
-    1,
-    1
-  )
-end
+), "\n")
+-- if #bundles == 0 then
+--   bundles = vim.fn.glob(
+--     home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar",
+--     1,
+--     1
+--   )
+-- end
 
 -- NOTE: for testing
 -- git clone git@github.com:microsoft/vscode-java-test.git ~/.config/lvim/.vscode-java-test
 -- cd ~/.config/lvim/vscode-java-test
 -- npm install
 -- npm run build-plugin
+-- local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
+-- if #extra_bundles == 0 then
 local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
-if #extra_bundles == 0 then
-  extra_bundles = vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar", 1, 1)
-end
+-- end
 vim.list_extend(bundles, extra_bundles)
 
 local config = {
@@ -173,6 +176,10 @@ local config = {
     server_side_fuzzy_completion = true,
   },
   init_options = {
+    -- bundles = {
+    --   vim.fn.glob(home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
+    --   -- vim.fn.glob("path/to/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
+    -- };
     bundles = bundles,
   },
 }
@@ -234,9 +241,9 @@ local vmappings = {
 which_key.register(mappings, opts)
 which_key.register(vmappings, vopts)
 
-if lvim.builtin.which_key.on_config_done then
-  lvim.builtin.which_key.on_config_done(which_key)
-end
+-- if lvim.builtin.which_key.on_config_done then
+--   lvim.builtin.which_key.on_config_done(which_key)
+-- end
 
 vim.cmd [[setlocal shiftwidth=2]]
 vim.cmd [[setlocal tabstop=2]]
