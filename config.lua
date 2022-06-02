@@ -18,7 +18,7 @@ vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,
 -- require("user.scheduler").config()
 
 -- general
-lvim.log.level = "debug"
+lvim.log.level = "warn"
 lvim.format_on_save = true
 local _time = os.date "*t"
 if _time.hour >= 1 and _time.hour < 9 then
@@ -63,6 +63,10 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 --   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
 --   w = { "<cmd>Trouble lsp_workspace_diagnostics<cr>", "Diagnostics" },
 -- }
+lvim.builtin.telescope.on_config_done = function(telescope)
+  telescope.load_extension('dap')
+  telescope.load_extension("ui-select")
+end
 
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
@@ -450,6 +454,9 @@ lvim.plugins = {
     end,
   },
   {
+    'nvim-telescope/telescope-ui-select.nvim',
+  },
+  {
     "karb94/neoscroll.nvim",
     event = "WinScrolled",
     config = function()
@@ -488,12 +495,61 @@ lvim.plugins = {
   {
     "rcarriga/nvim-dap-ui",
     config = function()
-      require("dapui").setup()
+      require("dapui").setup({
+        icons = { expanded = "▾", collapsed = "▸" },
+        mappings = {
+          -- Use a table to apply multiple mappings
+          expand = { "<CR>", "<2-LeftMouse>" },
+          open = "o",
+          remove = "d",
+          edit = "e",
+          repl = "r",
+          toggle = "t",
+        },
+        -- Expand lines larger than the window
+        -- Requires >= 0.7
+        expand_lines = vim.fn.has("nvim-0.7"),
+        sidebar = {
+          -- You can change the order of elements in the sidebar
+          elements = {
+            -- Provide as ID strings or tables with "id" and "size" keys
+            {
+              id = "scopes",
+              size = 0.25, -- Can be float or integer > 1
+            },
+            { id = "breakpoints", size = 0.25 },
+            { id = "stacks", size = 0.25 },
+            { id = "watches", size = 00.25 },
+          },
+          size = 40,
+          position = "left", -- Can be "left", "right", "top", "bottom"
+        },
+        tray = {
+          elements = { "repl" },
+          size = 10,
+          position = "bottom", -- Can be "left", "right", "top", "bottom"
+        },
+        floating = {
+          max_height = nil, -- These can be integers or a float between 0 and 1.
+          max_width = nil, -- Floats will be treated as percentage of your screen.
+          border = "single", -- Border style. Can be "single", "double" or "rounded"
+          mappings = {
+            close = { "q", "<Esc>" },
+          },
+        },
+        windows = { indent = 1 },
+        render = {
+          max_type_length = nil, -- Can be integer or nil.
+        }
+      })
     end,
-    ft = { "python", "rust", "go" },
+    ft = { "python", "rust", "go", "java" },
     event = "BufReadPost",
     requires = { "mfussenegger/nvim-dap" },
     disable = not lvim.builtin.dap.active,
+  },
+  {
+    "nvim-telescope/telescope-dap.nvim",
   },
   {
     "AckslD/nvim-neoclip.lua",

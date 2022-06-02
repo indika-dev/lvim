@@ -1,6 +1,4 @@
 -- credit: https://github.com/ChristianChiarulli/nvim
-vim.cmd('echomsg "SUCCESS!"')
-vim.cmd("packadd jdtls")
 local status_ok, jdtls = pcall(require, "jdtls")
 if not status_ok then
   return
@@ -156,6 +154,13 @@ local config = {
         "java.util.Objects.requireNonNullElse",
         "org.mockito.Mockito.*",
       },
+      filteredTypes = {
+        "com.sun.*",
+        "io.micrometer.shaded.*",
+        "java.awt.*",
+        "jdk.*",
+        "sun.*",
+      },
     },
     contentProvider = { preferred = "fernflower" },
     extendedClientCapabilities = extendedClientCapabilities,
@@ -168,6 +173,9 @@ local config = {
     codeGeneration = {
       toString = {
         template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+      },
+      hashCodeEquals = {
+        useJava7Objects = true,
       },
       useBlocks = true,
     },
@@ -220,7 +228,7 @@ local vopts = {
 
 local mappings = {
   j = {
-    name = "Java",
+    name = " Java",
     o = { "<Cmd>lua require'jdtls'.organize_imports()<CR>", "Organize Imports" },
     v = { "<Cmd>lua require('jdtls').extract_variable()<CR>", "Extract Variable" },
     c = { "<Cmd>lua require('jdtls').extract_constant()<CR>", "Extract Constant" },
@@ -232,7 +240,7 @@ local mappings = {
 
 local vmappings = {
   j = {
-    name = "Java",
+    name = " Java",
     v = { "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>", "Extract Variable" },
     c = { "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>", "Extract Constant" },
     m = { "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>", "Extract Method" },
@@ -241,6 +249,37 @@ local vmappings = {
 
 which_key.register(mappings, opts)
 which_key.register(vmappings, vopts)
+
+-- UI
+-- local finders = require 'telescope.finders'
+-- local sorters = require 'telescope.sorters'
+-- local actions = require 'telescope.actions'
+-- local pickers = require 'telescope.pickers'
+-- require('jdtls.ui').pick_one_async = function(items, prompt, label_fn, cb)
+--   local options = {}
+--   pickers.new(options, {
+--     prompt_title = prompt,
+--     finder = finders.new_table {
+--       results = items,
+--       entry_maker = function(entry)
+--         return {
+--           value = entry,
+--           display = label_fn(entry),
+--           ordinal = label_fn(entry),
+--         }
+--       end,
+--     },
+--     sorter = sorters.get_generic_fuzzy_sorter(),
+--     attach_mappings = function(prompt_bufnr)
+--       actions.goto_file_selection_edit:replace(function()
+--         local selection = actions.get_selected_entry(prompt_bufnr)
+--         actions.close(prompt_bufnr)
+--         cb(selection.value)
+--       end)
+--       return true
+--     end,
+--   }):find()
+-- end
 
 -- if lvim.builtin.which_key.on_config_done then
 --   lvim.builtin.which_key.on_config_done(which_key)
