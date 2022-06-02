@@ -9,15 +9,16 @@ end
 -- Determine OS
 local home = os.getenv "HOME"
 local launcher_path = vim.fn.glob(
-  home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar"
+  home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar"
 )
 if #launcher_path == 0 then
   launcher_path = vim.fn.glob(
-    home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar",
+    home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar",
     1,
     1
   )[1]
 end
+local CONFIG = ""
 if vim.fn.has "mac" == 1 then
   WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
   CONFIG = "mac"
@@ -111,7 +112,7 @@ local config = {
         updateBuildConfiguration = "interactive",
         runtimes = {
           {
-            name = "JavaSE-8",
+            name = "JavaSE-1.8",
             path = "/home/stefan/.local/lib/jvm-8/",
           },
           {
