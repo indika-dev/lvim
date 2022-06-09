@@ -64,8 +64,8 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 --   w = { "<cmd>Trouble lsp_workspace_diagnostics<cr>", "Diagnostics" },
 -- }
 lvim.builtin.telescope.on_config_done = function(telescope)
-  telescope.load_extension('dap')
-  telescope.load_extension("ui-select")
+  telescope.load_extension "dap"
+  telescope.load_extension "ui-select"
 end
 
 -- TODO: User Config for predefined plugins
@@ -80,9 +80,38 @@ lvim.builtin.treesitter.rainbow.enable = false
 -- if you don't want all the parsers change this to a table of the ones you want
 -- lvim.builtin.treesitter.ensure_installed = "maintained"
 lvim.builtin.treesitter.ensure_installed = {
-  "bash", "css", "dockerfile", "embedded_template",
-  "erlang", "go", "gomod", "gowork", "graphql", "html", "java", "javascript", "jsdoc", "json", "lua", "make", "markdown",
-  "php", "python", "ruby", "rust", "scala", "scheme", "scss", "sparql", "toml", "tsx", "typescript", "vim", "vue", "yaml" }
+  "bash",
+  "css",
+  "dockerfile",
+  "embedded_template",
+  "erlang",
+  "go",
+  "gomod",
+  "gowork",
+  "graphql",
+  "html",
+  "java",
+  "javascript",
+  "jsdoc",
+  "json",
+  "lua",
+  "make",
+  "markdown",
+  "php",
+  "python",
+  "ruby",
+  "rust",
+  "scala",
+  "scheme",
+  "scss",
+  "sparql",
+  "toml",
+  "tsx",
+  "typescript",
+  "vim",
+  "vue",
+  "yaml",
+}
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
 
@@ -226,13 +255,59 @@ lvim.plugins = {
     "rose-pine/neovim",
     as = "rose-pine",
     tag = "v1.*",
+    config = function()
+      require("rose-pine").setup {
+        ---@usage 'main'|'moon'
+        dark_variant = "main",
+        bold_vert_split = false,
+        dim_nc_background = false,
+        disable_background = false,
+        disable_float_background = false,
+        disable_italics = false,
+        ---@usage string hex value or named color from rosepinetheme.com/palette
+        groups = {
+          background = "base",
+          panel = "surface",
+          border = "highlight_med",
+          comment = "muted",
+          link = "iris",
+          punctuation = "subtle",
+
+          error = "love",
+          hint = "iris",
+          info = "foam",
+          warn = "gold",
+
+          headings = {
+            h1 = "iris",
+            h2 = "foam",
+            h3 = "rose",
+            h4 = "gold",
+            h5 = "pine",
+            h6 = "foam",
+          },
+          -- or set all headings at once
+          -- headings = 'subtle'
+        },
+        -- Change specific vim highlight groups
+        highlight_groups = {
+          LspReferenceText = { fg = "none", bg = "none" },
+          LspReferenceRead = { bg = "#403d52" },
+          LspReferenceWrite = { link = "LspReferenceRead" },
+        },
+      }
+    end,
   },
   {
     "Shatur/neovim-ayu",
     config = function()
       require("ayu").setup {
         mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
-        overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+        overrides = { -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+          LspReferenceText = { fg = "none", bg = "none" },
+          LspReferenceRead = { bg = "#5CCFE6" },
+          LspReferenceWrite = { link = "LspReferenceRead" },
+        },
       }
     end,
   },
@@ -249,12 +324,14 @@ lvim.plugins = {
         variablebuiltinStyle = "italic",
         specialReturn = true, -- special highlight for the return keyword
         specialException = true, -- special highlight for exception handling keywords
-        dimInactive = lvim.builtin.global_statusline, -- dim inactive window `:h hl-NormalNC`
+        dimInactive = true, -- dim inactive window `:h hl-NormalNC`
         globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
-        transparent = lvim.transparent_window,
-        colors = { sumiInk1b = "#1b1b23" },
+        transparent = true,
+        colors = {},
         overrides = {
-          diffRemoved = { fg = "#E46876" },
+          LspReferenceText = { fg = "none", bg = "none" },
+          LspReferenceRead = { bg = "#49443C" },
+          LspReferenceWrite = { link = "LspReferenceRead" },
         },
       }
     end,
@@ -262,6 +339,9 @@ lvim.plugins = {
   {
     "folke/trouble.nvim",
     cmd = "TroubleToggle",
+  },
+  {
+    "norcalli/nvim-colorizer.lua",
   },
   {
     "ChristianChiarulli/nvcode-color-schemes.vim",
@@ -376,7 +456,7 @@ lvim.plugins = {
     ft = { "typescript", "javascript", "lua", "c", "cpp", "go", "python", "java", "php" },
     event = "BufRead",
     config = function()
-      require("telescope").load_extension("refactoring")
+      require("telescope").load_extension "refactoring"
       -- remap to open the Telescope refactoring menu in visual mode
       vim.api.nvim_set_keymap(
         "v",
@@ -391,7 +471,7 @@ lvim.plugins = {
       --   "<Cmd>lua require('refactoring').select_refactor()<CR>",
       --   { noremap = true, silent = true, expr = false }
       -- )
-      require("refactoring").setup({
+      require("refactoring").setup {
         -- prompt for return type
         prompt_func_return_type = {
           go = true,
@@ -406,7 +486,7 @@ lvim.plugins = {
           c = true,
           java = true,
         },
-      })
+      }
     end,
   },
   {
@@ -454,7 +534,7 @@ lvim.plugins = {
     end,
   },
   {
-    'nvim-telescope/telescope-ui-select.nvim',
+    "nvim-telescope/telescope-ui-select.nvim",
   },
   {
     "karb94/neoscroll.nvim",
@@ -475,7 +555,7 @@ lvim.plugins = {
     end,
     cond = function()
       return not vim.g.neovide and not vim.g.nvui
-    end
+    end,
   },
   {
     "folke/persistence.nvim",
@@ -495,7 +575,7 @@ lvim.plugins = {
   {
     "rcarriga/nvim-dap-ui",
     config = function()
-      require("dapui").setup({
+      require("dapui").setup {
         icons = { expanded = "▾", collapsed = "▸" },
         mappings = {
           -- Use a table to apply multiple mappings
@@ -508,7 +588,7 @@ lvim.plugins = {
         },
         -- Expand lines larger than the window
         -- Requires >= 0.7
-        expand_lines = vim.fn.has("nvim-0.7"),
+        expand_lines = vim.fn.has "nvim-0.7",
         sidebar = {
           -- You can change the order of elements in the sidebar
           elements = {
@@ -540,8 +620,8 @@ lvim.plugins = {
         windows = { indent = 1 },
         render = {
           max_type_length = nil, -- Can be integer or nil.
-        }
-      })
+        },
+      }
     end,
     ft = { "python", "rust", "go", "java" },
     event = "BufReadPost",
@@ -553,18 +633,18 @@ lvim.plugins = {
   },
   {
     "AckslD/nvim-neoclip.lua",
-    requires = { { 'tami5/sqlite.lua', module = 'sqlite' }, },
+    requires = { { "tami5/sqlite.lua", module = "sqlite" } },
     config = function()
-      require('neoclip').setup({
+      require("neoclip").setup {
         history = 1000,
         enable_persistent_history = false,
         length_limit = 1048576,
         continuous_sync = false,
-        db_path = vim.fn.stdpath("data") .. "/databases/neoclip.sqlite3",
+        db_path = vim.fn.stdpath "data" .. "/databases/neoclip.sqlite3",
         filter = nil,
         preview = true,
         default_register = '"',
-        default_register_macros = 'q',
+        default_register_macros = "q",
         enable_macro_history = true,
         content_spec_column = false,
         on_paste = {
@@ -576,34 +656,35 @@ lvim.plugins = {
         keys = {
           telescope = {
             i = {
-              select = '<cr>',
-              paste = '<c-p>',
-              paste_behind = '<c-k>',
-              replay = '<c-q>', -- replay a macro
-              delete = '<c-d>', -- delete an entry
+              select = "<cr>",
+              paste = "<c-p>",
+              paste_behind = "<c-k>",
+              replay = "<c-q>", -- replay a macro
+              delete = "<c-d>", -- delete an entry
               custom = {},
             },
             n = {
-              select = '<cr>',
-              paste = 'p',
-              paste_behind = 'P',
-              replay = 'q',
-              delete = 'd',
+              select = "<cr>",
+              paste = "p",
+              paste_behind = "P",
+              replay = "q",
+              delete = "d",
               custom = {},
             },
           },
           fzf = {
-            select = 'default',
-            paste = 'ctrl-p',
-            paste_behind = 'ctrl-k',
+            select = "default",
+            paste = "ctrl-p",
+            paste_behind = "ctrl-k",
             custom = {},
           },
         },
-      })
+      }
     end,
   },
 }
 
+require("colorizer").setup()
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0.01
   vim.g.neovide_cursor_trail_length = 0.05
