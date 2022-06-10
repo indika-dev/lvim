@@ -15,8 +15,6 @@ an executable
 -- configure auto-session plugin
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 
--- require("user.scheduler").config()
-
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save = true
