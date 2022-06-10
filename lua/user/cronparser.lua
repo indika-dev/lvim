@@ -1,10 +1,9 @@
+<<<<<<< HEAD
 --
 -- @see https://github.com/pygy/LuLPeg
 --
 local lulpeg = require("lulpeg")
 local re = lulpeg.re
-
-
 --
 -- @see https://github.com/gorhill/cronexpr/blob/master/cronexpr_parse.go
 --
