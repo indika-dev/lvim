@@ -13,7 +13,7 @@ an executable
 -- vim.o.guifont = "CaskaydiaCove NF:h12"
 
 -- configure auto-session plugin
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
+-- vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 
 -- general
 lvim.log.level = "warn"
@@ -314,17 +314,17 @@ lvim.plugins = {
     config = function()
       require("kanagawa").setup {
         undercurl = true, -- enable undercurls
-        commentStyle = "NONE",
-        functionStyle = "NONE",
-        keywordStyle = "italic",
-        statementStyle = "italic",
-        typeStyle = "NONE",
-        variablebuiltinStyle = "italic",
+        commentStyle = { italic = true },
+        functionStyle = {},
+        keywordStyle = { italic = true },
+        statementStyle = { bold = true },
+        typeStyle = {},
+        variablebuiltinStyle = { italic = true },
         specialReturn = true, -- special highlight for the return keyword
         specialException = true, -- special highlight for exception handling keywords
-        dimInactive = true, -- dim inactive window `:h hl-NormalNC`
+        transparent = false, -- do not set background color
+        dimInactive = false, -- dim inactive window `:h hl-NormalNC`
         globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
-        transparent = true,
         colors = {},
         overrides = {
           LspReferenceText = { fg = "none", bg = "none" },
@@ -733,11 +733,11 @@ if vim.g.nvui then
   vim.cmd [[NvuiOpacity 0.99]]
 end
 
-require 'nvim-treesitter.configs'.setup {
+require("nvim-treesitter.configs").setup {
   context_commentstring = {
     enable = true,
     enable_autocmd = false,
-  }
+  },
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
