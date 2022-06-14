@@ -298,7 +298,7 @@ lvim.plugins = {
   },
   {
     "Shatur/neovim-ayu",
-    config = function()
+    setup = function()
       require("ayu").setup {
         mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
         overrides = { -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
@@ -620,6 +620,18 @@ lvim.plugins = {
           max_type_length = nil, -- Can be integer or nil.
         },
       }
+    end,
+    setup = function()
+      local dap, dapui = require("dap"), require("dapui")
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
     end,
     ft = { "python", "rust", "go", "java" },
     event = "BufReadPost",
