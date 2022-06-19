@@ -303,36 +303,51 @@ lvim.plugins = {
         mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
         overrides = { -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
           LspReferenceText = { fg = "none", bg = "none" },
-          LspReferenceRead = { bg = "#5CCFE6" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
+          -- LspReferenceRead = { bg = "#5CCFE6" },
+          -- LspReferenceWrite = { link = "LspReferenceRead" },
         },
       }
     end,
   },
   {
     "rebelot/kanagawa.nvim",
-    config = function()
-      require("kanagawa").setup {
-        undercurl = true, -- enable undercurls
-        commentStyle = { italic = true },
-        functionStyle = {},
-        keywordStyle = { italic = true },
-        statementStyle = { bold = true },
-        typeStyle = {},
-        variablebuiltinStyle = { italic = true },
-        specialReturn = true, -- special highlight for the return keyword
-        specialException = true, -- special highlight for exception handling keywords
-        transparent = false, -- do not set background color
-        dimInactive = false, -- dim inactive window `:h hl-NormalNC`
-        globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
-        colors = {},
-        overrides = {
-          LspReferenceText = { fg = "none", bg = "none" },
-          LspReferenceRead = { bg = "#49443C" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
-        },
-      }
+    setup = function()
+      local status_ok, kanagawa = pcall(require, "kanagawa")
+      if status_ok then
+        kanagawa.setup {
+          undercurl = true, -- enable undercurls
+          commentStyle = { italic = true },
+          functionStyle = {},
+          keywordStyle = { italic = true },
+          statementStyle = { bold = true },
+          typeStyle = {},
+          variablebuiltinStyle = { italic = true },
+          specialReturn = true, -- special highlight for the return keyword
+          specialException = true, -- special highlight for exception handling keywords
+          transparent = false, -- do not set background color
+          dimInactive = false, -- dim inactive window `:h hl-NormalNC`
+          globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
+          colors = {},
+          overrides = {
+            LspReferenceText = { fg = "none", bg = "none" },
+            LspReferenceRead = { bg = "#49443C" },
+            LspReferenceWrite = { link = "LspReferenceRead" },
+          },
+        }
+      end
     end,
+  },
+  {
+    "projekt0n/github-nvim-theme",
+  },
+  {
+    "NLKNguyen/papercolor-theme",
+  },
+  {
+    "sainnhe/everforest",
+  },
+  {
+    "nvim-telescope/telescope-dap.nvim",
   },
   {
     "folke/trouble.nvim",
@@ -627,9 +642,6 @@ lvim.plugins = {
     disable = not lvim.builtin.dap.active,
   },
   {
-    "nvim-telescope/telescope-dap.nvim",
-  },
-  {
     "AckslD/nvim-neoclip.lua",
     requires = { { "tami5/sqlite.lua", module = "sqlite" } },
     config = function()
@@ -683,6 +695,7 @@ lvim.plugins = {
 }
 
 require("colorizer").setup()
+
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0.01
   vim.g.neovide_cursor_trail_length = 0.05
