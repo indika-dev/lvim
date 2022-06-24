@@ -627,12 +627,12 @@ lvim.plugins = {
       dap.listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
       end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
+      -- dap.listeners.before.event_terminated["dapui_config"] = function()
+      --   dapui.close()
+      -- end
+      -- dap.listeners.before.event_exited["dapui_config"] = function()
+      --   dapui.close()
+      -- end
       dapui.setup {
         icons = { expanded = "▾", collapsed = "▸" },
         -- mappings = {
@@ -661,6 +661,7 @@ lvim.plugins = {
           {
             elements = {
               "console",
+              "repl",
             },
             size = 10,
             position = "bottom",
