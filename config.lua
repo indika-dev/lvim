@@ -29,7 +29,7 @@ local _time = os.date "*t"
 if _time.hour >= 1 and _time.hour < 9 then
   lvim.colorscheme = "rose-pine"
 elseif _time.hour >= 9 and _time.hour < 21 then
-  lvim.colorscheme = "material"
+  lvim.colorscheme = "aurora"
 else
   lvim.colorscheme = "kanagawa"
 end
@@ -65,6 +65,7 @@ end
 lvim.builtin.telescope.on_config_done = function(telescope)
   telescope.load_extension "dap"
   telescope.load_extension "ui-select"
+  telescope.load_extension "neoclip"
 end
 
 -- TODO: User Config for predefined plugins
@@ -251,6 +252,9 @@ code_actions.setup {
 -- Additional Plugins
 lvim.plugins = {
   {
+    "sainnhe/edge",
+  },
+  {
     "rose-pine/neovim",
     as = "rose-pine",
     tag = "v1.*",
@@ -341,15 +345,23 @@ lvim.plugins = {
   {
     "projekt0n/github-nvim-theme",
     config = function()
-      require("github-theme").setup {
+      require('github-theme').setup({
+        theme_style = "dark",
+        sidebars = { "qf", "vista_kind", "terminal", "packer" },
+
+        -- Change the "hint" color to the "orange" color, and make the "error" color bright red
+        colors = { hint = "orange", error = "#ff0000" },
+
+        -- Overwrite the highlight groups
         overrides = function(c)
           return {
-            LspReferenceText = { fg = "none", bg = "none" },
-            LspReferenceRead = { bg = "#cccccc" },
-            LspReferenceWrite = { link = "LspReferenceRead" },
+            htmlTag = { fg = c.red, bg = "#282c34", sp = c.hint, style = "underline" },
+            DiagnosticHint = { link = "LspDiagnosticsDefaultHint" },
+            -- this will remove the highlight groups
+            TSField = {},
           }
-        end,
-      }
+        end
+      })
     end,
   },
   {
@@ -617,14 +629,12 @@ lvim.plugins = {
       end
       dap.listeners.before.event_terminated["dapui_config"] = function()
         dapui.close()
-        dap.repl.close()
       end
       dap.listeners.before.event_exited["dapui_config"] = function()
         dapui.close()
-        dap.repl.close()
       end
       dapui.setup {
-        -- icons = { expanded = "▾", collapsed = "▸" },
+        icons = { expanded = "▾", collapsed = "▸" },
         -- mappings = {
         --   -- Use a table to apply multiple mappings
         --   expand = { "<CR>", "<2-LeftMouse>" },
@@ -634,13 +644,13 @@ lvim.plugins = {
         --   repl = "r",
         --   toggle = "t",
         -- },
-        -- -- Expand lines larger than the window
-        -- -- Requires >= 0.7
-        -- expand_lines = vim.fn.has "nvim-0.7",
+        -- Expand lines larger than the window
+        -- Requires >= 0.7
+        expand_lines = vim.fn.has "nvim-0.7",
         layouts = {
           {
             elements = {
-              "scopes",
+              { id = "scopes", size = 0.25 },
               "breakpoints",
               "stacks",
               "watches",
@@ -650,17 +660,24 @@ lvim.plugins = {
           },
           {
             elements = {
-              "repl",
               "console",
             },
             size = 10,
             position = "bottom",
           },
         },
-        -- windows = { indent = 1 },
-        -- render = {
-        --   max_type_length = nil, -- Can be integer or nil.
-        -- },
+        floating = {
+          max_height = nil, -- These can be integers or a float between 0 and 1.
+          max_width = nil, -- Floats will be treated as percentage of your screen.
+          border = "single", -- Border style. Can be "single", "double" or "rounded"
+          mappings = {
+            close = { "q", "<Esc>" },
+          },
+        },
+        windows = { indent = 1 },
+        render = {
+          max_type_length = nil, -- Can be integer or nil.
+        }
       }
     end,
     ft = { "python", "rust", "go", "java" },
