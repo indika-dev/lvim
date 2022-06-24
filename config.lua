@@ -17,21 +17,22 @@ an executable
 
 -- general
 lvim.log.level = "warn"
-lvim.format_on_save = true
-local _time = os.date "*t"
-if _time.hour >= 1 and _time.hour < 9 then
-  lvim.colorscheme = "rose-pine"
-elseif _time.hour >= 9 and _time.hour < 21 then
-  lvim.colorscheme = "ayu-mirage"
-else
-  lvim.colorscheme = "kanagawa"
-end
 vim.opt.relativenumber = true
+lvim.format_on_save = true
 
 -- keymappings [view all the defaults by pressing <leader>Lk]
 lvim.leader = "space"
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
+
+local _time = os.date "*t"
+if _time.hour >= 1 and _time.hour < 9 then
+  lvim.colorscheme = "rose-pine"
+elseif _time.hour >= 9 and _time.hour < 21 then
+  lvim.colorscheme = "material"
+else
+  lvim.colorscheme = "kanagawa"
+end
 -- unmap a default keymapping
 -- lvim.keys.normal_mode["<C-Up>"] = ""
 -- edit a default keymapping
@@ -298,20 +299,20 @@ lvim.plugins = {
   },
   {
     "Shatur/neovim-ayu",
-    setup = function()
-      require("ayu").setup {
-        mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
-        overrides = { -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
-          LspReferenceText = { fg = "none", bg = "none" },
-          -- LspReferenceRead = { bg = "#5CCFE6" },
-          -- LspReferenceWrite = { link = "LspReferenceRead" },
-        },
-      }
-    end,
+    -- setup = function()
+    --   require("ayu").setup {
+    --     mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
+    --     overrides = { -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+    --       -- LspReferenceText = { fg = "none", bg = "none" },
+    --       -- LspReferenceRead = { bg = "#5CCFE6" },
+    --       -- LspReferenceWrite = { link = "LspReferenceRead" },
+    --     },
+    --   }
+    -- end,
   },
   {
     "rebelot/kanagawa.nvim",
-    setup = function()
+    config = function()
       local status_ok, kanagawa = pcall(require, "kanagawa")
       if status_ok then
         kanagawa.setup {
@@ -341,11 +342,13 @@ lvim.plugins = {
     "projekt0n/github-nvim-theme",
     config = function()
       require("github-theme").setup {
-        overrides = {
-          LspReferenceText = { fg = "none", bg = "none" },
-          LspReferenceRead = { bg = "#cccccc" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
-        },
+        overrides = function(c)
+          return {
+            LspReferenceText = { fg = "none", bg = "none" },
+            LspReferenceRead = { bg = "#cccccc" },
+            LspReferenceWrite = { link = "LspReferenceRead" },
+          }
+        end,
       }
     end,
   },
@@ -364,6 +367,17 @@ lvim.plugins = {
   },
   {
     "norcalli/nvim-colorizer.lua",
+    config = function()
+      require("colorizer").setup({ "*" }, {
+        RGB = true, -- #RGB hex codes
+        RRGGBB = true, -- #RRGGBB hex codes
+        RRGGBBAA = true, -- #RRGGBBAA hex codes
+        rgb_fn = true, -- CSS rgb() and rgba() functions
+        hsl_fn = true, -- CSS hsl() and hsla() functions
+        css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+        css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+      })
+    end,
   },
   {
     "ChristianChiarulli/nvcode-color-schemes.vim",
@@ -395,7 +409,7 @@ lvim.plugins = {
   {
     "skywind3000/asynctasks.vim",
     requires = { "skywind3000/asyncrun.vim" },
-    setup = function()
+    config = function()
       vim.cmd [[
           let g:asyncrun_open = 8
           let g:asynctask_template = '~/.config/lvim/task_template.ini'
@@ -551,7 +565,7 @@ lvim.plugins = {
   {
     "nvim-telescope/telescope-project.nvim",
     event = "BufWinEnter",
-    setup = function()
+    config = function()
       vim.cmd [[packadd telescope.nvim]]
     end,
   },
@@ -597,20 +611,32 @@ lvim.plugins = {
   {
     "rcarriga/nvim-dap-ui",
     config = function()
-      require("dapui").setup {
-        icons = { expanded = "▾", collapsed = "▸" },
-        mappings = {
-          -- Use a table to apply multiple mappings
-          expand = { "<CR>", "<2-LeftMouse>" },
-          open = "o",
-          remove = "d",
-          edit = "e",
-          repl = "r",
-          toggle = "t",
-        },
-        -- Expand lines larger than the window
-        -- Requires >= 0.7
-        expand_lines = vim.fn.has "nvim-0.7",
+      local dap, dapui = require("dap"), require("dapui")
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+        dap.repl.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+        dap.repl.close()
+      end
+      dapui.setup {
+        -- icons = { expanded = "▾", collapsed = "▸" },
+        -- mappings = {
+        --   -- Use a table to apply multiple mappings
+        --   expand = { "<CR>", "<2-LeftMouse>" },
+        --   open = "o",
+        --   remove = "d",
+        --   edit = "e",
+        --   repl = "r",
+        --   toggle = "t",
+        -- },
+        -- -- Expand lines larger than the window
+        -- -- Requires >= 0.7
+        -- expand_lines = vim.fn.has "nvim-0.7",
         layouts = {
           {
             elements = {
@@ -631,27 +657,22 @@ lvim.plugins = {
             position = "bottom",
           },
         },
-        windows = { indent = 1 },
-        render = {
-          max_type_length = nil, -- Can be integer or nil.
-        },
+        -- windows = { indent = 1 },
+        -- render = {
+        --   max_type_length = nil, -- Can be integer or nil.
+        -- },
       }
-    end,
-    setup = function()
-      local dap, dapui = require("dap"), require("dapui")
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
     end,
     ft = { "python", "rust", "go", "java" },
     event = "BufReadPost",
     requires = { "mfussenegger/nvim-dap" },
+    disable = not lvim.builtin.dap.active,
+  },
+  {
+    "theHamsta/nvim-dap-virtual-text",
+    opt = true,
+    after = "nvim-dap",
+    config = function() require("nvim-dap-virtual-text").setup() end,
     disable = not lvim.builtin.dap.active,
   },
   {
