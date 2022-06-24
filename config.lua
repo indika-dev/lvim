@@ -289,7 +289,7 @@ lvim.plugins = {
         },
         -- Change specific vim highlight groups
         highlight_groups = {
-          LspReferenceText = { fg = "none", bg = "none" },
+          LspReferenceText = { fg = "NONE", bg = "NONE" },
           LspReferenceRead = { bg = "#403d52" },
           LspReferenceWrite = { link = "LspReferenceRead" },
         },
@@ -302,7 +302,7 @@ lvim.plugins = {
       require("ayu").setup {
         mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
         overrides = { -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
-          LspReferenceText = { fg = "none", bg = "none" },
+          LspReferenceText = { fg = "NONE", bg = "NONE" },
           -- LspReferenceRead = { bg = "#5CCFE6" },
           -- LspReferenceWrite = { link = "LspReferenceRead" },
         },
@@ -329,8 +329,8 @@ lvim.plugins = {
           globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
           colors = {},
           overrides = {
-            LspReferenceText = { fg = "none", bg = "none" },
-            LspReferenceRead = { bg = "#49443C" },
+            LspReferenceText = { fg = "NONE", bg = "NONE" },
+            LspReferenceRead = { bg = "#49443c" },
             LspReferenceWrite = { link = "LspReferenceRead" },
           },
         }
@@ -339,13 +339,15 @@ lvim.plugins = {
   },
   {
     "projekt0n/github-nvim-theme",
-    config = function()
+    setup = function()
       require("github-theme").setup {
-        overrides = {
-          LspReferenceText = { fg = "none", bg = "none" },
-          LspReferenceRead = { bg = "#cccccc" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
-        },
+        overrides = function(c)
+          return {
+            LspReferenceText = { fg = "NONE", bg = "NONE" },
+            LspReferenceRead = { bg = "#cccccc" },
+            LspReferenceWrite = { link = "LspReferenceRead" },
+          }
+        end,
       }
     end,
   },
@@ -638,7 +640,7 @@ lvim.plugins = {
       }
     end,
     setup = function()
-      local dap, dapui = require("dap"), require("dapui")
+      local dap, dapui = require "dap", require "dapui"
       dap.listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
       end
@@ -704,6 +706,9 @@ lvim.plugins = {
         },
       }
     end,
+  },
+  {
+    "~/workspace/luvcron/",
   },
 }
 
