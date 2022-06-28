@@ -608,7 +608,6 @@ lvim.plugins = {
   },
   {
     "mfussenegger/nvim-jdtls",
-    ft = "java",
   },
   {
     "rcarriga/nvim-dap-ui",

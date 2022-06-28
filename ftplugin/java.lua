@@ -27,6 +27,8 @@ else
   print "Unsupported system"
 end
 
+JAVA_LS_EXECUTABLE = home .. "/.local/share/lunarvim/lvim/utils/bin/jdtls"
+
 -- Find root of project
 local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }
 local root_dir = jdtls.setup.find_root(root_markers)
@@ -49,28 +51,13 @@ local workspace_dir = WORKSPACE_PATH .. project_name
 local bundles = vim.split(vim.fn.glob(
   home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
 ), "\n")
--- if #bundles == 0 then
---   bundles = vim.fn.glob(
---     home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar",
---     1,
---     1
---   )
--- end
 
--- NOTE: for testing
--- git clone git@github.com:microsoft/vscode-java-test.git ~/.config/lvim/.vscode-java-test
--- cd ~/.config/lvim/vscode-java-test
--- npm install
--- npm run build-plugin
--- local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
--- if #extra_bundles == 0 then
 local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
--- end
 vim.list_extend(bundles, extra_bundles)
 
 local config = {
   cmd = {
-    "java",
+    JAVA_LS_EXECUTABLE,
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
@@ -185,10 +172,6 @@ local config = {
     server_side_fuzzy_completion = true,
   },
   init_options = {
-    -- bundles = {
-    --   vim.fn.glob(home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
-    --   -- vim.fn.glob("path/to/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar")
-    -- };
     bundles = bundles,
   },
 }
