@@ -643,6 +643,7 @@ lvim.plugins = {
               "breakpoints",
               "stacks",
               "watches",
+              "repl",
             },
             size = 40,
             position = "left",
@@ -650,7 +651,6 @@ lvim.plugins = {
           {
             elements = {
               "console",
-              "repl",
             },
             size = 10,
             position = "bottom",
