@@ -7,7 +7,8 @@ end
 local handlers = require 'vim.lsp.handlers'
 
 -- don't call second jdtls server from LSP installation
-require 'lspconfig'.jdtls.setup { cmd = {} }
+-- disables https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/jdtls.lua
+require 'lspconfig'.jdtls = {}
 
 -- Determine OS
 local home = os.getenv "HOME"
