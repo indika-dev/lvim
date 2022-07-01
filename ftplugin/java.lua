@@ -48,6 +48,7 @@ extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
 local workspace_dir = WORKSPACE_PATH .. project_name
+os.execute("mkdir -p " .. workspace_dir)
 
 -- NOTE: for debugging
 -- git clone git@github.com:microsoft/java-debug.git ~/.config/lvim/.java-debug
