@@ -167,23 +167,19 @@ formatters.setup {
   { command = "shfmt", filetypes = { "sh" } },
   -- { command = "yamlfmt", args = { "/dev/stdin" }, filetypes = { "yaml", "yml" } },
   {
-    command = "prettier",
+    name = "prettier",
     filetypes = {
       "html",
       "json",
-      "javascript",
-      "javascriptreact",
-      "typescript",
-      "typescriptreact",
       "yaml",
       "yml",
     },
   },
-  -- {
-  -- 	command = "eslint",
-  -- 	args = { "--fix" },
-  -- 	filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-  -- },
+  {
+    name = "eslint",
+    -- args = { "--fix" },
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
+  },
   -- {
   -- 	name = "standardjs",
   -- 	args = { "--fix" },
@@ -209,7 +205,7 @@ linters.setup {
   },
   {
     command = "eslint",
-    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
   },
   -- {
   --   name = "semgrep",
@@ -246,6 +242,10 @@ local code_actions = require "lvim.lsp.null-ls.code_actions"
 code_actions.setup {
   {
     name = "proselint",
+  },
+  {
+    exe = "eslint",
+    filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact", "vue" },
   },
 }
 
@@ -302,8 +302,15 @@ lvim.plugins = {
     end,
   },
   {
+    "savq/melange",
+    -- config = function()
+    --   lvim.background = "light"
+    -- end
+  },
+  {
     "Shatur/neovim-ayu",
   },
+  { "folke/tokyonight.nvim", },
   {
     "rebelot/kanagawa.nvim",
     config = function()
