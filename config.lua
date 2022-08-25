@@ -310,7 +310,7 @@ lvim.plugins = {
   {
     "Shatur/neovim-ayu",
   },
-  { "folke/tokyonight.nvim", },
+  { "folke/tokyonight.nvim" },
   {
     "rebelot/kanagawa.nvim",
     config = function()
@@ -342,7 +342,7 @@ lvim.plugins = {
   {
     "projekt0n/github-nvim-theme",
     config = function()
-      require('github-theme').setup({
+      require("github-theme").setup {
         theme_style = "dark",
         sidebars = { "qf", "vista_kind", "terminal", "packer" },
 
@@ -357,8 +357,8 @@ lvim.plugins = {
             -- this will remove the highlight groups
             TSField = {},
           }
-        end
-      })
+        end,
+      }
     end,
   },
   {
@@ -619,7 +619,7 @@ lvim.plugins = {
   {
     "rcarriga/nvim-dap-ui",
     config = function()
-      local dap, dapui = require("dap"), require("dapui")
+      local dap, dapui = require "dap", require "dapui"
       dap.listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
       end
@@ -674,7 +674,7 @@ lvim.plugins = {
         windows = { indent = 1 },
         render = {
           max_type_length = nil, -- Can be integer or nil.
-        }
+        },
       }
     end,
     setup = function()
@@ -698,7 +698,9 @@ lvim.plugins = {
     "theHamsta/nvim-dap-virtual-text",
     opt = true,
     after = "nvim-dap",
-    config = function() require("nvim-dap-virtual-text").setup() end,
+    config = function()
+      require("nvim-dap-virtual-text").setup()
+    end,
     disable = not lvim.builtin.dap.active,
   },
   {
@@ -754,6 +756,12 @@ lvim.plugins = {
   },
   {
     "~/workspace/luvcron/",
+  },
+  {
+    "matbme/JABS.nvim",
+    config = function()
+      require("jabs").setup()
+    end,
   },
 }
 
@@ -815,6 +823,26 @@ require("nvim-treesitter.configs").setup {
     enable_autocmd = false,
   },
 }
+
+require("jabs").setup {
+  position = "center",
+  width = 50,
+  height = 10,
+  border = "rounded",
+  preview_position = "top",
+  preview = {
+    width = 70,
+    height = 20,
+    border = "rounded",
+  },
+}
+
+local status_ok, _ = pcall(require, "jabs")
+if status_ok then
+  lvim.builtin.which_key.mappings.b.s = { "<cmd>JABSOpen<cr>", "Open Bufferlist" }
+else
+  lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
+end
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- lvim.autocommands.custom_groups = {
