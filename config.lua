@@ -333,6 +333,7 @@ lvim.plugins = {
           overrides = {
             LspReferenceText = { fg = "NONE", bg = "NONE" },
             LspReferenceRead = { bg = "#49443c" },
+            -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
             LspReferenceWrite = { link = "LspReferenceRead" },
           },
         }
@@ -844,9 +845,9 @@ else
   lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 end
 
+-- vim.cmd("source ~/.vimrc")
+
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- lvim.autocommands.custom_groups = {
 --   { "BufWinEnter", "*.lua", "setlocal ts=8 sw=8" },
 -- }
-
--- vim.cmd("source ~/.vimrc")

@@ -4,23 +4,19 @@ if not status_ok then
   return
 end
 
-local handlers = require 'vim.lsp.handlers'
+local handlers = require "vim.lsp.handlers"
 
 -- don't call second jdtls server from LSP installation
 -- disables https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/jdtls.lua
-require 'lspconfig'.jdtls = {}
+require("lspconfig").jdtls = {}
 
 -- Determine OS
 local home = os.getenv "HOME"
-local launcher_path = vim.fn.glob(
-  home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar"
-)
+local launcher_path =
+  vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
 if #launcher_path == 0 then
-  launcher_path = vim.fn.glob(
-    home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar",
-    1,
-    1
-  )[1]
+  launcher_path =
+    vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
 end
 local CONFIG = ""
 if vim.fn.has "mac" == 1 then
@@ -55,9 +51,12 @@ os.execute("mkdir -p " .. workspace_dir)
 -- cd ~/.config/lvim/.java-debug/
 -- ./mvnw clean install
 
-local bundles = vim.split(vim.fn.glob(
-  home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
-), "\n")
+local bundles = vim.split(
+  vim.fn.glob(
+    home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
+  ),
+  "\n"
+)
 
 local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
 vim.list_extend(bundles, extra_bundles)
@@ -80,9 +79,9 @@ end
 local function on_textdocument_codeaction(err, actions, ctx)
   for _, action in ipairs(actions) do
     -- TODO: (steelsojka) Handle more than one edit?
-    if action.command == 'java.apply.workspaceEdit' then -- 'action' is Command in java format
+    if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
       action.edit = fix_zero_version(action.edit or action.arguments[1])
-    elseif type(action.command) == 'table' and action.command.command == 'java.apply.workspaceEdit' then -- 'action' is CodeAction in java format
+    elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
       action.edit = fix_zero_version(action.edit or action.command.arguments[1])
     end
   end
@@ -101,9 +100,9 @@ end
 -- Non-standard notification that can be used to display progress
 local function on_language_status(_, result)
   local command = vim.api.nvim_command
-  command 'echohl ModeMsg'
+  command "echohl ModeMsg"
   command(string.format('echo "%s"', result.message))
-  command 'echohl None'
+  command "echohl None"
 end
 
 local config = {
@@ -159,7 +158,7 @@ local config = {
             name = "JavaSE-17",
             path = "/home/stefan/.local/lib/jvm-17/",
           },
-        }
+        },
       },
       maven = {
         downloadSources = true,
@@ -228,10 +227,10 @@ local config = {
   handlers = {
     -- Due to an invalid protocol implementation in the jdtls we have to conform these to be spec compliant.
     -- https://github.com/eclipse/eclipse.jdt.ls/issues/376
-    ['textDocument/codeAction'] = on_textdocument_codeaction,
-    ['textDocument/rename'] = on_textdocument_rename,
-    ['workspace/applyEdit'] = on_workspace_applyedit,
-    ['language/status'] = vim.schedule_wrap(on_language_status),
+    ["textDocument/codeAction"] = on_textdocument_codeaction,
+    ["textDocument/rename"] = on_textdocument_rename,
+    ["workspace/applyEdit"] = on_workspace_applyedit,
+    ["language/status"] = vim.schedule_wrap(on_language_status),
   },
 }
 
@@ -295,34 +294,36 @@ which_key.register(mappings, opts)
 which_key.register(vmappings, vopts)
 
 -- UI
-local finders = require 'telescope.finders'
-local sorters = require 'telescope.sorters'
-local actions = require 'telescope.actions'
-local pickers = require 'telescope.pickers'
-require('jdtls.ui').pick_one_async = function(items, prompt, label_fn, cb)
+local finders = require "telescope.finders"
+local sorters = require "telescope.sorters"
+local actions = require "telescope.actions"
+local pickers = require "telescope.pickers"
+require("jdtls.ui").pick_one_async = function(items, prompt, label_fn, cb)
   local options = {}
-  pickers.new(options, {
-    prompt_title = prompt,
-    finder = finders.new_table {
-      results = items,
-      entry_maker = function(entry)
-        return {
-          value = entry,
-          display = label_fn(entry),
-          ordinal = label_fn(entry),
-        }
-      end,
-    },
-    sorter = sorters.get_generic_fuzzy_sorter(),
-    attach_mappings = function(prompt_bufnr)
-      actions.goto_file_selection_edit:replace(function()
-        local selection = actions.get_selected_entry(prompt_bufnr)
-        actions.close(prompt_bufnr)
-        cb(selection.value)
-      end)
-      return true
-    end,
-  }):find()
+  pickers
+    .new(options, {
+      prompt_title = prompt,
+      finder = finders.new_table {
+        results = items,
+        entry_maker = function(entry)
+          return {
+            value = entry,
+            display = label_fn(entry),
+            ordinal = label_fn(entry),
+          }
+        end,
+      },
+      sorter = sorters.get_generic_fuzzy_sorter(),
+      -- attach_mappings = function(prompt_bufnr)
+      --   actions.goto_file_selection_edit:replace(function()
+      --     local selection = actions.get_selected_entry(prompt_bufnr)
+      --     actions.close(prompt_bufnr)
+      --     cb(selection.value)
+      --   end)
+      --   return true
+      -- end,
+    })
+    :find()
 end
 
 -- if lvim.builtin.which_key.on_config_done then

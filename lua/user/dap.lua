@@ -294,6 +294,7 @@ M.config = function()
   })
   lvim.builtin.dap.on_config_done = function(_)
     lvim.builtin.which_key.mappings["d"].name = " Debug"
+    lvim.builtin.which_key.mappings.d.T = { '<cmd>lua require("dapui").toggle()<cr>', "Toggle DapUI" }
   end
 end
 
