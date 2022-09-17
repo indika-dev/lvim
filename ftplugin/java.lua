@@ -13,10 +13,12 @@ require("lspconfig").jdtls = {}
 -- Determine OS
 local home = os.getenv "HOME"
 local launcher_path =
-  vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
+  -- vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
+  vim.fn.glob(home .. "/.local/lib/vscode-jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
 if #launcher_path == 0 then
   launcher_path =
-    vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
+    --  vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
+    vim.fn.glob(home .. "/.local/lib/vscode-jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
 end
 local CONFIG = ""
 if vim.fn.has "mac" == 1 then
@@ -29,7 +31,7 @@ else
   print "Unsupported system"
 end
 
-JAVA_LS_EXECUTABLE = home .. "/.local/share/lunarvim/lvim/utils/bin/jdtls"
+JAVA_LS_EXECUTABLE = home .. "/.local/lib/vscode-jdtls/bin/jdtls"
 
 -- Find root of project
 local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }
@@ -51,14 +53,10 @@ os.execute("mkdir -p " .. workspace_dir)
 -- cd ~/.config/lvim/.java-debug/
 -- ./mvnw clean install
 
-local bundles = vim.split(
-  vim.fn.glob(
-    home .. "/.local/lib/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar"
-  ),
-  "\n"
-)
+local bundles =
+  vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-debug/com.microsoft.java.debug.plugin-*.jar"), "\n")
 
-local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/server/*.jar"), "\n")
+local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/*.jar"), "\n")
 vim.list_extend(bundles, extra_bundles)
 
 -- TextDocument version is reported as 0, override with nil so that
@@ -113,7 +111,7 @@ local config = {
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
-    "-javaagent:" .. home .. "/.local/share/nvim/lsp_servers/jdtls/lombok.jar",
+    "-javaagent:" .. home .. "/.local/lib/vscode-jdtls/lombok.jar",
     "-Xms1g",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
@@ -123,7 +121,7 @@ local config = {
     "-jar",
     launcher_path,
     "-configuration",
-    home .. "/.local/share/nvim/lsp_servers/jdtls/config_" .. CONFIG,
+    home .. "/.local/lib/vscode-jdtls/config_" .. CONFIG,
     "-data",
     workspace_dir,
   },

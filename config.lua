@@ -26,10 +26,8 @@ lvim.leader = "space"
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 
 local _time = os.date "*t"
-if _time.hour >= 1 and _time.hour < 9 then
-  lvim.colorscheme = "rose-pine"
-elseif _time.hour >= 9 and _time.hour < 21 then
-  lvim.colorscheme = "aurora"
+if _time.hour >= 6 and _time.hour < 21 then
+  lvim.colorscheme = "github_dark"
 else
   lvim.colorscheme = "kanagawa"
 end
