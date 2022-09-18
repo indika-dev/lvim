@@ -255,62 +255,6 @@ code_actions.setup {
 -- Additional Plugins
 lvim.plugins = {
   {
-    "sainnhe/edge",
-  },
-  {
-    "rose-pine/neovim",
-    as = "rose-pine",
-    tag = "v1.*",
-    config = function()
-      require("rose-pine").setup {
-        ---@usage 'main'|'moon'
-        dark_variant = "main",
-        bold_vert_split = false,
-        dim_nc_background = false,
-        disable_background = false,
-        disable_float_background = false,
-        disable_italics = false,
-        ---@usage string hex value or named color from rosepinetheme.com/palette
-        groups = {
-          background = "base",
-          panel = "surface",
-          border = "highlight_med",
-          comment = "muted",
-          link = "iris",
-          punctuation = "subtle",
-
-          error = "love",
-          hint = "iris",
-          info = "foam",
-          warn = "gold",
-
-          headings = {
-            h1 = "iris",
-            h2 = "foam",
-            h3 = "rose",
-            h4 = "gold",
-            h5 = "pine",
-            h6 = "foam",
-          },
-          -- or set all headings at once
-          -- headings = 'subtle'
-        },
-        -- Change specific vim highlight groups
-        highlight_groups = {
-          LspReferenceText = { fg = "NONE", bg = "NONE" },
-          LspReferenceRead = { bg = "#403d52" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
-        },
-      }
-    end,
-  },
-  {
-    "savq/melange",
-    -- config = function()
-    --   lvim.background = "light"
-    -- end
-  },
-  {
     "Shatur/neovim-ayu",
   },
   { "folke/tokyonight.nvim" },
@@ -366,12 +310,6 @@ lvim.plugins = {
     end,
   },
   {
-    "NLKNguyen/papercolor-theme",
-  },
-  {
-    "sainnhe/everforest",
-  },
-  {
     "nvim-telescope/telescope-dap.nvim",
   },
   {
@@ -397,14 +335,6 @@ lvim.plugins = {
     opt = true,
     config = function()
       vim.g.nvcode_termcolors = 256
-    end,
-  },
-  {
-    "kaicataldo/material.vim",
-    opt = true,
-    config = function()
-      vim.g.material_branch = "main"
-      vim.g.material_theme_style = "default-community" -- deafualt,palenight, ocean, lighter, darker, default-community
     end,
   },
   {
@@ -766,6 +696,11 @@ lvim.plugins = {
     config = function()
       require("jabs").setup()
     end,
+  },
+  {
+    "nvim-telescope/telescope-fzy-native.nvim",
+    run = "make",
+    event = "BufRead",
   },
 }
 
