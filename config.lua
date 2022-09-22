@@ -61,9 +61,11 @@ end
 --   w = { "<cmd>Trouble lsp_workspace_diagnostics<cr>", "Diagnostics" },
 -- }
 lvim.builtin.telescope.on_config_done = function(telescope)
-  telescope.load_extension "dap"
-  telescope.load_extension "ui-select"
-  telescope.load_extension "neoclip"
+  pcall(telescope.load_extension, "dap")
+  pcall(telescope.load_extension, "ui-select")
+  pcall(telescope.load_extension, "neoclip")
+  pcall(telescope.load_extension, "fzf")
+  pcall(telescope.load_extension, "refactoring")
 end
 
 -- TODO: User Config for predefined plugins
@@ -435,7 +437,6 @@ lvim.plugins = {
     ft = { "typescript", "javascript", "lua", "c", "cpp", "go", "python", "java", "php" },
     event = "BufRead",
     config = function()
-      require("telescope").load_extension "refactoring"
       -- remap to open the Telescope refactoring menu in visual mode
       vim.api.nvim_set_keymap(
         "v",
@@ -466,6 +467,7 @@ lvim.plugins = {
           java = true,
         },
       }
+      -- require("telescope").load_extension "refactoring"
     end,
   },
   {
@@ -698,7 +700,7 @@ lvim.plugins = {
     end,
   },
   {
-    "nvim-telescope/telescope-fzy-native.nvim",
+    "nvim-telescope/telescope-fzf-native.nvim",
     run = "make",
     event = "BufRead",
   },
