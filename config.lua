@@ -1,4 +1,6 @@
 --[[
+
+
 lvim is the global options object
 
 Linters should be
@@ -704,6 +706,16 @@ lvim.plugins = {
     run = "make",
     event = "BufRead",
   },
+  {
+    "simrat39/symbols-outline.nvim",
+    config = function()
+      lvim.builtin.which_key.mappings.l.o = {
+        "<cmd>SymbolsOutline<CR>",
+        require("user.lsp_kind").symbols_outline.Module .. "Outline Symbols",
+      }
+      require("symbols-outline").setup()
+    end,
+  },
 }
 
 require("colorizer").setup()
@@ -783,6 +795,10 @@ if status_ok then
   lvim.builtin.which_key.mappings.b.s = { "<cmd>JABSOpen<cr>", "Open Bufferlist" }
 else
   lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
+end
+status_ok, _ = pcall(require, "symbols-outline")
+if status_ok then
+  lvim.builtin.which_key.mappings.l.o = { "<cmd>SymbolsOutline<CR>", "Outline Symbols" }
 end
 
 -- vim.cmd("source ~/.vimrc")
