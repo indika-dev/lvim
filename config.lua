@@ -167,6 +167,16 @@ code_actions.setup {
 lvim.plugins = {
   {
     "Shatur/neovim-ayu",
+    config = function()
+      local status_ok, lualine = pcall(require, "lualine")
+      if status_ok then
+        lualine.setup {
+          options = {
+            theme = "ayu",
+          },
+        }
+      end
+    end,
   },
   { "folke/tokyonight.nvim" },
   {
