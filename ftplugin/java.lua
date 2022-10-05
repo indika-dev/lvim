@@ -1,6 +1,5 @@
 vim.opt_local.shiftwidth = 2
 vim.opt_local.tabstop = 2
-vim.opt_local.cmdheight = 2 -- more space in the neovim command line for displaying messages
 
 -- credit: https://github.com/ChristianChiarulli/nvim
 local status_ok, jdtls = pcall(require, "jdtls")
@@ -8,24 +7,25 @@ if not status_ok then
   return
 end
 
+-- let mason handle updates of jdtls, but don't call it
+require("lspconfig").jdtls.setup = function() end
+
 local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- local capabilities = require("lvim.lsp").common_capabilities(),
 local status_cmp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
 if status_cmp_ok then
   capabilities.textDocument.completion.completionItem.snippetSupport = false
   capabilities = cmp_nvim_lsp.update_capabilities(capabilities)
 end
 
-local handlers = require "vim.lsp.handlers"
+-- local handlers = require "vim.lsp.handlers"
+local home = os.getenv "HOME"
+local JDTLS_BASEPATH = home .. "/.local/share/nvim/mason/packages/jdtls"
 
 -- Determine OS
-local home = os.getenv "HOME"
-local launcher_path =
-  -- vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
-  vim.fn.glob(home .. "/.local/lib/vscode-jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
+local launcher_path = vim.fn.glob(JDTLS_BASEPATH .. "/plugins/org.eclipse.equinox.launcher_*.jar")
 if #launcher_path == 0 then
-  launcher_path =
-    --  vim.fn.glob(home .. "/.local/share/nvim/lsp_servers/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
-    vim.fn.glob(home .. "/.local/lib/vscode-jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
+  launcher_path = vim.fn.glob(JDTLS_BASEPATH .. "/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
 end
 local CONFIG = ""
 if vim.fn.has "mac" == 1 then
@@ -37,8 +37,6 @@ elseif vim.fn.has "unix" == 1 then
 else
   print "Unsupported system"
 end
-
-JAVA_LS_EXECUTABLE = home .. "/.local/lib/vscode-jdtls/bin/jdtls"
 
 -- Find root of project
 local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }
@@ -63,13 +61,13 @@ vim.list_extend(bundles, extra_bundles)
 
 local config = {
   cmd = {
-    home .. "/.local/lib/vscode-jdtls/jre/bin/java",
+    home .. "/.local/lib/jvm-17/bin/java",
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
-    "-javaagent:" .. home .. "/.local/lib/vscode-jdtls/lombok.jar",
+    "-javaagent:" .. JDTLS_BASEPATH .. "/lombok.jar",
     "-Xms1g",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
@@ -79,7 +77,7 @@ local config = {
     "-jar",
     launcher_path,
     "-configuration",
-    home .. "/.local/lib/vscode-jdtls/config_" .. CONFIG,
+    JDTLS_BASEPATH .. "/config_" .. CONFIG,
     "-data",
     workspace_dir,
   },
@@ -87,7 +85,6 @@ local config = {
   on_attach = require("lvim.lsp").common_on_attach,
   on_init = require("lvim.lsp").common_on_init,
   on_exit = require("lvim.lsp").common_on_exit,
-  -- capabilities = require("lvim.lsp").common_capabilities(),
   root_dir = root_dir,
   capabilities = capabilities,
   settings = {

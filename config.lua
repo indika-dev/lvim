@@ -1,31 +1,19 @@
 --[[
-
-
 lvim is the global options object
-
-Linters should be
-filled in as strings with either
-a global executable or a path to
-an executable
 ]]
--- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
-
--- set fonts for GUIs
--- vim.o.guifont = "JetBrainsMono NF:h14"
--- vim.o.guifont = "CaskaydiaCove NF:h12"
-
--- configure auto-session plugin
--- vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
 lvim.format_on_save = true
-
--- keymappings [view all the defaults by pressing <leader>Lk]
 lvim.leader = "space"
--- add your own keymapping
-lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
+lvim.builtin.alpha.active = true
+lvim.builtin.terminal.active = true
+lvim.builtin.dap.active = true
+lvim.builtin.notify.active = true
+lvim.builtin.treesitter.rainbow.enable = false
+lvim.builtin.treesitter.ignore_install = { "haskell" }
+lvim.builtin.treesitter.highlight.enabled = true
 
 local _time = os.date "*t"
 if _time.hour >= 6 and _time.hour < 21 then
@@ -33,133 +21,73 @@ if _time.hour >= 6 and _time.hour < 21 then
 else
   lvim.colorscheme = "kanagawa"
 end
--- unmap a default keymapping
--- lvim.keys.normal_mode["<C-Up>"] = ""
--- edit a default keymapping
--- lvim.keys.normal_mode["<C-q>"] = ":q<cr>"
 
--- Change Telescope navigation to use j and k for navigation and n and p for history in both input and normal mode.
--- lvim.builtin.telescope.on_config_done = function()
---   local actions = require "telescope.actions"
---   -- for input mode
---   lvim.builtin.telescope.defaults.mappings.i["<C-j>"] = actions.move_selection_next
---   lvim.builtin.telescope.defaults.mappings.i["<C-k>"] = actions.move_selection_previous
---   lvim.builtin.telescope.defaults.mappings.i["<C-n>"] = actions.cycle_history_next
---   lvim.builtin.telescope.defaults.mappings.i["<C-p>"] = actions.cycle_history_prev
---   -- for normal mode
---   lvim.builtin.telescope.defaults.mappings.n["<C-j>"] = actions.move_selection_next
---   lvim.builtin.telescope.defaults.mappings.n["<C-k>"] = actions.move_selection_previous
--- end
+lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+lvim.builtin.which_key.mappings["t"] = {
+  name = "+Trouble",
+  r = { "<cmd>Trouble lsp_references<cr>", "References" },
+  f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
+  d = { "<cmd>Trouble lsp_document_diagnostics<cr>", "Diagnostics" },
+  q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
+  l = { "<cmd>Trouble loclist<cr>", "LocationList" },
+  w = { "<cmd>Trouble workspace_diagnostics<cr>", "Diagnostics" },
+}
 
--- Use which-key to add extra bindings with the leader-key prefix
--- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
--- lvim.builtin.which_key.mappings["t"] = {
---   name = "+Trouble",
---   r = { "<cmd>Trouble lsp_references<cr>", "References" },
---   f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
---   d = { "<cmd>Trouble lsp_document_diagnostics<cr>", "Diagnostics" },
---   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
---   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
---   w = { "<cmd>Trouble lsp_workspace_diagnostics<cr>", "Diagnostics" },
--- }
 lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "dap")
   pcall(telescope.load_extension, "ui-select")
   pcall(telescope.load_extension, "neoclip")
   pcall(telescope.load_extension, "fzf")
   pcall(telescope.load_extension, "refactoring")
+  pcall(telescope.load_extension, "asynctasks")
 end
 
--- TODO: User Config for predefined plugins
--- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
--- lvim.builtin.dashboard.active = true
-lvim.builtin.alpha.mode = "dashboard"
-lvim.builtin.terminal.active = true
-lvim.builtin.dap.active = true
-lvim.builtin.notify.active = true
-lvim.builtin.treesitter.rainbow.enable = false
-
--- if you don't want all the parsers change this to a table of the ones you want
--- lvim.builtin.treesitter.ensure_installed = "maintained"
-lvim.builtin.treesitter.ensure_installed = {
-  "bash",
-  "css",
-  "dockerfile",
-  "embedded_template",
-  "erlang",
-  "go",
-  "gomod",
-  "gowork",
-  "graphql",
-  "html",
-  "java",
-  "javascript",
-  "jsdoc",
-  "json",
-  "lua",
-  "make",
-  "markdown",
-  "php",
-  "python",
-  "ruby",
-  "rust",
-  "scala",
-  "scheme",
-  "scss",
-  "sparql",
-  "toml",
-  "tsx",
-  "typescript",
-  "vim",
-  "vue",
-  "yaml",
-}
-lvim.builtin.treesitter.ignore_install = { "haskell" }
-lvim.builtin.treesitter.highlight.enabled = true
+-- for some reasons, this is not working as I intended
+lvim.builtin.dap.on_config_done = function(dap)
+  --   local dapui_status_ok, dapui = pcall(require, "dapui")
+  --   if not dapui_status_ok then
+  --     return
+  --   end
+  --   dap.listeners.after["event_initialized"]["dapui_config"] = function(session, body)
+  --     dapui.open()
+  --   end
+  --   dap.listeners.before["event_terminated"]["dapui_config"] = function(session, body)
+  --     dapui.close()
+  --   end
+  --   dap.listeners.before["event_exited"]["dapui_config"] = function(session, body)
+  --     dapui.close()
+  --   end
+end
 
 -- generic LSP settings
--- you can set a custom on_attach function that will be used for all the language servers
--- See <https://github.com/neovim/nvim-lspconfig#keybindings-and-completion>
--- lvim.lsp.on_attach_callback = function(client, bufnr)
---   local function buf_set_option(...)
---     vim.api.nvim_buf_set_option(bufnr, ...)
---   end
---   --Enable completion triggered by <c-x><c-o>
---   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
--- end
--- you can overwrite the null_ls setup table (useful for setting the root_dir function)
--- lvim.lsp.null_ls.setup = {
---   root_dir = require("lspconfig").util.root_pattern("Makefile", ".git", "node_modules"),
--- }
--- or if you need something more advanced
--- lvim.lsp.null_ls.setup.root_dir = function(fname)
---   if vim.bo.filetype == "javascript" then
---     return require("lspconfig/util").root_pattern("Makefile", ".git", "node_modules")(fname)
---       or require("lspconfig/util").path.dirname(fname)
---   elseif vim.bo.filetype == "php" then
---     return require("lspconfig/util").root_pattern("Makefile", ".git", "composer.json")(fname) or vim.fn.getcwd()
---   else
---     return require("lspconfig/util").root_pattern("Makefile", ".git")(fname) or require("lspconfig/util").path.dirname(fname)
---   end
--- end
-
--- set a formatter if you want to override the default lsp one (if it exists)
--- lvim.lang.python.formatters = {
---   {
---     exe = "black",
---   }
--- }
--- set an additional linter
--- lvim.lang.python.linters = {
---   {
---     exe = "flake8",
---   }
--- }
-lvim.format_on_save = true
-
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, {
-  "jdtls",
-})
+lvim.lsp.diagnostics.virtual_text = true
+require("mason-lspconfig").setup {
+  highlight = {
+    enabled = true,
+  },
+  ignore_install = { "haskell" },
+  automatic_installation = true,
+  ensure_installed = {
+    "jdtls",
+    "tsserver",
+    "jsonls",
+    "sumneko_lua",
+    "bashls",
+    "cssls",
+    "dockerls",
+    "eslint",
+    "html",
+    "zk",
+    "pyright",
+    "taplo",
+    "vimls",
+    "vuels",
+    "yamlls",
+    -- currently not working...see later again when a higher mason version arrives
+    -- "java-test",
+    -- "java-debug-adapter",
+  },
+}
 
 local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup {
@@ -167,32 +95,26 @@ formatters.setup {
     command = "stylua",
     filetypes = { "lua" },
   },
-  -- {
-  --   command = "uncrustify",
-  --   filetypes = { "java" },
-  -- },
   { command = "shfmt", filetypes = { "sh" } },
-  -- { command = "yamlfmt", args = { "/dev/stdin" }, filetypes = { "yaml", "yml" } },
   {
     name = "prettier",
     filetypes = {
       "html",
-      "json",
-      "yaml",
-      "yml",
     },
   },
   {
-    name = "eslint",
-    -- args = { "--fix" },
+    name = "eslint_d",
+    args = { "--fix" },
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
   },
-  -- {
-  -- 	name = "standardjs",
-  -- 	args = { "--fix" },
-  -- filetypes = { "javascript", "javascriptreact" },
-  -- , "typescript", "typescriptreact" },
-  -- },
+  {
+    command = "yamlfmt",
+    filetypes = { "yaml", "yml" },
+  },
+  {
+    name = "fixjson",
+    filetypes = { "json" },
+  },
 }
 
 local linters = require "lvim.lsp.null-ls.linters"
@@ -211,21 +133,9 @@ linters.setup {
     filetypes = { "yaml", "yml" },
   },
   {
-    command = "eslint",
+    command = "eslint_d",
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
   },
-  -- {
-  --   name = "semgrep",
-  --   args = {
-  --     "--config",
-  --     "/home/stefan/workspace/semgrep-rules/java/lang/correctness/",
-  --     "--config",
-  --     "/home/stefan/workspace/semgrep-rules/java/lang/security/",
-  --     "--config",
-  --     "/home/stefan/workspace/semgrep-rules/java/log4j/security/",
-  --   },
-  --   filetypes = { "java" },
-  -- },
 }
 
 lvim.custom = {
@@ -248,10 +158,7 @@ end
 local code_actions = require "lvim.lsp.null-ls.code_actions"
 code_actions.setup {
   {
-    name = "proselint",
-  },
-  {
-    exe = "eslint",
+    exe = "eslint_d",
     filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact", "vue" },
   },
 }
@@ -265,30 +172,14 @@ lvim.plugins = {
   {
     "rebelot/kanagawa.nvim",
     config = function()
-      local status_ok, kanagawa = pcall(require, "kanagawa")
-      if status_ok then
-        kanagawa.setup {
-          undercurl = true, -- enable undercurls
-          commentStyle = { italic = true },
-          functionStyle = {},
-          keywordStyle = { italic = true },
-          statementStyle = { bold = true },
-          typeStyle = {},
-          variablebuiltinStyle = { italic = true },
-          specialReturn = true, -- special highlight for the return keyword
-          specialException = true, -- special highlight for exception handling keywords
-          transparent = false, -- do not set background color
-          dimInactive = false, -- dim inactive window `:h hl-NormalNC`
-          globalStatus = lvim.builtin.global_statusline, -- adjust window separators highlight for laststatus=3
-          colors = {},
-          overrides = {
-            LspReferenceText = { fg = "NONE", bg = "NONE" },
-            LspReferenceRead = { bg = "#49443c" },
-            -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
-            LspReferenceWrite = { link = "LspReferenceRead" },
-          },
-        }
-      end
+      require("kanagawa").setup {
+        overrides = {
+          LspReferenceText = { fg = "NONE", bg = "NONE" },
+          LspReferenceRead = { bg = "#49443c" },
+          -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
+          LspReferenceWrite = { link = "LspReferenceRead" },
+        },
+      }
     end,
   },
   {
@@ -332,13 +223,6 @@ lvim.plugins = {
         css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
         css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
       })
-    end,
-  },
-  {
-    "ChristianChiarulli/nvcode-color-schemes.vim",
-    opt = true,
-    config = function()
-      vim.g.nvcode_termcolors = 256
     end,
   },
   {
@@ -439,13 +323,13 @@ lvim.plugins = {
     ft = { "typescript", "javascript", "lua", "c", "cpp", "go", "python", "java", "php" },
     event = "BufRead",
     config = function()
-      -- remap to open the Telescope refactoring menu in visual mode
-      vim.api.nvim_set_keymap(
-        "v",
-        "<leader>rr",
-        "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
-        { noremap = true }
-      )
+      -- -- remap to open the Telescope refactoring menu in visual mode
+      -- vim.api.nvim_set_keymap(
+      --   "v",
+      --   "<leader>rr",
+      --   "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
+      --   { noremap = true }
+      -- )
       -- prompt for a refactor to apply when the remap is triggered
       -- vim.api.nvim_set_keymap(
       --   "v",
@@ -453,23 +337,7 @@ lvim.plugins = {
       --   "<Cmd>lua require('refactoring').select_refactor()<CR>",
       --   { noremap = true, silent = true, expr = false }
       -- )
-      require("refactoring").setup {
-        -- prompt for return type
-        prompt_func_return_type = {
-          go = true,
-          cpp = true,
-          c = true,
-          java = true,
-        },
-        -- prompt for function parameters
-        prompt_func_param_type = {
-          go = true,
-          cpp = true,
-          c = true,
-          java = true,
-        },
-      }
-      -- require("telescope").load_extension "refactoring"
+      require("refactoring").setup {}
     end,
   },
   {
@@ -482,6 +350,7 @@ lvim.plugins = {
   },
   {
     "dhruvasagar/vim-table-mode",
+    disable = true,
   },
   {
     "kevinhwang91/nvim-bqf",
@@ -553,52 +422,70 @@ lvim.plugins = {
   },
   {
     "mfussenegger/nvim-jdtls",
+    ft = "java",
   },
   {
     "rcarriga/nvim-dap-ui",
+    ft = { "python", "rust", "go", "java" },
+    after = "nvim-dap",
     config = function()
-      local dap, dapui = require "dap", require "dapui"
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      -- dap.listeners.before.event_terminated["dapui_config"] = function()
-      --   dapui.close()
-      -- end
-      -- dap.listeners.before.event_exited["dapui_config"] = function()
-      --   dapui.close()
-      -- end
+      local dapui = require "dapui"
       dapui.setup {
-        icons = { expanded = "▾", collapsed = "▸" },
-        -- mappings = {
-        --   -- Use a table to apply multiple mappings
-        --   expand = { "<CR>", "<2-LeftMouse>" },
-        --   open = "o",
-        --   remove = "d",
-        --   edit = "e",
-        --   repl = "r",
-        --   toggle = "t",
-        -- },
+        icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
+        mappings = {
+          -- Use a table to apply multiple mappings
+          expand = { "<CR>", "<2-LeftMouse>" },
+          open = "o",
+          remove = "d",
+          edit = "e",
+          repl = "r",
+          toggle = "t",
+        },
         -- Expand lines larger than the window
         -- Requires >= 0.7
         expand_lines = vim.fn.has "nvim-0.7",
+        -- Layouts define sections of the screen to place windows.
+        -- The position can be "left", "right", "top" or "bottom".
+        -- The size specifies the height/width depending on position. It can be an Int
+        -- or a Float. Integer specifies height/width directly (i.e. 20 lines/columns) while
+        -- Float value specifies percentage (i.e. 0.3 - 30% of available lines/columns)
+        -- Elements are the elements shown in the layout (in order).
+        -- Layouts are opened in order so that earlier layouts take priority in window sizing.
         layouts = {
           {
             elements = {
+              -- Elements can be strings or table with id and size keys.
               { id = "scopes", size = 0.25 },
               "breakpoints",
               "stacks",
               "watches",
-              "repl",
             },
-            size = 40,
+            size = 40, -- 40 columns
             position = "left",
           },
           {
             elements = {
+              "repl",
               "console",
             },
-            size = 10,
+            size = 0.25, -- 25% of total lines
             position = "bottom",
+          },
+        },
+        controls = {
+          -- Requires Neovim nightly (or 0.8 when released)
+          enabled = true,
+          -- Display controls in this element
+          element = "repl",
+          icons = {
+            pause = "",
+            play = "",
+            step_into = "",
+            step_over = "",
+            step_out = "",
+            step_back = "",
+            run_last = "↻",
+            terminate = "□",
           },
         },
         floating = {
@@ -612,29 +499,25 @@ lvim.plugins = {
         windows = { indent = 1 },
         render = {
           max_type_length = nil, -- Can be integer or nil.
+          max_value_lines = 100, -- Can be integer or nil.
         },
       }
-    end,
-    setup = function()
-      local dap, dapui = require "dap", require "dapui"
-      dap.listeners.after.event_initialized["dapui_config"] = function()
+      local dap = require "dap"
+      dap.listeners.after["event_initialized"]["dapui_config"] = function(session, body)
         dapui.open()
       end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
+      dap.listeners.before["event_terminated"]["dapui_config"] = function(session, body)
         dapui.close()
       end
-      dap.listeners.before.event_exited["dapui_config"] = function()
+      dap.listeners.before["event_exited"]["dapui_config"] = function(session, body)
         dapui.close()
       end
     end,
-    ft = { "python", "rust", "go", "java" },
     event = "BufReadPost",
-    requires = { "mfussenegger/nvim-dap" },
     disable = not lvim.builtin.dap.active,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
-    opt = true,
     after = "nvim-dap",
     config = function()
       require("nvim-dap-virtual-text").setup()
@@ -698,13 +581,20 @@ lvim.plugins = {
   {
     "matbme/JABS.nvim",
     config = function()
-      require("jabs").setup()
+      require("jabs").setup {
+        position = "center",
+        width = 50,
+        height = 10,
+        border = "rounded",
+        preview_position = "top",
+        preview = {
+          width = 70,
+          height = 20,
+          border = "rounded",
+        },
+      }
+      lvim.builtin.which_key.mappings.b.s = { "<cmd>JABSOpen<cr>", "Open Bufferlist" }
     end,
-  },
-  {
-    "nvim-telescope/telescope-fzf-native.nvim",
-    run = "make",
-    event = "BufRead",
   },
   {
     "simrat39/symbols-outline.nvim",
@@ -713,12 +603,29 @@ lvim.plugins = {
         "<cmd>SymbolsOutline<CR>",
         require("user.lsp_kind").symbols_outline.Module .. "Outline Symbols",
       }
-      require("symbols-outline").setup()
+      lvim.builtin.which_key.mappings.l.o = { "<cmd>SymbolsOutline<CR>", "Outline Symbols" }
+    end,
+  },
+  {
+    "jayp0521/mason-null-ls.nvim",
+    config = function()
+      require("mason-null-ls").setup {
+        ensure_installed = {
+          "stylua",
+          "yamllint",
+          "eslint_d",
+          "shellcheck",
+          "luacheck",
+          "prettier",
+          "shfmt",
+          "stylua",
+          "yamlfmt",
+          "fixjson",
+        },
+      }
     end,
   },
 }
-
-require("colorizer").setup()
 
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0.01
@@ -730,14 +637,20 @@ if vim.g.neovide then
   -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
   -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
   -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
-  vim.o.guifont = "FiraCode NF:h12"
+  vim.o.guifont = "FiraCode Nerd Font:h12"
   -- vim.o.guifont ="GoMono NF:h16"
   -- vim.o.guifont ="FuraCode NF:h16"
   -- vim.o.guifont ="Hack Nerd Font:h16"
   -- vim.o.guifont ="NotoSansMono Nerd Font:h16"
   -- vim.o.guifont ="SaucecodePro Nerd Font:h16"
   -- vim.o.guifont ="UbuntuMonoDerivativePowerline Nerd Font:h16"
-  -- vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+  -- vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h12]]
+  -- vim.api.nvim_set_keymap("n", "p", "<cmd>:put +<cr>Jk", { noremap = true, silent = true })
+  -- vim.api.nvim_set_keymap("n", "p", "<cmd>:set paste | put + | set nopaste<cr>Jk", { noremap = true, silent = true })
+  -- vim.api.nvim_set_keymap("n", "<s-p>", "<cmd>:put! +<cr>Jk", { noremap = true, silent = true })
+  -- Ctrl-ScrollWheel for zooming in/out
+  vim.api.nvim_set_keymap("n", "<C-ScrollWheelUp>", "<cmd>:set guifont=+<CR>", { noremap = true, silent = true })
+  vim.api.nvim_set_keymap("n", "<C-ScrollWheelDown>", "<cmd>:set guifont=-<CR>", { noremap = true, silent = true })
 end
 
 if vim.g.nvui then
@@ -770,38 +683,33 @@ if vim.g.nvui then
   vim.cmd [[NvuiOpacity 0.99]]
 end
 
-require("nvim-treesitter.configs").setup {
-  context_commentstring = {
-    enable = true,
-    enable_autocmd = false,
-  },
-}
+if vim.g.fvim_loaded then
+  vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+  vim.cmd [[FVimCursorSmoothMove v:true]]
+  vim.cmd [[FVimCursorSmoothBlink v:true]]
+  vim.cmd [[FVimCustomTitleBar v:true ]]
+  vim.cmd [[FVimFontAutoSnap v:true]]
+  vim.cmd [[FVimUIPopupMenu v:true]]
+  vim.cmd [[FVimUIWildMenu v:false]]
+  vim.cmd [[FVimFontAntialias v:true]]
+  vim.cmd [[FVimFontAutohint v:true]]
+  vim.cmd [[FVimFontHintLevel 'full']]
+  vim.cmd [[FVimFontLigature v:true]]
+  vim.cmd [[FVimFontLineHeight '+1.0']]
+  vim.cmd [[FVimFontSubpixel v:true]]
+  vim.cmd [[FVimFontNoBuiltinSymbols v:true]]
+  vim.cmd [[FVimKeyAltGr v:true]]
+  -- Ctrl-ScrollWheel for zooming in/out
+  -- nnoremap <silent> <C-ScrollWheelUp> :set guifont=+<CR>
+  -- nnoremap <silent> <C-ScrollWheelDown> :set guifont=-<CR>
+  -- nnoremap <A-CR> :FVimToggleFullScreen<CR>
+end
 
-require("jabs").setup {
-  position = "center",
-  width = 50,
-  height = 10,
-  border = "rounded",
-  preview_position = "top",
-  preview = {
-    width = 70,
-    height = 20,
-    border = "rounded",
-  },
-}
-
+-- fallback configuration, if JABS is not working
 local status_ok, _ = pcall(require, "jabs")
-if status_ok then
-  lvim.builtin.which_key.mappings.b.s = { "<cmd>JABSOpen<cr>", "Open Bufferlist" }
-else
+if not status_ok then
   lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 end
-status_ok, _ = pcall(require, "symbols-outline")
-if status_ok then
-  lvim.builtin.which_key.mappings.l.o = { "<cmd>SymbolsOutline<CR>", "Outline Symbols" }
-end
-
--- vim.cmd("source ~/.vimrc")
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- lvim.autocommands.custom_groups = {

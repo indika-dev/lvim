@@ -1,4 +1,3 @@
-
 syntax keyword luaMyKeyword
       \ self
 
@@ -81,4 +80,3 @@ syntax keyword luaMetatableEquivalence
     \ __le
 
 syntax match luaFunctionCall display /\<\(function\)\@!\w\+(/he=e-1
-
