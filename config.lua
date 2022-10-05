@@ -635,6 +635,9 @@ lvim.plugins = {
       }
     end,
   },
+  {
+    "gpanders/editorconfig.nvim",
+  },
 }
 
 if vim.g.neovide then
@@ -721,6 +724,7 @@ if not status_ok then
   lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 end
 
+require("user.autocommands").config()
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- lvim.autocommands.custom_groups = {
 --   { "BufWinEnter", "*.lua", "setlocal ts=8 sw=8" },
