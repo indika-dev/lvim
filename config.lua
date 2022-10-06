@@ -14,6 +14,61 @@ lvim.builtin.notify.active = true
 lvim.builtin.treesitter.rainbow.enable = false
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
+lvim.builtin.nvimtree.setup.view.side = "left"
+lvim.builtin.telescope.active = true
+lvim.builtin.telescope.defaults.file_ignore_patterns = {
+  ".git/",
+  "target/",
+  "docs/",
+  "vendor/*",
+  "%.lock",
+  "__pycache__/*",
+  "%.sqlite3",
+  "%.ipynb",
+  "node_modules/*",
+  -- "%.jpg",
+  -- "%.jpeg",
+  -- "%.png",
+  "%.svg",
+  "%.otf",
+  "%.ttf",
+  "%.webp",
+  ".dart_tool/",
+  ".github/",
+  ".gradle/",
+  ".idea/",
+  ".settings/",
+  ".vscode/",
+  "__pycache__/",
+  "build/",
+  "env/",
+  "gradle/",
+  "node_modules/",
+  "%.pdb",
+  "%.dll",
+  "%.class",
+  "%.exe",
+  "%.cache",
+  "%.ico",
+  "%.pdf",
+  "%.dylib",
+  "%.jar",
+  "%.docx",
+  "%.met",
+  "smalljre_*/*",
+  ".vale/",
+  "%.burp",
+  "%.mp4",
+  "%.mkv",
+  "%.rar",
+  "%.zip",
+  "%.7z",
+  "%.tar",
+  "%.bz2",
+  "%.epub",
+  "%.flac",
+  "%.tar.gz",
+}
 
 local _time = os.date "*t"
 if _time.hour >= 6 and _time.hour < 21 then
@@ -23,6 +78,8 @@ else
 end
 
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+lvim.builtin.which_key.mappings["L"].K = { "<cmd>Telescope commands<CR>", "View commands" }
+lvim.builtin.which_key.mappings["L"].a = { "<cmd>Telescope autocommands<CR>", "View autocommands" }
 lvim.builtin.which_key.mappings["t"] = {
   name = "+Trouble",
   r = { "<cmd>Trouble lsp_references<cr>", "References" },
@@ -635,8 +692,29 @@ lvim.plugins = {
       }
     end,
   },
+  { "gpanders/editorconfig.nvim" },
   {
-    "gpanders/editorconfig.nvim",
+    "stevearc/dressing.nvim",
+    config = function()
+      require("dressing").setup {
+        input = {
+          get_config = function()
+            if vim.api.nvim_buf_get_option(0, "filetype") == "neo-tree" then
+              return { enabled = false }
+            end
+          end,
+        },
+        select = {
+          format_item_override = {
+            codeaction = function(action_tuple)
+              local title = action_tuple[2].title:gsub("\r\n", "\\r\\n")
+              local client = vim.lsp.get_client_by_id(action_tuple[1])
+              return string.format("%s\t[%s]", title:gsub("\n", "\\n"), client.name)
+            end,
+          },
+        },
+      }
+    end,
   },
 }
 
