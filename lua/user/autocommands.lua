@@ -7,30 +7,11 @@ M.config = function()
     vim.api.nvim_del_augroup_by_name "_last_status"
   end)
   vim.api.nvim_clear_autocmds { pattern = "lir", group = "_filetype_settings" }
-  vim.api.nvim_create_augroup("_lvim_user", {})
   -- Autocommands
   if lvim.builtin.nonumber_unfocus then
-    create_aucmd("WinEnter", { group = "_lvim_user", pattern = "*", command = "set relativenumber number cursorline" })
-    create_aucmd(
-      "WinLeave",
-      { group = "_lvim_user", pattern = "*", command = "set norelativenumber nonumber nocursorline" }
-    )
+    create_aucmd("WinEnter", { pattern = "*", command = "set relativenumber number cursorline" })
+    create_aucmd("WinLeave", { pattern = "*", command = "set norelativenumber nonumber nocursorline" })
   end
-
-  -- NOTE: autocommands for "lvimuser/lsp-inlayhints.nvim"
-  -- vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
-  -- vim.api.nvim_create_autocmd("LspAttach", {
-  --   group = "LspAttach_inlayhints",
-  --   callback = function(args)
-  --     if not (args.data and args.data.client_id) then
-  --       return
-  --     end
-
-  --     local bufnr = args.buf
-  --     local client = vim.lsp.get_client_by_id(args.data.client_id)
-  --     require("lsp-inlayhints").on_attach(client, bufnr)
-  --   end,
-  -- })
 
   -- TODO: change this to lua
   vim.cmd [[
@@ -58,127 +39,174 @@ augroup BigFileDisable
 augroup END
   ]]
   create_aucmd("BufReadPost", {
-    group = "_lvim_user",
     pattern = "*.md",
     command = "set syntax=markdown",
   })
 
-  -- if lvim.builtin.sql_integration.active then
-  --   -- Add vim-dadbod-completion in sql files
-  --   create_aucmd("FileType", {
-  --     group = "_lvim_user",
-  --     pattern = { "sql", "mysql", "plsql" },
-  --     command = "lua require('cmp').setup.buffer { sources = { { name = 'vim-dadbod-completion' } } }",
-  --   })
-  -- end
-  create_aucmd("TextYankPost", {
-    group = "_general_settings",
-    pattern = "*",
-    desc = "Highlight text on yank",
-    callback = function()
-      require("vim.highlight").on_yank { higroup = "Search", timeout = 40 }
-    end,
+  create_aucmd("TermOpen", {
+    pattern = "term://*",
+    command = "lua require('user.keybindings').set_terminal_keymaps()",
   })
-  create_aucmd("BufWritePre", {
-    group = "_lvim_user",
-    pattern = { "/tmp/*", "COMMIT_EDITMSG", "MERGE_MSG", "*.tmp", "*.bak" },
+
+  create_aucmd("CursorHold", {
+    pattern = { "*.rs", "*.go", "*.ts", "*.tsx", "*.js", "*.java", "*.lua" },
+    command = "lua require('user.codelens').show_line_sign()",
+  })
+
+  create_aucmd({ "FileType" }, {
+    pattern = {
+      "Jaq",
+      "qf",
+      "help",
+      "man",
+      "lspinfo",
+      "spectre_panel",
+      "lir",
+      "DressingSelect",
+      "tsplayground",
+      "Markdown",
+    },
     callback = function()
-      vim.opt_local.undofile = false
+      vim.cmd [[
+      nnoremap <silent> <buffer> q :close<CR>
+      nnoremap <silent> <buffer> <esc> :close<CR>
+      set nobuflisted
+    ]]
     end,
   })
 
-  -- create_aucmd("TermOpen", {
-  --   group = "_lvim_user",
-  --   pattern = "term://*",
-  --   command = "lua require('user.keybindings').set_terminal_keymaps()",
+  create_aucmd({ "FileType" }, {
+    pattern = { "Jaq" },
+    callback = function()
+      vim.cmd [[
+      nnoremap <silent> <buffer> <m-r> :close<CR>
+      " nnoremap <silent> <buffer> <m-r> <NOP>
+      set nobuflisted
+    ]]
+    end,
+  })
+
+  create_aucmd({ "BufEnter" }, {
+    pattern = { "" },
+    callback = function()
+      local buf_ft = vim.bo.filetype
+      if buf_ft == "" or buf_ft == nil then
+        vim.cmd [[
+      nnoremap <silent> <buffer> q :close<CR>
+      nnoremap <silent> <buffer> <c-j> j<CR>
+      nnoremap <silent> <buffer> <c-k> k<CR>
+      set nobuflisted
+    ]]
+      end
+    end,
+  })
+
+  create_aucmd({ "BufEnter" }, {
+    pattern = { "" },
+    callback = function()
+      local get_project_dir = function()
+        local cwd = vim.fn.getcwd()
+        local project_dir = vim.split(cwd, "/")
+        local project_name = project_dir[#project_dir]
+        return project_name
+      end
+
+      vim.opt.titlestring = get_project_dir() .. " - nvim"
+    end,
+  })
+
+  create_aucmd({ "BufEnter" }, {
+    pattern = { "term://*" },
+    callback = function()
+      vim.cmd "startinsert!"
+      -- TODO: if java = 2
+      vim.cmd "set cmdheight=1"
+    end,
+  })
+
+  create_aucmd({ "FileType" }, {
+    pattern = { "gitcommit", "markdown" },
+    callback = function()
+      vim.opt_local.wrap = true
+      vim.opt_local.spell = true
+    end,
+  })
+
+  create_aucmd({ "VimResized" }, {
+    callback = function()
+      vim.cmd "tabdo wincmd ="
+    end,
+  })
+
+  create_aucmd({ "CmdWinEnter" }, {
+    callback = function()
+      vim.cmd "quit"
+    end,
+  })
+
+  create_aucmd({ "BufWinEnter" }, {
+    callback = function()
+      vim.cmd "set formatoptions-=cro"
+    end,
+  })
+
+  create_aucmd({ "TextYankPost" }, {
+    callback = function()
+      vim.highlight.on_yank { higroup = "Visual", timeout = 40 }
+    end,
+  })
+
+  -- create_aucmd({ "BufWritePost" }, {
+  --   pattern = { "*.java" },
+  --   callback = function()
+  --     vim.lsp.codelens.refresh()
+  --   end,
   -- })
-  -- if lvim.builtin.metals.active then
-  --   create_aucmd("Filetype", {
-  --     group = "_lvim_user",
-  --     pattern = { "scala", "sbt" },
-  --     callback = require("user.metals").start,
-  --   })
-  -- end
-  -- create_aucmd("FileType", {
-  --   group = "_lvim_user",
-  --   pattern = "toml",
-  --   command = "lua require('cmp').setup.buffer { sources = { { name = 'crates' } } }",
+
+  create_aucmd({ "VimEnter" }, {
+    callback = function()
+      vim.cmd "hi link illuminatedWord LspReferenceText"
+    end,
+  })
+
+  create_aucmd({ "BufWinEnter" }, {
+    pattern = { "*" },
+    callback = function()
+      vim.cmd "checktime"
+    end,
+  })
+
+  create_aucmd({ "CursorHold" }, {
+    callback = function()
+      local status_ok, luasnip = pcall(require, "luasnip")
+      if not status_ok then
+        return
+      end
+      if luasnip.expand_or_jumpable() then
+        -- ask maintainer for option to make this silent
+        -- luasnip.unlink_current()
+        vim.cmd [[silent! lua require("luasnip").unlink_current()]]
+      end
+    end,
+  })
+
+  -- create_aucmd({ "ModeChanged" }, {
+  --   callback = function()
+  --     local luasnip = require "luasnip"
+  --     if luasnip.expand_or_jumpable() then
+  --       -- ask maintainer for option to make this silent
+  --       -- luasnip.unlink_current()
+  --       vim.cmd [[silent! lua require("luasnip").unlink_current()]]
+  --     end
+  --   end,
   -- })
 
-  local codelens_viewer = "lua require('user.codelens').show_line_sign()"
-  local user = os.getenv "USER"
-  if user and user == "stefan" then
-    create_aucmd("CursorHold", {
-      group = "_lvim_user",
-      pattern = { "*.rs", "*.go", "*.ts", "*.tsx", "*.js", "*.java", "*.lua" },
-      command = codelens_viewer,
-    })
-  end
-end
-
-M.make_run = function()
-  create_aucmd("FileType", {
-    group = "_lvim_user",
-    pattern = { "c", "cpp" },
-    callback = function()
-      vim.keymap.set(
-        "n",
-        "<leader>m",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='make ;read',count=2,direction='float'})<CR>"
-      )
-      vim.keymap.set(
-        "n",
-        "<leader>r",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='make run;read',count=3,direction='float'})<CR>"
-      )
-    end,
-  })
-  create_aucmd("FileType", {
-    group = "_lvim_user",
-    pattern = "go",
-    callback = function()
-      vim.keymap.set(
-        "n",
-        "<leader>m",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='go build -v .;read',count=2,direction='float'})<CR>"
-      )
-      vim.keymap.set(
-        "n",
-        "<leader>r",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='go run .;read',count=3,direction='float'})<CR>"
-      )
-    end,
-  })
-  create_aucmd("FileType", {
-    group = "_lvim_user",
-    pattern = "python",
-    callback = function()
-      vim.keymap.set(
-        "n",
-        "<leader>r",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='python "
-          .. vim.fn.expand "%"
-          .. ";read',count=2,direction='float'})<CR>"
-      )
-      vim.keymap.set(
-        "n",
-        "<leader>m",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='echo \"compile :pepelaugh:\";read',count=2,direction='float'})<cr>"
-      )
-    end,
-  })
-  create_aucmd("FileType", {
-    group = "_lvim_user",
-    pattern = "rust",
-    callback = function()
-      vim.keymap.set(
-        "n",
-        "<leader>m",
-        "<cmd>lua require('lvim.core.terminal')._exec_toggle({cmd='cargo build;read',count=2,direction='float'})<CR>"
-      )
-      vim.keymap.set("n", "<leader>r", "<cmd>lua require('rust-tools.runnables').runnables()<CR>")
-    end,
-  })
+  -- create_aucmd({ "BufWritePost" }, {
+  --   pattern = { "*.ts" },
+  --   callback = function()
+  --     vim.lsp.buf.format { async = true }
+  --   end,
+  -- })
 end
 
 return M

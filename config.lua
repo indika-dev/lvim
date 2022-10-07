@@ -68,6 +68,10 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
   "%.epub",
   "%.flac",
   "%.tar.gz",
+  ".classpath",
+  ".factorypath",
+  ".project",
+  ".settings/",
 }
 
 local _time = os.date "*t"
@@ -794,6 +798,19 @@ if vim.g.fvim_loaded then
   -- nnoremap <silent> <C-ScrollWheelUp> :set guifont=+<CR>
   -- nnoremap <silent> <C-ScrollWheelDown> :set guifont=-<CR>
   -- nnoremap <A-CR> :FVimToggleFullScreen<CR>
+end
+
+if vim.fn.has "wsl" == 1 then
+  vim.g.clipboard = {
+    copy = {
+      ["+"] = "win32yank.exe -i --crlf",
+      ["*"] = "win32yank.exe -i --crlf",
+    },
+    paste = {
+      ["+"] = "win32yank.exe -o --lf",
+      ["*"] = "win32yank.exe -o --lf",
+    },
+  }
 end
 
 -- fallback configuration, if JABS is not working

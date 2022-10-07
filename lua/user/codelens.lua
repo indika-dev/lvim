@@ -8,13 +8,12 @@ if vim.tbl_isempty(vim.fn.sign_getdefined(SIGN_NAME)) then
   vim.fn.sign_define(SIGN_NAME, { text = require("user.lsp_kind").icons.code_action, texthl = "MoreMsg" })
 end
 
-
 M.show_line_sign = function()
   -- Check for code action capability
   local code_action_cap_found = false
-  for _, client in pairs(vim.lsp.buf_get_clients()) do
+  for _, client in pairs(vim.lsp.get_active_clients()) do
     if client then
-      if client.supports_method("textDocument/codeAction") then
+      if client.supports_method "textDocument/codeAction" then
         code_action_cap_found = true
       end
     end
@@ -39,10 +38,11 @@ M.code_lens_available = function(cursor)
     table.insert(codelens_actions, { start = l.range.start, finish = l.range["end"] })
   end
   for _, action in ipairs(codelens_actions) do
-    if action.start.line <= cursor[1]
-        and cursor[1] <= action.finish.line
-        and action.start.character <= cursor[2]
-        and cursor[2] <= action.finish.character
+    if
+      action.start.line <= cursor[1]
+      and cursor[1] <= action.finish.line
+      and action.start.character <= cursor[2]
+      and cursor[2] <= action.finish.character
     then
       return true
     end
@@ -93,9 +93,9 @@ M.handler_factory = function(line, bufnr)
 
     -- No available code actions
     if not has_actions then
-      M.update_sign(10, vim.b.lightbulb_line, nil, bufnr, "code_action")
+      -- M.update_sign(10, vim.b.lightbulb_line, nil, bufnr, "code_action")
     else
-      M.update_sign(10, vim.b.lightbulb_line, line + 1, bufnr, "code_action")
+      -- M.update_sign(10, vim.b.lightbulb_line, line + 1, bufnr, "code_action")
     end
   end
 
@@ -134,10 +134,10 @@ end
 --- @param text string the sign icon
 ---
 M.update_sign = function(priority, old_line, new_line, bufnr, text)
-  bufnr = bufnr or "%"
+  -- bufnr = bufnr or "%"
 
   if old_line then
-    vim.fn.sign_unplace(SIGN_GROUP, { id = old_line, buffer = bufnr })
+    vim.fn.sign_unplace(SIGN_GROUP, { id = old_line, buffer = bufnr or "%" })
 
     -- Update current lightbulb line
     vim.b.lightbulb_line = nil
@@ -145,15 +145,15 @@ M.update_sign = function(priority, old_line, new_line, bufnr, text)
 
   -- Avoid redrawing lightbulb if code action line did not change
   if new_line and (vim.b.lightbulb_line ~= new_line) then
-    vim.fn.sign_place(new_line, SIGN_GROUP, SIGN_NAME, bufnr, { lnum = new_line, priority = priority })
+    vim.fn.sign_place(new_line, SIGN_GROUP, SIGN_NAME, bufnr or "%", { lnum = new_line, priority = priority })
     -- Update current lightbulb line
     vim.b.lightbulb_line = new_line
   end
   local icon = require("user.lsp_kind").icons.code_action
   if text == "code_lens_action" then
     icon = require("user.lsp_kind").icons.code_lens_action
+    vim.fn.sign_define(SIGN_NAME, { text = icon, texthl = "MoreMsg" })
   end
-  vim.fn.sign_define(SIGN_NAME, { text = icon, texthl = "MoreMsg" })
 end
 
 return M
