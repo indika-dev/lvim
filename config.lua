@@ -176,6 +176,10 @@ formatters.setup {
     name = "fixjson",
     filetypes = { "json" },
   },
+  {
+    name = "taplo",
+    filetypes = { "toml" },
+  },
 }
 
 local linters = require "lvim.lsp.null-ls.linters"
