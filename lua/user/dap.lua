@@ -15,6 +15,40 @@ M.config = function()
     return
   end
 
+  dap.configurations.java = {
+    {
+      type = "java",
+      request = "launch",
+      name = "Debug Shoo",
+      args = "-r /tmp/shoo/",
+      vmargs = "-Xms2G -Xmx2G",
+      mainClass = "de.creditreform.architecture.management.shoo.Shoo",
+      projectName = "shoo",
+      console = "integratedTerminal",
+    },
+    -- {
+    --   type = "java",
+    --   request = "attach",
+    --   name = "Attach to CrateDB",
+    --   hostName = "127.0.0.1",
+    --   port = 5005,
+    --   projectName = "app",
+    -- },
+    --   host = function()
+    --     local value = vim.fn.input "Host [127.0.0.1]: "
+    --     if value ~= "" then
+    --       return value
+    --     end
+    --     return "127.0.0.1"
+    --   end,
+    --   port = function()
+    --     local val = tonumber(vim.fn.input "Port: ")
+    --     assert(val, "Please provide a port number")
+    --     return val
+    --   end,
+    -- },
+  }
+
   dap.configurations.lua = {
     {
       type = "nlua",

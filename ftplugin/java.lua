@@ -1,5 +1,7 @@
 vim.opt_local.shiftwidth = 2
 vim.opt_local.tabstop = 2
+vim.opt_local.cmdheight = 2 -- more space in the neovim command line for displaying messages
+vim.opt.cc = ""
 
 -- credit: https://github.com/ChristianChiarulli/nvim
 local status_ok, jdtls = pcall(require, "jdtls")
@@ -88,6 +90,7 @@ end
 
 local extendedClientCapabilities = jdtls.extendedClientCapabilities
 extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+-- extendedClientCapabilities = vim.lsp.protocol.resolve_capabilities(jdtls.extendedClientCapabilities)
 
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
@@ -100,9 +103,12 @@ local bundles =
 local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/*.jar"), "\n")
 vim.list_extend(bundles, extra_bundles)
 
+local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
+-- local javaHome = home .. "/.local/lib/jvm-17"
+
 local config = {
   cmd = {
-    home .. "/.local/lib/jvm-17/bin/java",
+    javaHome .. "/bin/java",
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
@@ -136,8 +142,8 @@ local config = {
     java = {
       -- jdt = {
       --   ls = {
-      --     vmargs = "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m"
-      --   }
+      --     vmargs = "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m",
+      --   },
       -- },
       eclipse = {
         downloadSources = true,
@@ -204,6 +210,7 @@ local config = {
       },
     },
     contentProvider = { preferred = "fernflower" },
+    extendedClientCapabilities = extendedClientCapabilities,
     sources = {
       organizeImports = {
         starThreshold = 9999,
@@ -234,9 +241,16 @@ local config = {
   },
   init_options = {
     bundles = bundles,
-    extendedClientCapabilities = extendedClientCapabilities,
+    -- extendedClientCapabilities = extendedClientCapabilities,
   },
 }
+
+-- vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+--   pattern = { "*.java" },
+--   callback = function()
+--     vim.lsp.codelens.refresh()
+--   end,
+-- })
 
 jdtls.start_or_attach(config)
 

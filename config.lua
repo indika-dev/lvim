@@ -5,12 +5,13 @@ lvim is the global options object
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
+vim.opt.termguicolors = true
 lvim.format_on_save = true
 lvim.leader = "space"
 lvim.builtin.alpha.active = true
 lvim.builtin.terminal.active = true
 lvim.builtin.dap.active = true
-lvim.builtin.notify.active = true
+-- lvim.builtin.notify.active = true
 lvim.builtin.treesitter.rainbow.enable = false
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
@@ -75,8 +76,8 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
 }
 
 local _time = os.date "*t"
-if _time.hour >= 6 and _time.hour < 21 then
-  lvim.colorscheme = "github_dark"
+if _time.hour >= 6 and _time.hour < 20 then
+  lvim.colorscheme = "tokyonight-storm"
 else
   lvim.colorscheme = "kanagawa"
 end
@@ -269,24 +270,28 @@ lvim.plugins = {
   {
     "projekt0n/github-nvim-theme",
     config = function()
-      require("github-theme").setup {
-        theme_style = "dark",
-        sidebars = { "qf", "vista_kind", "terminal", "packer" },
+      local ok, githubTheme = pcall(require, "github-theme")
+      if ok then
+        githubTheme.setup {
+          theme_style = "dark",
+          sidebars = { "qf", "vista_kind", "terminal", "packer" },
 
-        -- Change the "hint" color to the "orange" color, and make the "error" color bright red
-        colors = { hint = "orange", error = "#ff0000" },
+          -- Change the "hint" color to the "orange" color, and make the "error" color bright red
+          colors = { hint = "orange", error = "#ff0000" },
 
-        -- Overwrite the highlight groups
-        overrides = function(c)
-          return {
-            htmlTag = { fg = c.red, bg = "#282c34", sp = c.hint, style = "underline" },
-            DiagnosticHint = { link = "LspDiagnosticsDefaultHint" },
-            -- this will remove the highlight groups
-            TSField = {},
-          }
-        end,
-      }
+          -- Overwrite the highlight groups
+          overrides = function(c)
+            return {
+              htmlTag = { fg = c.red, bg = "#282c34", sp = c.hint, style = "underline" },
+              DiagnosticHint = { link = "LspDiagnosticsDefaultHint" },
+              -- this will remove the highlight groups
+              TSField = {},
+            }
+          end,
+        }
+      end
     end,
+    disable = true,
   },
   {
     "nvim-telescope/telescope-dap.nvim",
@@ -320,6 +325,7 @@ lvim.plugins = {
         let g:minimap_auto_start_win_enter = 0
       ]]
     end,
+    disable = true,
   },
   {
     "skywind3000/asynctasks.vim",
@@ -508,98 +514,6 @@ lvim.plugins = {
     "mfussenegger/nvim-jdtls",
     ft = "java",
   },
-  -- {
-  --   "rcarriga/nvim-dap-ui",
-  --   ft = { "python", "rust", "go", "java" },
-  --   after = "nvim-dap",
-  --   config = function()
-  --     local dapui = require "dapui"
-  --     dapui.setup {
-  --       icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
-  --       mappings = {
-  --         -- Use a table to apply multiple mappings
-  --         expand = { "<CR>", "<2-LeftMouse>" },
-  --         open = "o",
-  --         remove = "d",
-  --         edit = "e",
-  --         repl = "r",
-  --         toggle = "t",
-  --       },
-  --       -- Expand lines larger than the window
-  --       -- Requires >= 0.7
-  --       expand_lines = vim.fn.has "nvim-0.7",
-  --       -- Layouts define sections of the screen to place windows.
-  --       -- The position can be "left", "right", "top" or "bottom".
-  --       -- The size specifies the height/width depending on position. It can be an Int
-  --       -- or a Float. Integer specifies height/width directly (i.e. 20 lines/columns) while
-  --       -- Float value specifies percentage (i.e. 0.3 - 30% of available lines/columns)
-  --       -- Elements are the elements shown in the layout (in order).
-  --       -- Layouts are opened in order so that earlier layouts take priority in window sizing.
-  --       layouts = {
-  --         {
-  --           elements = {
-  --             -- Elements can be strings or table with id and size keys.
-  --             { id = "scopes", size = 0.25 },
-  --             "breakpoints",
-  --             "stacks",
-  --             "watches",
-  --           },
-  --           size = 40, -- 40 columns
-  --           position = "left",
-  --         },
-  --         {
-  --           elements = {
-  --             "repl",
-  --             "console",
-  --           },
-  --           size = 0.25, -- 25% of total lines
-  --           position = "bottom",
-  --         },
-  --       },
-  --       controls = {
-  --         -- Requires Neovim nightly (or 0.8 when released)
-  --         enabled = true,
-  --         -- Display controls in this element
-  --         element = "repl",
-  --         icons = {
-  --           pause = "",
-  --           play = "",
-  --           step_into = "",
-  --           step_over = "",
-  --           step_out = "",
-  --           step_back = "",
-  --           run_last = "↻",
-  --           terminate = "□",
-  --         },
-  --       },
-  --       floating = {
-  --         max_height = nil, -- These can be integers or a float between 0 and 1.
-  --         max_width = nil, -- Floats will be treated as percentage of your screen.
-  --         border = "single", -- Border style. Can be "single", "double" or "rounded"
-  --         mappings = {
-  --           close = { "q", "<Esc>" },
-  --         },
-  --       },
-  --       windows = { indent = 1 },
-  --       render = {
-  --         max_type_length = nil, -- Can be integer or nil.
-  --         max_value_lines = 100, -- Can be integer or nil.
-  --       },
-  --     }
-  --     local dap = require "dap"
-  --     dap.listeners.after["event_initialized"]["dapui_config"] = function(session, body)
-  --       dapui.open()
-  --     end
-  --     dap.listeners.before["event_terminated"]["dapui_config"] = function(session, body)
-  --       dapui.close()
-  --     end
-  --     dap.listeners.before["event_exited"]["dapui_config"] = function(session, body)
-  --       dapui.close()
-  --     end
-  --   end,
-  --   event = "BufReadPost",
-  --   disable = not lvim.builtin.dap.active,
-  -- },
   {
     "theHamsta/nvim-dap-virtual-text",
     after = "nvim-dap",
@@ -783,6 +697,36 @@ lvim.plugins = {
     config = function()
       require("lsp_signature").on_attach()
     end,
+  },
+  {
+    "rcarriga/nvim-notify",
+    setup = function()
+      local ok, notify = pcall(require, "nvim-notify")
+      if ok then
+        notify.setup {
+          stages = "fade_in_slide_out",
+          timeout = 3000,
+          background_colour = "NormalFloat",
+          render = function(...)
+            local notif = select(2, ...)
+            local style = notif.title[1] == "" and "minimal" or "default"
+            require("notify.render")[style](...)
+          end,
+          min_width = function()
+            return math.floor(vim.o.columns * 0.4)
+          end,
+          max_width = function()
+            return math.floor(vim.o.columns * 0.4)
+          end,
+          max_height = function()
+            return math.floor(vim.o.lines * 0.8)
+          end,
+        }
+      end
+    end,
+  },
+  {
+    "gennaro-tedesco/nvim-peekup",
   },
 }
 
