@@ -9,8 +9,6 @@ if not status_ok then
   return
 end
 
--- let mason handle updates of jdtls, but don't call it
-require("lspconfig").jdtls.setup = function() end
 local handlers = require "vim.lsp.handlers"
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 -- local capabilities = require("lvim.lsp").common_capabilities(),
@@ -97,10 +95,21 @@ local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = WORKSPACE_PATH .. project_name
 os.execute("mkdir -p " .. workspace_dir)
 
-local bundles =
-  vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-debug/com.microsoft.java.debug.plugin-*.jar"), "\n")
+-- local bundles =
+--   vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-debug/com.microsoft.java.debug.plugin-*.jar"), "\n")
 
-local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/*.jar"), "\n")
+-- local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/*.jar"), "\n")
+-- vim.list_extend(bundles, extra_bundles)
+
+local bundles = vim.split(
+  vim.fn.glob(
+    home .. ".local/share/nvim/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"
+  ),
+  "\n"
+)
+
+local extra_bundles =
+  vim.split(vim.fn.glob(home .. "/.local/share/nvim/mason/packages/java-test/extension/server/*.jar"), "\n")
 vim.list_extend(bundles, extra_bundles)
 
 local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
@@ -137,7 +146,8 @@ local config = {
   on_init = require("lvim.lsp").common_on_init,
   on_exit = require("lvim.lsp").common_on_exit,
   root_dir = root_dir,
-  capabilities = capabilities,
+  -- capabilities = capabilities,
+  -- extendedClientCapabilities = extendedClientCapabilities,
   settings = {
     java = {
       -- jdt = {
@@ -210,7 +220,7 @@ local config = {
       },
     },
     contentProvider = { preferred = "fernflower" },
-    extendedClientCapabilities = extendedClientCapabilities,
+    -- extendedClientCapabilities = extendedClientCapabilities,
     sources = {
       organizeImports = {
         starThreshold = 9999,

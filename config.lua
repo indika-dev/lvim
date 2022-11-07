@@ -1,17 +1,12 @@
---[[
-lvim is the global options object
-]]
-
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
-vim.opt.termguicolors = true
+-- vim.opt.termguicolors = true
 lvim.format_on_save = true
 lvim.leader = "space"
 lvim.builtin.alpha.active = true
 lvim.builtin.terminal.active = true
 lvim.builtin.dap.active = true
--- lvim.builtin.notify.active = true
 lvim.builtin.treesitter.rainbow.enable = false
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
@@ -82,6 +77,7 @@ else
   lvim.colorscheme = "kanagawa"
 end
 
+lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["L"].K = { "<cmd>Telescope commands<CR>", "View commands" }
 lvim.builtin.which_key.mappings["L"].a = { "<cmd>Telescope autocommands<CR>", "View autocommands" }
@@ -105,21 +101,21 @@ lvim.builtin.telescope.on_config_done = function(telescope)
 end
 
 -- for some reasons, this is not working as I intended
-lvim.builtin.dap.on_config_done = function(dap)
-  --   local dapui_status_ok, dapui = pcall(require, "dapui")
-  --   if not dapui_status_ok then
-  --     return
-  --   end
-  --   dap.listeners.after["event_initialized"]["dapui_config"] = function(session, body)
-  --     dapui.open()
-  --   end
-  --   dap.listeners.before["event_terminated"]["dapui_config"] = function(session, body)
-  --     dapui.close()
-  --   end
-  --   dap.listeners.before["event_exited"]["dapui_config"] = function(session, body)
-  --     dapui.close()
-  --   end
-end
+-- lvim.builtin.dap.on_config_done = function(dap)
+--   local dapui_status_ok, dapui = pcall(require, "dapui")
+--   if not dapui_status_ok then
+--     return
+--   end
+--   dap.listeners.after["event_initialized"]["dapui_config"] = function(session, body)
+--     dapui.open()
+--   end
+--   dap.listeners.before["event_terminated"]["dapui_config"] = function(session, body)
+--     dapui.close()
+--   end
+--   dap.listeners.before["event_exited"]["dapui_config"] = function(session, body)
+--     dapui.close()
+--   end
+-- end
 
 -- generic LSP settings
 lvim.lsp.diagnostics.virtual_text = true
@@ -146,14 +142,8 @@ require("mason-lspconfig").setup {
     "vuels",
     "yamlls",
     "marksman",
-    "markdownlint",
-    -- currently not working...see later again when a higher mason version arrives
-    -- "java-test",
-    -- "java-debug-adapter",
   },
 }
-
--- require("lspconfig").marksman.setup {}
 
 local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup {
@@ -513,6 +503,234 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     ft = "java",
+    setup = function()
+      require("lspconfig").jdtls.setup = function() end
+    end,
+    -- setup = function()
+    --   local handlers = vim.lsp.handlers
+
+    --   -- TextDocument version is reported as 0, override with nil so that
+    --   -- the client doesn't think the document is newer and refuses to update
+    --   -- See: https://github.com/eclipse/eclipse.jdt.ls/issues/1695
+    --   local function fix_zero_version(workspace_edit)
+    --     if workspace_edit and workspace_edit.documentChanges then
+    --       for _, change in pairs(workspace_edit.documentChanges) do
+    --         local text_document = change.textDocument
+    --         if text_document and text_document.version and text_document.version == 0 then
+    --           text_document.version = nil
+    --         end
+    --       end
+    --     end
+    --     return workspace_edit
+    --   end
+
+    --   local function on_textdocument_codeaction(err, actions, ctx)
+    --     for _, action in ipairs(actions) do
+    --       -- TODO: (steelsojka) Handle more than one edit?
+    --       if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
+    --         action.edit = fix_zero_version(action.edit or action.arguments[1])
+    --       elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
+    --         action.edit = fix_zero_version(action.edit or action.command.arguments[1])
+    --       end
+    --     end
+    --   end
+
+    --   local function on_textdocument_rename(err, workspace_edit, ctx)
+    --     handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+    --   end
+
+    --   -- -- Non-standard notification that can be used to display progress
+    --   local function on_language_status(_, result)
+    --     local command = vim.api.nvim_command
+    --     command "echohl ModeMsg"
+    --     command(string.format('echo "%s"', result.message))
+    --     command "echohl None"
+    --   end
+
+    --   local function on_workspace_applyedit(err, workspace_edit, ctx)
+    --     handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+    --   end
+
+    --   local home = os.getenv "HOME"
+    --   local JDTLS_BASEPATH = home .. "/.local/share/nvim/mason/packages/jdtls"
+    --   -- Determine OS
+    --   local launcher_path = vim.fn.glob(JDTLS_BASEPATH .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+    --   if #launcher_path == 0 then
+    --     launcher_path = vim.fn.glob(JDTLS_BASEPATH .. "/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
+    --   end
+    --   local CONFIG = ""
+    --   if vim.fn.has "mac" == 1 then
+    --     WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
+    --     CONFIG = "mac"
+    --   elseif vim.fn.has "unix" == 1 then
+    --     WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
+    --     CONFIG = "linux"
+    --   else
+    --     print "Unsupported system"
+    --   end
+    --   -- Find root of project
+    --   local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }
+    --   local root_dir = require("jdtls.setup").find_root(root_markers)
+    --   if root_dir == "" then
+    --     return
+    --   end
+
+    --   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+
+    --   local workspace_dir = WORKSPACE_PATH .. project_name
+    --   os.execute("mkdir -p " .. workspace_dir)
+
+    --   local bundles = vim.split(
+    --     vim.fn.glob(
+    --       home
+    --         .. ".local/share/nvim/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"
+    --     ),
+    --     "\n"
+    --   )
+    --   local extra_bundles =
+    --     vim.split(vim.fn.glob(home .. "/.local/share/nvim/mason/packages/java-test/extension/server/*.jar"), "\n")
+    --   vim.list_extend(bundles, extra_bundles)
+
+    --   -- local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
+    --   -- extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+
+    --   local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
+    --   -- local javaHome = home .. "/.local/lib/jvm-17"
+    --   -- let mason handle updates of jdtls, but don't call it
+    --   require("lspconfig").jdtls.setup {
+    --     cmd = {
+    --       javaHome .. "/bin/java",
+    --       "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+    --       "-Dosgi.bundles.defaultStartLevel=4",
+    --       "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    --       "-Dlog.protocol=true",
+    --       "-Dlog.level=ALL",
+    --       "-javaagent:" .. JDTLS_BASEPATH .. "/lombok.jar",
+    --       "-Xms1g",
+    --       "--add-modules=ALL-SYSTEM",
+    --       "--add-opens",
+    --       "java.base/java.util=ALL-UNNAMED",
+    --       "--add-opens",
+    --       "java.base/java.lang=ALL-UNNAMED",
+    --       "-jar",
+    --       launcher_path,
+    --       "-configuration",
+    --       JDTLS_BASEPATH .. "/config_" .. CONFIG,
+    --       "-data",
+    --       workspace_dir,
+    --     },
+    --     filetypes = { "java" },
+    --     single_file_support = true,
+    --     init_options = {
+    --       bundles = bundles,
+    --       workspace = workspace_dir,
+    --       jvm_args = {},
+    --       os_config = nil,
+    --     },
+    --     handlers = {
+    --       -- Due to an invalid protocol implementation in the jdtls we have to conform these to be spec compliant.
+    --       -- https://github.com/eclipse/eclipse.jdt.ls/issues/376
+    --       ["textDocument/codeAction"] = on_textdocument_codeaction,
+    --       ["textDocument/rename"] = on_textdocument_rename,
+    --       ["workspace/applyEdit"] = on_workspace_applyedit,
+    --       ["language/status"] = vim.schedule_wrap(on_language_status),
+    --       ["$/progress"] = function() end,
+    --     },
+    --     on_attach = function(client, bufnr)
+    --       require("jdtls.dap").setup_dap_main_class_configs()
+    --       require("jdtls").setup_dap { hotcodereplace = "auto" }
+    --       require("jdtls.setup").add_commands()
+    --       require("lvim.lsp").common_on_attach(client, bufnr)
+    --     end,
+    --     settings = {
+    --       java = {
+    --         eclipse = {
+    --           downloadSources = true,
+    --         },
+    --         configuration = {
+    --           updateBuildConfiguration = "interactive",
+    --           runtimes = {
+    --             {
+    --               name = "JavaSE-1.8",
+    --               path = "/home/stefan/.local/lib/jvm-8/",
+    --             },
+    --             {
+    --               name = "JavaSE-11",
+    --               path = "/home/stefan/.local/lib/jvm-11/",
+    --             },
+    --             {
+    --               name = "JavaSE-17",
+    --               path = "/home/stefan/.local/lib/jvm-17/",
+    --             },
+    --           },
+    --         },
+    --         maven = {
+    --           downloadSources = true,
+    --         },
+    --         implementationsCodeLens = {
+    --           enabled = true,
+    --         },
+    --         referencesCodeLens = {
+    --           enabled = true,
+    --         },
+    --         references = {
+    --           includeDecompiledSources = true,
+    --         },
+    --         inlayHints = {
+    --           parameterNames = {
+    --             enabled = "all", -- literals, all, none
+    --           },
+    --         },
+    --         format = {
+    --           enabled = true,
+    --           settings = {
+    --             profile = "GoogleStyle",
+    --             url = home .. "/.config/lvim/.java-google-formatter.xml",
+    --           },
+    --         },
+    --       },
+    --       signatureHelp = { enabled = true, description = { enabled = true } },
+    --       completion = {
+    --         favoriteStaticMembers = {
+    --           "org.hamcrest.MatcherAssert.assertThat",
+    --           "org.hamcrest.Matchers.*",
+    --           "org.hamcrest.CoreMatchers.*",
+    --           "org.junit.jupiter.api.Assertions.*",
+    --           "java.util.Objects.requireNonNull",
+    --           "java.util.Objects.requireNonNullElse",
+    --           "org.mockito.Mockito.*",
+    --         },
+    --         filteredTypes = {
+    --           "com.sun.*",
+    --           "io.micrometer.shaded.*",
+    --           "java.awt.*",
+    --           "jdk.*",
+    --           "sun.*",
+    --         },
+    --         contentProvider = { preferred = "fernflower" },
+    --         sources = {
+    --           organizeImports = {
+    --             starThreshold = 9999,
+    --             staticStarThreshold = 9999,
+    --           },
+    --         },
+    --         codeGeneration = {
+    --           toString = {
+    --             template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+    --           },
+    --           hashCodeEquals = {
+    --             useJava7Objects = true,
+    --           },
+    --           useBlocks = true,
+    --         },
+    --       },
+    --       flags = {
+    --         allow_incremental_sync = true,
+    --         server_side_fuzzy_completion = true,
+    --       },
+    --     },
+    --   }
+    -- end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -577,25 +795,8 @@ lvim.plugins = {
     "~/workspace/luvcron/",
   },
   {
-    "matbme/JABS.nvim",
-    config = function()
-      require("jabs").setup {
-        position = "center",
-        width = 50,
-        height = 10,
-        border = "rounded",
-        preview_position = "top",
-        preview = {
-          width = 70,
-          height = 20,
-          border = "rounded",
-        },
-      }
-      lvim.builtin.which_key.mappings.b.s = { "<cmd>JABSOpen<cr>", "Open Bufferlist" }
-    end,
-  },
-  {
     "jayp0521/mason-null-ls.nvim",
+    after = "mason.nvim",
     config = function()
       require("mason-null-ls").setup {
         ensure_installed = {
@@ -609,7 +810,22 @@ lvim.plugins = {
           "stylua",
           "yamlfmt",
           "fixjson",
+          "markdownlint",
         },
+      }
+    end,
+  },
+  {
+    "jayp0521/mason-nvim-dap.nvim",
+    after = { "mason.nvim" },
+    config = function()
+      require("mason-nvim-dap").setup {
+        ensure_installed = {
+          "java-debug-adapter",
+          "java-test",
+        },
+        automatic_installation = true,
+        automatic_setup = false,
       }
     end,
   },
@@ -639,7 +855,7 @@ lvim.plugins = {
   },
   {
     "liuchengxu/vista.vim",
-    setup = function()
+    config = function()
       vim.g.vista_default_executive = "nvim_lsp"
       vim.g.vista_echo_cursor_strategy = "floating_win"
       vim.g.vista_floating_delay = 100
@@ -700,7 +916,7 @@ lvim.plugins = {
   },
   {
     "rcarriga/nvim-notify",
-    setup = function()
+    config = function()
       local ok, notify = pcall(require, "nvim-notify")
       if ok then
         notify.setup {
@@ -727,6 +943,28 @@ lvim.plugins = {
   },
   {
     "gennaro-tedesco/nvim-peekup",
+  },
+  {
+    "ggandor/leap.nvim",
+    config = function()
+      local status_ok, leap = pcall(require, "leap")
+      if status_ok then
+        leap.add_default_mappings()
+      end
+    end,
+  },
+  {
+    "ggandor/leap-ast.nvim",
+    config = function()
+      lvim.builtin.which_key.mappings.s.l = {
+        function()
+          require("leap-ast").leap()
+        end,
+        "Leap w AST",
+      }
+      -- vim.keymap.set({ "n", "x", "o" }, "<leader>s",
+      -- end, {})
+    end,
   },
 }
 
@@ -819,12 +1057,6 @@ if vim.fn.has "wsl" == 1 then
       ["*"] = "win32yank.exe -o --lf",
     },
   }
-end
-
--- fallback configuration, if JABS is not working
-local status_ok, _ = pcall(require, "jabs")
-if not status_ok then
-  lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 end
 
 require("user.autocommands").config()
