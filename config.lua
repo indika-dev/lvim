@@ -516,6 +516,7 @@ lvim.plugins = {
 
       local home = "/home/stefan/"
       local WORKSPACE_PATH = home .. ".cache/jdtls/workspace/"
+      local JDTLS_BASEPATH = home .. ".local/share/nvim/mason/packages/jdtls/"
 
       local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
@@ -533,12 +534,8 @@ lvim.plugins = {
         vim.split(vim.fn.glob(home .. ".local/share/nvim/mason/packages/java-test/extension/server/*.jar"), "\n")
       vim.list_extend(bundles, extra_bundles)
 
-      -- local extendedClientCapabilities = require("jdtls").extendedClientCapabilities
-      -- extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-
       local javaHome = home .. ".local/lib/vscode-jdtls/jre"
-      -- local javaHome = home .. "/.local/lib/jvm-17"
-      -- let mason handle updates of jdtls, but don't call it
+
       require("lspconfig").jdtls.setup {
         cmd = {
           "jdtls",
@@ -548,6 +545,7 @@ lvim.plugins = {
           workspace_dir,
           "--jvm-arg --add-modules jdk.incubator.vector=ALL-SYSTEM",
           "--jvm-arg --add-modules jdk.incubator.foreign=ALL-SYSTEM",
+          "--jvm-arg -javaagent:" .. JDTLS_BASEPATH .. "lombok.jar",
         },
         on_attach = function(client, bufnr)
           require("jdtls.dap").setup_dap_main_class_configs()
@@ -562,6 +560,20 @@ lvim.plugins = {
             resolveAdditionalTextEditsSupport = true,
           },
         },
+        capabilities = {
+          workspace = {
+            configuration = true,
+          },
+          textDocument = {
+            completion = {
+              completionItem = {
+                snippetSupport = true,
+              },
+            },
+          },
+        },
+        -- for a complete list of jdt configuration options:
+        -- https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
         settings = {
           java = {
             eclipse = {
@@ -596,9 +608,9 @@ lvim.plugins = {
             references = {
               includeDecompiledSources = true,
             },
-            inlayHints = {
+            inlayhints = {
               parameterNames = {
-                enabled = "all", -- literals, all, none
+                enabled = true, -- literals, all, none
               },
             },
             format = {
@@ -609,7 +621,10 @@ lvim.plugins = {
               },
             },
           },
-          signatureHelp = { enabled = true, description = { enabled = true } },
+          quickfix = {
+            showAt = "line",
+          },
+          signatureHelp = { enabled = true },
           completion = {
             favoriteStaticMembers = {
               "org.hamcrest.MatcherAssert.assertThat",
