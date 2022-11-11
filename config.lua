@@ -555,10 +555,25 @@ lvim.plugins = {
         end,
         init_options = {
           bundles = bundles,
-          extendedClientCapabilities = {
-            progressReportProvider = true,
-            resolveAdditionalTextEditsSupport = true,
-          },
+          extendedClientCapabilities = vim.tbl_deep_extend(
+            "keep",
+            { resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
+            require("jdtls.setup").extendedClientCapabilities
+          ),
+          -- extendedClientCapabilities = {
+          --   resolveAdditionalTextEditsSupport = true,
+          --   progressReportProvider = true,
+          --   classFileContentsSupport = true,
+          --   generateToStringPromptSupport = true,
+          --   hashCodeEqualsPromptSupport = true,
+          --   advancedExtractRefactoringSupport = true,
+          --   advancedOrganizeImportsSupport = true,
+          --   generateConstructorsPromptSupport = true,
+          --   generateDelegateMethodsPromptSupport = true,
+          --   moveRefactoringSupport = true,
+          --   overrideMethodsPromptSupport = true,
+          --   inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
+          -- },
         },
         capabilities = {
           workspace = {
