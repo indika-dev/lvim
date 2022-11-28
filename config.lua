@@ -70,12 +70,12 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
   ".settings/",
 }
 
-local _time = os.date "*t"
-if _time.hour >= 6 and _time.hour < 20 then
-  lvim.colorscheme = "tokyonight-storm"
-else
-  lvim.colorscheme = "kanagawa"
-end
+-- local _time = os.date "*t"
+-- if _time.hour >= 6 and _time.hour < 20 then
+--   lvim.colorscheme = "tokyonight-storm"
+-- else
+--   lvim.colorscheme = "kanagawa"
+-- end
 
 lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
@@ -243,7 +243,16 @@ lvim.plugins = {
       end
     end,
   },
-  -- { "folke/tokyonight.nvim" },
+  {
+    "folke/tokyonight.nvim",
+    config = function()
+      vim.cmd [[colorscheme tokyonight-storm]]
+    end,
+    cond = function()
+      local _time = os.date "*t"
+      return (_time.hour >= 6 and _time.hour < 18)
+    end,
+  },
   {
     "rebelot/kanagawa.nvim",
     config = function()
@@ -255,6 +264,10 @@ lvim.plugins = {
           LspReferenceWrite = { link = "LspReferenceRead" },
         },
       }
+    end,
+    cond = function()
+      local _time = os.date "*t"
+      return ((_time.hour >= 18 and _time.hour < 24) or (_time.hour >= 0 and _time.hour < 6))
     end,
   },
   {
