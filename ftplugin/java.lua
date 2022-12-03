@@ -10,13 +10,6 @@ if not status_ok then
 end
 
 local handlers = require "vim.lsp.handlers"
-local capabilities = vim.lsp.protocol.make_client_capabilities()
--- local capabilities = require("lvim.lsp").common_capabilities(),
-local status_cmp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-if status_cmp_ok then
-  capabilities.textDocument.completion.completionItem.snippetSupport = false
-  capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
-end
 
 -- TextDocument version is reported as 0, override with nil so that
 -- the client doesn't think the document is newer and refuses to update
@@ -61,19 +54,18 @@ local function on_workspace_applyedit(err, workspace_edit, ctx)
 end
 
 local home = os.getenv "HOME"
-local JDTLS_BASEPATH = home .. "/.local/share/nvim/mason/packages/jdtls"
+local MASON_BASEPATH = home .. "/.local/share/nvim/mason/packages"
 
 -- Determine OS
-local launcher_path = vim.fn.glob(JDTLS_BASEPATH .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+local launcher_path = vim.fn.glob(MASON_BASEPATH .. "/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
 if #launcher_path == 0 then
-  launcher_path = vim.fn.glob(JDTLS_BASEPATH .. "/plugins/org.eclipse.equinox.launcher_*.jar", 1, 1)[1]
+  launcher_path = vim.fn.glob(MASON_BASEPATH .. "/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", true, true)[1]
 end
 local CONFIG = ""
+local WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
 if vim.fn.has "mac" == 1 then
-  WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
   CONFIG = "mac"
 elseif vim.fn.has "unix" == 1 then
-  WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
   CONFIG = "linux"
 else
   print "Unsupported system"
@@ -86,30 +78,17 @@ if root_dir == "" then
   return
 end
 
-local extendedClientCapabilities = jdtls.extendedClientCapabilities
-extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
--- extendedClientCapabilities = vim.lsp.protocol.resolve_capabilities(jdtls.extendedClientCapabilities)
-
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+local project_name = vim.fs.basename(root_dir)
 
 local workspace_dir = WORKSPACE_PATH .. project_name
 os.execute("mkdir -p " .. workspace_dir)
 
--- local bundles =
---   vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-debug/com.microsoft.java.debug.plugin-*.jar"), "\n")
-
--- local extra_bundles = vim.split(vim.fn.glob(home .. "/.local/lib/vscode-java-test/*.jar"), "\n")
--- vim.list_extend(bundles, extra_bundles)
-
 local bundles = vim.split(
-  vim.fn.glob(
-    home .. ".local/share/nvim/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"
-  ),
+  vim.fn.glob(MASON_BASEPATH .. "/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"),
   "\n"
 )
 
-local extra_bundles =
-  vim.split(vim.fn.glob(home .. "/.local/share/nvim/mason/packages/java-test/extension/server/*.jar"), "\n")
+local extra_bundles = vim.split(vim.fn.glob(MASON_BASEPATH .. "/java-test/extension/server/*.jar"), "\n")
 vim.list_extend(bundles, extra_bundles)
 
 local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
@@ -123,7 +102,7 @@ local config = {
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
-    "-javaagent:" .. JDTLS_BASEPATH .. "/lombok.jar",
+    "-javaagent:" .. MASON_BASEPATH .. "/jdtls/lombok.jar",
     "-Xms1g",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
@@ -133,21 +112,18 @@ local config = {
     "-jar",
     launcher_path,
     "-configuration",
-    JDTLS_BASEPATH .. "/config_" .. CONFIG,
+    MASON_BASEPATH .. "/jdtls/config_" .. CONFIG,
     "-data",
     workspace_dir,
   },
   on_attach = function(client, bufnr)
-    require("jdtls.dap").setup_dap_main_class_configs()
-    jdtls.setup_dap { hotcodereplace = "auto" }
+    -- require("jdtls.dap").setup_dap_main_class_configs()
     require("jdtls.setup").add_commands()
     require("lvim.lsp").common_on_attach(client, bufnr)
   end,
   on_init = require("lvim.lsp").common_on_init,
   on_exit = require("lvim.lsp").common_on_exit,
   root_dir = root_dir,
-  -- capabilities = capabilities,
-  -- extendedClientCapabilities = extendedClientCapabilities,
   settings = {
     java = {
       -- jdt = {
@@ -220,7 +196,6 @@ local config = {
       },
     },
     contentProvider = { preferred = "fernflower" },
-    -- extendedClientCapabilities = extendedClientCapabilities,
     sources = {
       organizeImports = {
         starThreshold = 9999,
@@ -251,25 +226,28 @@ local config = {
   },
   init_options = {
     bundles = bundles,
-    -- extendedClientCapabilities = extendedClientCapabilities,
+    extendedClientCapabilities = vim.tbl_deep_extend(
+      "keep",
+      { resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
+      require("jdtls.setup").extendedClientCapabilities
+    ),
+  },
+  capabilities = {
+    workspace = {
+      configuration = true,
+    },
+    textDocument = {
+      completion = {
+        completionItem = {
+          snippetSupport = true,
+        },
+      },
+    },
   },
 }
 
--- vim.api.nvim_create_autocmd({ "BufWritePost" }, {
---   pattern = { "*.java" },
---   callback = function()
---     vim.lsp.codelens.refresh()
---   end,
--- })
-
 jdtls.start_or_attach(config)
-
-vim.cmd "command! -buffer -nargs=? -complete=custom,v:lua.require'jdtls'._complete_compile JdtCompile lua require('jdtls').compile(<f-args>)"
-vim.cmd "command! -buffer -nargs=? -complete=custom,v:lua.require'jdtls'._complete_set_runtime JdtSetRuntime lua require('jdtls').set_runtime(<f-args>)"
-vim.cmd "command! -buffer JdtUpdateConfig lua require('jdtls').update_project_config()"
--- vim.cmd "command! -buffer JdtJol lua require('jdtls').jol()"
-vim.cmd "command! -buffer JdtBytecode lua require('jdtls').javap()"
--- vim.cmd "command! -buffer JdtJshell lua require('jdtls').jshell()"
+jdtls.setup_dap { hotcodereplace = "auto" }
 
 local wkstatus_ok, which_key = pcall(require, "which-key")
 if wkstatus_ok then

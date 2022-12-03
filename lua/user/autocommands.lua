@@ -49,7 +49,7 @@ augroup END
   })
 
   create_aucmd("CursorHold", {
-    pattern = { "*.rs", "*.go", "*.ts", "*.tsx", "*.js", "*.java", "*.lua" },
+    pattern = { "*.rs", "*.go", "*.ts", "*.tsx", "*.js", "*.lua" }, -- "*.java",
     command = "lua require('user.codelens').show_line_sign()",
   })
 
