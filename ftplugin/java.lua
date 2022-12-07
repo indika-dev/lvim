@@ -2,6 +2,9 @@ vim.opt_local.shiftwidth = 2
 vim.opt_local.tabstop = 2
 vim.opt_local.cmdheight = 2 -- more space in the neovim command line for displaying messages
 vim.opt.cc = ""
+vim.opt_local.foldcolumn = "1"
+vim.opt_local.foldenable = true
+vim.opt_local.signcolumn = "yes"
 
 -- credit: https://github.com/ChristianChiarulli/nvim
 local status_ok, jdtls = pcall(require, "jdtls")
@@ -9,48 +12,13 @@ if not status_ok then
   return
 end
 
-local handlers = require "vim.lsp.handlers"
-
--- TextDocument version is reported as 0, override with nil so that
--- the client doesn't think the document is newer and refuses to update
--- See: https://github.com/eclipse/eclipse.jdt.ls/issues/1695
-local function fix_zero_version(workspace_edit)
-  if workspace_edit and workspace_edit.documentChanges then
-    for _, change in pairs(workspace_edit.documentChanges) do
-      local text_document = change.textDocument
-      if text_document and text_document.version and text_document.version == 0 then
-        text_document.version = nil
-      end
+local function has_value(table, value)
+  for _, val in ipairs(table) do
+    if value == val then
+      return true
     end
   end
-  return workspace_edit
-end
-
-local function on_textdocument_codeaction(err, actions, ctx)
-  for _, action in ipairs(actions) do
-    -- TODO: (steelsojka) Handle more than one edit?
-    if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
-      action.edit = fix_zero_version(action.edit or action.arguments[1])
-    elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
-      action.edit = fix_zero_version(action.edit or action.command.arguments[1])
-    end
-  end
-end
-
-local function on_textdocument_rename(err, workspace_edit, ctx)
-  handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
-end
-
--- -- Non-standard notification that can be used to display progress
-local function on_language_status(_, result)
-  local command = vim.api.nvim_command
-  command "echohl ModeMsg"
-  command(string.format('echo "%s"', result.message))
-  command "echohl None"
-end
-
-local function on_workspace_applyedit(err, workspace_edit, ctx)
-  handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+  return false
 end
 
 local home = os.getenv "HOME"
@@ -80,8 +48,15 @@ end
 
 local project_name = vim.fs.basename(root_dir)
 
-local workspace_dir = WORKSPACE_PATH .. project_name
+local non_workspace_markers = { vim.fs.basename(home), "workspace" }
+local workspace_dir = ""
+
+-- if not (has_value(non_workspace_markers, vim.fs.basename(vim.fn.fnamemodify(root_dir, ":h")))) then
+--   workspace_dir = vim.fn.fnamemodify(root_dir, ":h")
+-- else
+workspace_dir = WORKSPACE_PATH .. project_name
 os.execute("mkdir -p " .. workspace_dir)
+-- end
 
 local bundles = vim.split(
   vim.fn.glob(MASON_BASEPATH .. "/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"),
@@ -117,12 +92,11 @@ local config = {
     workspace_dir,
   },
   on_attach = function(client, bufnr)
-    -- require("jdtls.dap").setup_dap_main_class_configs()
+    vim.lsp.codelens.refresh()
+    jdtls.setup_dap { hotcodereplace = "auto" }
     require("jdtls.setup").add_commands()
     require("lvim.lsp").common_on_attach(client, bufnr)
   end,
-  on_init = require("lvim.lsp").common_on_init,
-  on_exit = require("lvim.lsp").common_on_exit,
   root_dir = root_dir,
   settings = {
     java = {
@@ -216,14 +190,6 @@ local config = {
     allow_incremental_sync = true,
     server_side_fuzzy_completion = true,
   },
-  handlers = {
-    -- Due to an invalid protocol implementation in the jdtls we have to conform these to be spec compliant.
-    -- https://github.com/eclipse/eclipse.jdt.ls/issues/376
-    ["textDocument/codeAction"] = on_textdocument_codeaction,
-    ["textDocument/rename"] = on_textdocument_rename,
-    ["workspace/applyEdit"] = on_workspace_applyedit,
-    ["language/status"] = vim.schedule_wrap(on_language_status),
-  },
   init_options = {
     bundles = bundles,
     extendedClientCapabilities = vim.tbl_deep_extend(
@@ -231,6 +197,18 @@ local config = {
       { resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
       require("jdtls.setup").extendedClientCapabilities
     ),
+  },
+  handlers = {
+    ["language/status"] = vim.schedule_wrap(function(_, s)
+      local command = vim.api.nvim_command
+      command "echohl ModeMsg"
+      command(string.format('echo "%s"', s.message))
+      command "echohl None"
+      if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.initial_debug_search == false then
+        require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
+        lvim.custom.jdtls.initial_debug_search = true
+      end
+    end),
   },
   capabilities = {
     workspace = {
@@ -245,9 +223,7 @@ local config = {
     },
   },
 }
-
 jdtls.start_or_attach(config)
-jdtls.setup_dap { hotcodereplace = "auto" }
 
 local wkstatus_ok, which_key = pcall(require, "which-key")
 if wkstatus_ok then
