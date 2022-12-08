@@ -108,6 +108,20 @@ local config = {
       eclipse = {
         downloadSources = true,
       },
+      templates = {
+        fileHeader = {
+          "/**",
+          " * ${type_name}",
+          " * @author ${user}",
+          " */",
+        },
+        typeComment = {
+          "/**",
+          " * ${type_name}",
+          " * @author ${user}",
+          " */",
+        },
+      },
       configuration = {
         updateBuildConfiguration = "interactive",
         runtimes = {
@@ -195,7 +209,7 @@ local config = {
     extendedClientCapabilities = vim.tbl_deep_extend(
       "keep",
       { resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
-      require("jdtls.setup").extendedClientCapabilities
+      jdtls.extendedClientCapabilities
     ),
   },
   handlers = {
@@ -222,6 +236,18 @@ local config = {
       },
     },
   },
+  -- capabilities = vim.tbl_deep_extend("keep", {
+  --   workspace = {
+  --     configuration = true,
+  --   },
+  --   textDocument = {
+  --     completion = {
+  --       completionItem = {
+  --         snippetSupport = true,
+  --       },
+  --     },
+  --   },
+  -- }, require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())),
 }
 jdtls.start_or_attach(config)
 
