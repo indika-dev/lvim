@@ -10,11 +10,12 @@ lvim.builtin.dap.active = true
 lvim.builtin.treesitter.rainbow.enable = false
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
+lvim.builtin.treesitter.auto_install = true
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.telescope.active = true
 lvim.builtin.telescope.defaults.file_ignore_patterns = {
-  ".git/",
-  "target/",
+  ".git/*",
+  "target/*",
   "docs/",
   "vendor/*",
   "%.lock",
@@ -68,6 +69,8 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
   ".factorypath",
   ".project",
   ".settings/",
+  "%.class",
+  "%.jar",
 }
 
 -- local _time = os.date "*t"
@@ -119,7 +122,9 @@ end
 
 -- generic LSP settings
 lvim.lsp.diagnostics.virtual_text = true
-require("mason-lspconfig").setup {
+lvim.lsp.installer.setup.automatic_installation = false
+lvim.lsp.automatic_servers_installation = true
+lvim.lsp.null_ls.setup = {
   highlight = {
     enabled = true,
   },
@@ -248,6 +253,7 @@ lvim.plugins = {
   },
   {
     "folke/tokyonight.nvim",
+    tag = "*",
     config = function()
       vim.cmd [[colorscheme tokyonight-storm]]
     end,
@@ -275,6 +281,7 @@ lvim.plugins = {
   },
   {
     "projekt0n/github-nvim-theme",
+    tag = "*",
     config = function()
       local ok, githubTheme = pcall(require, "github-theme")
       if ok then
@@ -304,6 +311,7 @@ lvim.plugins = {
   },
   {
     "folke/trouble.nvim",
+    tag = "*",
     cmd = "TroubleToggle",
   },
   {
@@ -367,6 +375,7 @@ lvim.plugins = {
   },
   {
     "folke/zen-mode.nvim",
+    tag = "*",
     config = function()
       require("zen-mode").setup {
         -- your configuration comes here
@@ -446,10 +455,12 @@ lvim.plugins = {
   },
   {
     "dhruvasagar/vim-table-mode",
+    commit = "9555a3e6e5bcf285ec181b7fc983eea90500feb4",
     disable = true,
   },
   {
     "kevinhwang91/nvim-bqf",
+    tag = "*",
     event = { "BufRead", "BufNew" },
     config = function()
       require("bqf").setup {
@@ -507,6 +518,7 @@ lvim.plugins = {
   },
   {
     "folke/persistence.nvim",
+    tag = "*",
     event = "BufReadPre", -- this will only start session saving when an actual file was opened
     module = "persistence",
     config = function()
@@ -519,6 +531,7 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     ft = "java",
+    tag = "*",
     setup = function()
       require("lspconfig").jdtls.setup = function() end
     end,
@@ -582,32 +595,23 @@ lvim.plugins = {
       }
     end,
   },
+  -- {
+  --   "~/workspace/luvcron/",
+  -- },
   {
-    "~/workspace/luvcron/",
-  },
-  {
-    "jayp0521/mason-null-ls.nvim",
+    "jay-babu/mason-null-ls.nvim",
     after = "mason.nvim",
     config = function()
       require("mason-null-ls").setup {
-        ensure_installed = {
-          "stylua",
-          "yamllint",
-          "eslint_d",
-          "shellcheck",
-          "luacheck",
-          "prettier",
-          "shfmt",
-          "stylua",
-          "yamlfmt",
-          "fixjson",
-          "markdownlint",
-        },
+        automatic_installation = false,
+        automatic_setup = false,
+        ensure_installed = nil,
       }
     end,
+    disable = true,
   },
   {
-    "jayp0521/mason-nvim-dap.nvim",
+    "jay-babu/mason-nvim-dap.nvim",
     after = { "mason.nvim" },
     config = function()
       require("mason-nvim-dap").setup {
@@ -620,7 +624,7 @@ lvim.plugins = {
       }
     end,
   },
-  { "gpanders/editorconfig.nvim" },
+  { "gpanders/editorconfig.nvim", tag = "*" },
   {
     "stevearc/dressing.nvim",
     config = function()
@@ -700,6 +704,7 @@ lvim.plugins = {
   },
   {
     "ray-x/lsp_signature.nvim",
+    tag = "*",
     event = "BufRead",
     config = function()
       require("lsp_signature").on_attach()
@@ -707,6 +712,7 @@ lvim.plugins = {
   },
   {
     "rcarriga/nvim-notify",
+    tag = "*",
     config = function()
       local ok, notify = pcall(require, "nvim-notify")
       if ok then
@@ -734,6 +740,7 @@ lvim.plugins = {
   },
   {
     "gennaro-tedesco/nvim-peekup",
+    tag = "*",
   },
   {
     "ggandor/leap.nvim",

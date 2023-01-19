@@ -190,6 +190,13 @@ augroup END
     end,
   })
 
+  -- create_aucmd({ "BufWritePre" }, {
+  --   pattern = { "*.java" },
+  --   callback = function()
+  --     require("jdtls").organize_imports()
+  --   end,
+  -- })
+
   -- create_aucmd({ "ModeChanged" }, {
   --   callback = function()
   --     local luasnip = require "luasnip"
@@ -201,12 +208,12 @@ augroup END
   --   end,
   -- })
 
-  -- create_aucmd({ "BufWritePost" }, {
-  --   pattern = { "*.ts" },
-  --   callback = function()
-  --     vim.lsp.buf.format { async = true }
-  --   end,
-  -- })
+  create_aucmd({ "BufWritePre" }, {
+    pattern = { "*.ts" },
+    callback = function()
+      vim.lsp.buf.format { async = false }
+    end,
+  })
 end
 
 return M

@@ -68,6 +68,7 @@ vim.list_extend(bundles, extra_bundles)
 
 local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
 -- local javaHome = home .. "/.local/lib/jvm-17"
+-- local javaHome = "/home/stefan/.sdkman/candidates/java/17.0.4-tem"
 
 local config = {
   cmd = {
@@ -77,13 +78,13 @@ local config = {
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
-    "-javaagent:" .. MASON_BASEPATH .. "/jdtls/lombok.jar",
     "-Xms1g",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
     "java.base/java.util=ALL-UNNAMED",
     "--add-opens",
     "java.base/java.lang=ALL-UNNAMED",
+    "-javaagent:" .. MASON_BASEPATH .. "/jdtls/lombok.jar",
     "-jar",
     launcher_path,
     "-configuration",
@@ -98,13 +99,14 @@ local config = {
     require("lvim.lsp").common_on_attach(client, bufnr)
   end,
   root_dir = root_dir,
+  -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
   settings = {
     java = {
-      -- jdt = {
-      --   ls = {
-      --     vmargs = "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m",
-      --   },
-      -- },
+      jdt = {
+        ls = {
+          lombokSupport = { enabled = true },
+        },
+      },
       eclipse = {
         downloadSources = true,
       },
@@ -139,6 +141,12 @@ local config = {
           },
         },
       },
+      rename = {
+        enabled = true,
+      },
+      import = {
+        enabled = true,
+      },
       maven = {
         downloadSources = true,
       },
@@ -153,7 +161,7 @@ local config = {
       },
       inlayHints = {
         parameterNames = {
-          enabled = "all", -- literals, all, none
+          enabled = true,
         },
       },
       format = {
@@ -163,41 +171,60 @@ local config = {
           url = home .. "/.config/lvim/.java-google-formatter.xml",
         },
       },
-    },
-    signatureHelp = { enabled = true, description = { enabled = true } },
-    completion = {
-      favoriteStaticMembers = {
-        "org.hamcrest.MatcherAssert.assertThat",
-        "org.hamcrest.Matchers.*",
-        "org.hamcrest.CoreMatchers.*",
-        "org.junit.jupiter.api.Assertions.*",
-        "java.util.Objects.requireNonNull",
-        "java.util.Objects.requireNonNullElse",
-        "org.mockito.Mockito.*",
+      signatureHelp = { enabled = true },
+      completion = {
+        favoriteStaticMembers = {
+          "java.util.Objects.requireNonNull",
+          "java.util.Objects.requireNonNullElse",
+          "org.mockito.Mockito.*",
+          "org.junit.jupiter.api.DynamicTest.*",
+          "org.junit.jupiter.api.Assertions.*",
+          "org.junit.jupiter.api.Assumptions.*",
+          "org.junit.jupiter.api.DynamicContainer.*",
+          "org.junit.Assert.*",
+          "org.junit.Assume.*",
+          "org.mockito.ArgumentMatchers.*",
+          "org.mockito.Mockito.*",
+          "org.mockito.Answers.*",
+        },
+        filteredTypes = {
+          "com.sun.*",
+          "io.micrometer.shaded.*",
+          "java.awt.*",
+          "jdk.*",
+          "sun.*",
+        },
       },
-      filteredTypes = {
-        "com.sun.*",
-        "io.micrometer.shaded.*",
-        "java.awt.*",
-        "jdk.*",
-        "sun.*",
+      contentProvider = { preferred = "fernflower" },
+      sources = {
+        organizeImports = {
+          starThreshold = 9999,
+          staticStarThreshold = 9999,
+        },
       },
-    },
-    contentProvider = { preferred = "fernflower" },
-    sources = {
-      organizeImports = {
-        starThreshold = 9999,
-        staticStarThreshold = 9999,
+      codeGeneration = {
+        toString = {
+          listArrayContents = true,
+          skipNullValues = true,
+          template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+        },
+        hashCodeEquals = {
+          useInstanceof = true,
+          useJava7Objects = true,
+        },
+        useBlocks = true,
+        generateComments = true,
+        insertLocation = true,
       },
-    },
-    codeGeneration = {
-      toString = {
-        template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+      saveActions = {
+        organizeImports = true,
       },
-      hashCodeEquals = {
-        useJava7Objects = true,
+      autobuild = {
+        enabled = true,
       },
-      useBlocks = true,
+      progressReports = {
+        enabled = false,
+      },
     },
   },
   flags = {
@@ -208,7 +235,7 @@ local config = {
     bundles = bundles,
     extendedClientCapabilities = vim.tbl_deep_extend(
       "keep",
-      { resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
+      { progressReportProvider = false, resolveAdditionalTextEditsSupport = true, classFileContentsSupport = true },
       jdtls.extendedClientCapabilities
     ),
   },
@@ -236,18 +263,6 @@ local config = {
       },
     },
   },
-  -- capabilities = vim.tbl_deep_extend("keep", {
-  --   workspace = {
-  --     configuration = true,
-  --   },
-  --   textDocument = {
-  --     completion = {
-  --       completionItem = {
-  --         snippetSupport = true,
-  --       },
-  --     },
-  --   },
-  -- }, require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())),
 }
 jdtls.start_or_attach(config)
 
@@ -282,6 +297,7 @@ if wkstatus_ok then
       u = { "<Cmd>JdtUpdateConfig<CR>", "Update Config" },
       i = { "<Cmd>JdtCompile incremental<CR>", "Compile incrementaly" },
       f = { "<Cmd>JdtCompile full<CR>", "Compile fully" },
+      s = { "<Cmd>lua require'jdtls'.super_implementation()<CR>", "Go to super implementation" },
     },
   }
 
