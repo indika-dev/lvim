@@ -235,7 +235,7 @@ local config = {
     bundles = bundles,
     extendedClientCapabilities = vim.tbl_deep_extend(
       "keep",
-      { progressReportProvider = false, resolveAdditionalTextEditsSupport = true, classFileContentsSupport = true },
+      { progressReportProvider = false, resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
       jdtls.extendedClientCapabilities
     ),
   },
