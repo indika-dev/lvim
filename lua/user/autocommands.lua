@@ -190,12 +190,12 @@ augroup END
     end,
   })
 
-  create_aucmd({ "BufWritePre" }, {
-    pattern = { "*.java" },
-    callback = function()
-      require("jdtls").organize_imports()
-    end,
-  })
+  -- create_aucmd({ "BufWritePre" }, {
+  --   pattern = { "*.java" },
+  --   callback = function()
+  --     require("jdtls").organize_imports()
+  --   end,
+  -- })
 
   -- create_aucmd({ "ModeChanged" }, {
   --   callback = function()

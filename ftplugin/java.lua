@@ -100,133 +100,134 @@ local config = {
   end,
   root_dir = root_dir,
   -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
-  settings = {
-    java = {
-      jdt = {
-        ls = {
-          lombokSupport = { enabled = true },
-        },
-      },
-      eclipse = {
-        downloadSources = true,
-      },
-      templates = {
-        fileHeader = {
-          "/**",
-          " * ${type_name}",
-          " * @author ${user}",
-          " */",
-        },
-        typeComment = {
-          "/**",
-          " * ${type_name}",
-          " * @author ${user}",
-          " */",
-        },
-      },
-      configuration = {
-        updateBuildConfiguration = "interactive",
-        runtimes = {
-          {
-            name = "JavaSE-1.8",
-            path = "/home/stefan/.local/lib/jvm-8/",
-          },
-          {
-            name = "JavaSE-11",
-            path = "/home/stefan/.local/lib/jvm-11/",
-          },
-          {
-            name = "JavaSE-17",
-            path = "/home/stefan/.local/lib/jvm-17/",
-          },
-        },
-      },
-      rename = {
-        enabled = true,
-      },
-      import = {
-        enabled = true,
-      },
-      maven = {
-        downloadSources = true,
-      },
-      implementationsCodeLens = {
-        enabled = true,
-      },
-      referencesCodeLens = {
-        enabled = true,
-      },
-      references = {
-        includeDecompiledSources = true,
-      },
-      inlayHints = {
-        parameterNames = {
-          enabled = true,
-        },
-      },
-      format = {
-        enabled = true,
-        settings = {
-          profile = "GoogleStyle",
-          url = home .. "/.config/lvim/.java-google-formatter.xml",
-        },
-      },
-      signatureHelp = { enabled = true },
-      completion = {
-        favoriteStaticMembers = {
-          "java.util.Objects.requireNonNull",
-          "java.util.Objects.requireNonNullElse",
-          "org.mockito.Mockito.*",
-          "org.junit.jupiter.api.DynamicTest.*",
-          "org.junit.jupiter.api.Assertions.*",
-          "org.junit.jupiter.api.Assumptions.*",
-          "org.junit.jupiter.api.DynamicContainer.*",
-          "org.junit.Assert.*",
-          "org.junit.Assume.*",
-          "org.mockito.ArgumentMatchers.*",
-          "org.mockito.Mockito.*",
-          "org.mockito.Answers.*",
-        },
-        filteredTypes = {
-          "com.sun.*",
-          "io.micrometer.shaded.*",
-          "java.awt.*",
-          "jdk.*",
-          "sun.*",
-        },
-      },
-      contentProvider = { preferred = "fernflower" },
-      sources = {
-        organizeImports = {
-          starThreshold = 9999,
-          staticStarThreshold = 9999,
-        },
-      },
-      codeGeneration = {
-        toString = {
-          listArrayContents = true,
-          skipNullValues = true,
-          template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-        },
-        hashCodeEquals = {
-          useInstanceof = true,
-          useJava7Objects = true,
-        },
-        useBlocks = true,
-        generateComments = true,
-        insertLocation = true,
-      },
-      saveActions = {
-        organizeImports = true,
-      },
-      autobuild = {
-        enabled = true,
-      },
-      progressReports = {
-        enabled = false,
-      },
-    },
-  },
+  -- settings = {
+  --   java = {
+  --     jdt = {
+  --       ls = {
+  --         lombokSupport = { enabled = true },
+  --       },
+  --     },
+  --     eclipse = {
+  --       downloadSources = true,
+  --     },
+  --     templates = {
+  --       fileHeader = {
+  --         "/**",
+  --         " * ${type_name}",
+  --         " * @author ${user}",
+  --         " */",
+  --       },
+  --       typeComment = {
+  --         "/**",
+  --         " * ${type_name}",
+  --         " * @author ${user}",
+  --         " */",
+  --       },
+  --     },
+  --     configuration = {
+  --       updateBuildConfiguration = "interactive",
+  --       runtimes = {
+  --         {
+  --           name = "JavaSE-1.8",
+  --           path = "/home/stefan/.local/lib/jvm-8/",
+  --         },
+  --         {
+  --           name = "JavaSE-11",
+  --           path = "/home/stefan/.local/lib/jvm-11/",
+  --         },
+  --         {
+  --           name = "JavaSE-17",
+  --           path = "/home/stefan/.local/lib/jvm-17/",
+  --           default = true,
+  --         },
+  --       },
+  --     },
+  --     rename = {
+  --       enabled = true,
+  --     },
+  --     import = {
+  --       enabled = true,
+  --     },
+  --     maven = {
+  --       downloadSources = true,
+  --     },
+  --     implementationsCodeLens = {
+  --       enabled = true,
+  --     },
+  --     referencesCodeLens = {
+  --       enabled = true,
+  --     },
+  --     references = {
+  --       includeDecompiledSources = true,
+  --     },
+  --     inlayHints = {
+  --       parameterNames = {
+  --         enabled = true,
+  --       },
+  --     },
+  --     format = {
+  --       enabled = true,
+  --       settings = {
+  --         profile = "GoogleStyle",
+  --         url = home .. "/.config/lvim/.java-google-formatter.xml",
+  --       },
+  --     },
+  --     signatureHelp = { enabled = true },
+  --     completion = {
+  --       favoriteStaticMembers = {
+  --         "java.util.Objects.requireNonNull",
+  --         "java.util.Objects.requireNonNullElse",
+  --         "org.mockito.Mockito.*",
+  --         "org.junit.jupiter.api.DynamicTest.*",
+  --         "org.junit.jupiter.api.Assertions.*",
+  --         "org.junit.jupiter.api.Assumptions.*",
+  --         "org.junit.jupiter.api.DynamicContainer.*",
+  --         "org.junit.Assert.*",
+  --         "org.junit.Assume.*",
+  --         "org.mockito.ArgumentMatchers.*",
+  --         "org.mockito.Mockito.*",
+  --         "org.mockito.Answers.*",
+  --       },
+  --       filteredTypes = {
+  --         "com.sun.*",
+  --         "io.micrometer.shaded.*",
+  --         "java.awt.*",
+  --         "jdk.*",
+  --         "sun.*",
+  --       },
+  --     },
+  --     contentProvider = { preferred = "fernflower" },
+  --     sources = {
+  --       organizeImports = {
+  --         starThreshold = 9999,
+  --         staticStarThreshold = 9999,
+  --       },
+  --     },
+  --     codeGeneration = {
+  --       toString = {
+  --         listArrayContents = true,
+  --         skipNullValues = true,
+  --         template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+  --       },
+  --       hashCodeEquals = {
+  --         useInstanceof = true,
+  --         useJava7Objects = true,
+  --       },
+  --       useBlocks = true,
+  --       generateComments = true,
+  --       insertLocation = true,
+  --     },
+  --     saveActions = {
+  --       organizeImports = false,
+  --     },
+  --     autobuild = {
+  --       enabled = true,
+  --     },
+  --     progressReports = {
+  --       enabled = false,
+  --     },
+  --   },
+  -- },
   flags = {
     allow_incremental_sync = true,
     server_side_fuzzy_completion = true,
