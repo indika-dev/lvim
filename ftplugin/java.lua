@@ -104,7 +104,7 @@ local config = {
   --   java = {
   --     jdt = {
   --       ls = {
-  --         lombokSupport = { enabled = true },
+  --         lombokSupport = { enabled = false },
   --       },
   --     },
   --     eclipse = {
