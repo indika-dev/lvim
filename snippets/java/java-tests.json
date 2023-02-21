@@ -1,20 +1,4 @@
 {
-	"JUnit 4 - Imports for Tests": {
-		"prefix": "imports_junit4",
-		"body": [
-			"import static org.hamcrest.Matchers.*;",
-			"import static org.junit.Assert.assertEquals;",
-			"import static org.junit.Assert.assertThat;",
-			"import static org.mockito.Mockito.*;",
-			"import org.hamcrest.CoreMatchers;",
-			"import org.junit.After;",
-			"import org.junit.Before;",
-			"import org.junit.Test;",
-			"import org.mockito.ArgumentCaptor;",
-			"import org.mockito.Mock;"
-		],
-		"description": "Imports to write tests with JUnit 4, Mockito and Hamcrest"
-	},
 	"JUnit 5 - Imports for Tests": {
 		"prefix": "imports_junit5",
 		"body": [

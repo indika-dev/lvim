@@ -20,6 +20,39 @@
       {
         "language": "typescriptreact",
         "path": "./react-ts.json"
+      },
+      {
+        "language": "java",
+        "path": "./java.json"
+        "
+      },
+      {
+        "language": "docker",
+        "path": "./docker/docker_file.json"
+      },
+      {
+        "language": "elixir",
+        "path": ["./elixir.json", "./eelixir.json"]
+      },
+      {
+        "language": "erlang",
+        "path": "./erlang.json"
+      },
+      {
+        "language": "html",
+        "path": "./html.json"
+      },
+      {
+        "language": "kubernetes",
+        "path": "./kubernetes.json"
+      },
+      {
+        "language": "make",
+        "path": "./make.json"
+      },
+      {
+        "language": "rust",
+        "path": "./rust.json"
       }
     ]
   }
