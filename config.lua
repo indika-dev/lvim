@@ -536,9 +536,9 @@ lvim.plugins = {
     "mfussenegger/nvim-jdtls",
     ft = "java",
     tag = "*",
-    setup = function()
-      require("lspconfig").jdtls.setup = function() end
-    end,
+    -- setup = function()
+    --   require("lspconfig").jdtls.setup = function() end
+    -- end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -783,6 +783,9 @@ lvim.plugins = {
           height_ratio = 0.7,
         }
       end
+    end,
+  },
+  {
     "fladson/vim-kitty",
   },
   {

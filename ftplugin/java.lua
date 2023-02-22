@@ -21,22 +21,22 @@ local function has_value(table, value)
   return false
 end
 
-local home = os.getenv "HOME"
-local MASON_BASEPATH = home .. "/.local/share/nvim/mason/packages"
-
--- Determine OS
-local launcher_path = vim.fn.glob(MASON_BASEPATH .. "/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
+local home = vim.env.HOME
+local MASON_BASEPATH = vim.fn.glob(vim.fn.stdpath "data" .. "/mason")
+local launcher_path = vim.fn.glob(MASON_BASEPATH .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
 if #launcher_path == 0 then
-  launcher_path = vim.fn.glob(MASON_BASEPATH .. "/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", true, true)[1]
+  launcher_path =
+    vim.fn.glob(MASON_BASEPATH .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", true, true)[1]
 end
-local CONFIG = ""
 local WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
+-- Determine OS
+local CONFIG = ""
 if vim.fn.has "mac" == 1 then
   CONFIG = "mac"
 elseif vim.fn.has "unix" == 1 then
   CONFIG = "linux"
 else
-  print "Unsupported system"
+  vim.notify("Unsupported system", vim.log.levels.ERROR)
 end
 
 -- Find root of project
@@ -47,27 +47,37 @@ if root_dir == "" then
 end
 
 local project_name = vim.fs.basename(root_dir)
+-- alternative from abzcoding: local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
-local non_workspace_markers = { vim.fs.basename(home), "workspace" }
-local workspace_dir = ""
-
--- if not (has_value(non_workspace_markers, vim.fs.basename(vim.fn.fnamemodify(root_dir, ":h")))) then
---   workspace_dir = vim.fn.fnamemodify(root_dir, ":h")
--- else
-workspace_dir = WORKSPACE_PATH .. project_name
+local workspace_dir = WORKSPACE_PATH .. project_name
 os.execute("mkdir -p " .. workspace_dir)
--- end
 
-local bundles = vim.split(
-  vim.fn.glob(MASON_BASEPATH .. "/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"),
-  "\n"
-)
-
-local extra_bundles = vim.split(vim.fn.glob(MASON_BASEPATH .. "/java-test/extension/server/*.jar"), "\n")
+-- Test bundle
+-- Run :MasonInstall java-test
+local bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
+if #bundles == 0 then
+  bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
+end
+-- Debug bundle
+-- Run :MasonInstall java-debug-adapter
+local extra_bundles = {
+  vim.fn.glob(
+    MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
+    true
+  ),
+}
+if #extra_bundles == 0 then
+  extra_bundles = {
+    vim.fn.glob(
+      MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
+      true
+    ),
+  }
+end
 vim.list_extend(bundles, extra_bundles)
 
-local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
--- local javaHome = home .. "/.local/lib/jvm-17"
+-- local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
+local javaHome = home .. "/.local/lib/jvm-17"
 -- local javaHome = "/home/stefan/.sdkman/candidates/java/17.0.4-tem"
 
 local config = {
@@ -78,156 +88,161 @@ local config = {
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
+    "-javaagent:" .. MASON_BASEPATH .. "/packages/jdtls/lombok.jar",
     "-Xms1g",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
     "java.base/java.util=ALL-UNNAMED",
     "--add-opens",
     "java.base/java.lang=ALL-UNNAMED",
-    "-javaagent:" .. MASON_BASEPATH .. "/jdtls/lombok.jar",
     "-jar",
     launcher_path,
     "-configuration",
-    MASON_BASEPATH .. "/jdtls/config_" .. CONFIG,
+    MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
     "-data",
     workspace_dir,
   },
   on_attach = function(client, bufnr)
-    vim.lsp.codelens.refresh()
-    jdtls.setup_dap { hotcodereplace = "auto" }
-    require("jdtls.setup").add_commands()
-    require("lvim.lsp").common_on_attach(client, bufnr)
+    local _, _ = pcall(vim.lsp.codelens.refresh)
+    if lvim.builtin.dap.active then
+      -- abzcoding: require("jdtls.dap").setup_dap_main_class_configs()
+      require("jdtls").setup_dap { hotcodereplace = "auto" }
+      require("jdtls.setup").add_commands()
+      require("lvim.lsp").on_attach(client, bufnr)
+    end
   end,
+  on_init = require("lvim.lsp").common_on_init,
+  on_exit = require("lvim.lsp").common_on_exit,
   root_dir = root_dir,
   -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
-  -- settings = {
-  --   java = {
-  --     jdt = {
-  --       ls = {
-  --         lombokSupport = { enabled = false },
-  --       },
-  --     },
-  --     eclipse = {
-  --       downloadSources = true,
-  --     },
-  --     templates = {
-  --       fileHeader = {
-  --         "/**",
-  --         " * ${type_name}",
-  --         " * @author ${user}",
-  --         " */",
-  --       },
-  --       typeComment = {
-  --         "/**",
-  --         " * ${type_name}",
-  --         " * @author ${user}",
-  --         " */",
-  --       },
-  --     },
-  --     configuration = {
-  --       updateBuildConfiguration = "interactive",
-  --       runtimes = {
-  --         {
-  --           name = "JavaSE-1.8",
-  --           path = "/home/stefan/.local/lib/jvm-8/",
-  --         },
-  --         {
-  --           name = "JavaSE-11",
-  --           path = "/home/stefan/.local/lib/jvm-11/",
-  --         },
-  --         {
-  --           name = "JavaSE-17",
-  --           path = "/home/stefan/.local/lib/jvm-17/",
-  --           default = true,
-  --         },
-  --       },
-  --     },
-  --     rename = {
-  --       enabled = true,
-  --     },
-  --     import = {
-  --       enabled = true,
-  --     },
-  --     maven = {
-  --       downloadSources = true,
-  --     },
-  --     implementationsCodeLens = {
-  --       enabled = true,
-  --     },
-  --     referencesCodeLens = {
-  --       enabled = true,
-  --     },
-  --     references = {
-  --       includeDecompiledSources = true,
-  --     },
-  --     inlayHints = {
-  --       parameterNames = {
-  --         enabled = true,
-  --       },
-  --     },
-  --     format = {
-  --       enabled = true,
-  --       settings = {
-  --         profile = "GoogleStyle",
-  --         url = home .. "/.config/lvim/.java-google-formatter.xml",
-  --       },
-  --     },
-  --     signatureHelp = { enabled = true },
-  --     completion = {
-  --       favoriteStaticMembers = {
-  --         "java.util.Objects.requireNonNull",
-  --         "java.util.Objects.requireNonNullElse",
-  --         "org.mockito.Mockito.*",
-  --         "org.junit.jupiter.api.DynamicTest.*",
-  --         "org.junit.jupiter.api.Assertions.*",
-  --         "org.junit.jupiter.api.Assumptions.*",
-  --         "org.junit.jupiter.api.DynamicContainer.*",
-  --         "org.junit.Assert.*",
-  --         "org.junit.Assume.*",
-  --         "org.mockito.ArgumentMatchers.*",
-  --         "org.mockito.Mockito.*",
-  --         "org.mockito.Answers.*",
-  --       },
-  --       filteredTypes = {
-  --         "com.sun.*",
-  --         "io.micrometer.shaded.*",
-  --         "java.awt.*",
-  --         "jdk.*",
-  --         "sun.*",
-  --       },
-  --     },
-  --     contentProvider = { preferred = "fernflower" },
-  --     sources = {
-  --       organizeImports = {
-  --         starThreshold = 9999,
-  --         staticStarThreshold = 9999,
-  --       },
-  --     },
-  --     codeGeneration = {
-  --       toString = {
-  --         listArrayContents = true,
-  --         skipNullValues = true,
-  --         template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-  --       },
-  --       hashCodeEquals = {
-  --         useInstanceof = true,
-  --         useJava7Objects = true,
-  --       },
-  --       useBlocks = true,
-  --       generateComments = true,
-  --       insertLocation = true,
-  --     },
-  --     saveActions = {
-  --       organizeImports = false,
-  --     },
-  --     autobuild = {
-  --       enabled = true,
-  --     },
-  --     progressReports = {
-  --       enabled = false,
-  --     },
-  --   },
-  -- },
+  settings = {
+    java = {
+      jdt = {
+        ls = {
+          lombokSupport = { enabled = true },
+        },
+      },
+      eclipse = {
+        downloadSources = true,
+      },
+      templates = {
+        fileHeader = {
+          "/**",
+          " * ${type_name}",
+          " * @author ${user}",
+          " */",
+        },
+        typeComment = {
+          "/**",
+          " * ${type_name}",
+          " * @author ${user}",
+          " */",
+        },
+      },
+      configuration = {
+        updateBuildConfiguration = "interactive",
+        runtimes = {
+          {
+            name = "JavaSE-1.8",
+            path = "/home/stefan/.local/lib/jvm-8/",
+          },
+          {
+            name = "JavaSE-11",
+            path = "/home/stefan/.local/lib/jvm-11/",
+          },
+          {
+            name = "JavaSE-17",
+            path = "/home/stefan/.local/lib/jvm-17/",
+            default = true,
+          },
+        },
+      },
+      rename = {
+        enabled = true,
+      },
+      import = {
+        enabled = true,
+      },
+      maven = {
+        downloadSources = true,
+      },
+      implementationsCodeLens = {
+        enabled = true,
+      },
+      referencesCodeLens = {
+        enabled = true,
+      },
+      references = {
+        includeDecompiledSources = true,
+      },
+      inlayHints = {
+        parameterNames = {
+          enabled = true,
+        },
+      },
+      format = {
+        enabled = true,
+        settings = {
+          profile = "GoogleStyle",
+          url = home .. "/.config/lvim/.java-google-formatter.xml",
+        },
+      },
+      signatureHelp = { enabled = true },
+      completion = {
+        favoriteStaticMembers = {
+          "java.util.Objects.requireNonNull",
+          "java.util.Objects.requireNonNullElse",
+          "org.mockito.Mockito.*",
+          "org.junit.jupiter.api.DynamicTest.*",
+          "org.junit.jupiter.api.Assertions.*",
+          "org.junit.jupiter.api.Assumptions.*",
+          "org.junit.jupiter.api.DynamicContainer.*",
+          "org.junit.Assert.*",
+          "org.junit.Assume.*",
+          "org.mockito.ArgumentMatchers.*",
+          "org.mockito.Mockito.*",
+          "org.mockito.Answers.*",
+        },
+        filteredTypes = {
+          "com.sun.*",
+          "io.micrometer.shaded.*",
+          "java.awt.*",
+          "jdk.*",
+          "sun.*",
+        },
+      },
+      contentProvider = { preferred = "fernflower" },
+      sources = {
+        organizeImports = {
+          starThreshold = 9999,
+          staticStarThreshold = 9999,
+        },
+      },
+      codeGeneration = {
+        toString = {
+          listArrayContents = true,
+          skipNullValues = true,
+          template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+        },
+        hashCodeEquals = {
+          useInstanceof = true,
+          useJava7Objects = true,
+        },
+        useBlocks = true,
+        generateComments = true,
+        insertLocation = true,
+      },
+      saveActions = {
+        organizeImports = false,
+      },
+      autobuild = {
+        enabled = true,
+      },
+      progressReports = {
+        enabled = false,
+      },
+    },
+  },
   flags = {
     allow_incremental_sync = true,
     server_side_fuzzy_completion = true,
