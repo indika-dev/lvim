@@ -783,6 +783,9 @@ lvim.plugins = {
           height_ratio = 0.7,
         }
       end
+    end,
+  },
+  {
     "fladson/vim-kitty",
   },
   {
@@ -880,19 +883,6 @@ if vim.g.fvim_loaded then
   -- nnoremap <silent> <C-ScrollWheelUp> :set guifont=+<CR>
   -- nnoremap <silent> <C-ScrollWheelDown> :set guifont=-<CR>
   -- nnoremap <A-CR> :FVimToggleFullScreen<CR>
-end
-
-if vim.fn.has "wsl" == 1 then
-  vim.g.clipboard = {
-    copy = {
-      ["+"] = "win32yank.exe -i --crlf",
-      ["*"] = "win32yank.exe -i --crlf",
-    },
-    paste = {
-      ["+"] = "win32yank.exe -o --lf",
-      ["*"] = "win32yank.exe -o --lf",
-    },
-  }
 end
 
 require("user.autocommands").config()
