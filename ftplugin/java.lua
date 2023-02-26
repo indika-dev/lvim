@@ -37,6 +37,7 @@ elseif vim.fn.has "unix" == 1 then
   CONFIG = "linux"
 else
   vim.notify("Unsupported system", vim.log.levels.ERROR)
+  return
 end
 
 -- Find root of project
@@ -86,15 +87,19 @@ local config = {
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    "-Dosgi.checkConfiguration=true",
+    "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
+    "-Dosgi.sharedConfiguration.area.readOnly=true",
+    "-Dosgi.configuration.cascaded=true",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
-    "-javaagent:" .. MASON_BASEPATH .. "/packages/jdtls/lombok.jar",
-    "-Xms1g",
+    "-Xms1G",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
     "java.base/java.util=ALL-UNNAMED",
     "--add-opens",
     "java.base/java.lang=ALL-UNNAMED",
+    "-javaagent:" .. MASON_BASEPATH .. "/packages/jdtls/lombok.jar",
     "-jar",
     launcher_path,
     "-configuration",
@@ -287,7 +292,7 @@ if wkstatus_ok then
   local opts = {
     mode = "n",
     prefix = "<leader>",
-    buffer = nil,
+    buffer = vim.fn.bufnr(),
     silent = true,
     noremap = true,
     nowait = true,
@@ -296,7 +301,7 @@ if wkstatus_ok then
   local vopts = {
     mode = "v",
     prefix = "<leader>",
-    buffer = nil,
+    buffer = vim.fn.bufnr(),
     silent = true,
     noremap = true,
     nowait = true,
@@ -314,6 +319,7 @@ if wkstatus_ok then
       i = { "<Cmd>JdtCompile incremental<CR>", "Compile incrementaly" },
       f = { "<Cmd>JdtCompile full<CR>", "Compile fully" },
       s = { "<Cmd>lua require'jdtls'.super_implementation()<CR>", "Go to super implementation" },
+      r = { "<Cmd>JdtSetRuntime<CR>", "Set runtime" },
     },
   }
 

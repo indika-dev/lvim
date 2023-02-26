@@ -12,5 +12,8 @@
   "rust-analyzer.lens.methodReferences": true,
   "rust-analyzer.cargo.autoreload": true,
   "rust-analyzer.hoverActions.enable": true,
+  "rust-analyzer.checkOnSave.allTargets": true,
+  "rust-analyzer.cargo.buildScripts.enable": true,
+  "rust-analyzer.hoverActions.references": true,
   "rust-analyzer.updates.channel": "system"
 }

@@ -122,33 +122,33 @@ end
 
 -- generic LSP settings
 lvim.lsp.diagnostics.virtual_text = true
-lvim.lsp.installer.setup.automatic_installation = false
-lvim.lsp.automatic_servers_installation = true
-lvim.lsp.null_ls.setup = {
-  highlight = {
-    enabled = true,
-  },
-  ignore_install = { "haskell" },
-  automatic_installation = true,
-  ensure_installed = {
-    "jdtls",
-    "tsserver",
-    "jsonls",
-    "sumneko_lua",
-    "bashls",
-    "cssls",
-    "dockerls",
-    "eslint",
-    "html",
-    "zk",
-    "pyright",
-    "taplo",
-    "vimls",
-    "vuels",
-    "yamlls",
-    "marksman",
-  },
+lvim.lsp.document_highlight = true
+lvim.lsp.code_lens_refresh = true
+lvim.lsp.installer.setup.automatic_installation = true
+lvim.lsp.installer.setup.ensure_installed = {
+  "jdtls",
+  "tsserver",
+  "jsonls",
+  "sumneko_lua",
+  "bashls",
+  "cssls",
+  "dockerls",
+  "eslint",
+  "html",
+  "zk",
+  "pyright",
+  "taplo",
+  "vimls",
+  "vuels",
+  "yamlls",
+  "marksman",
+  "lemminx",
 }
+
+-- Installer
+vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, {
+  "jdtls",
+})
 
 local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup {
@@ -226,12 +226,6 @@ lvim.custom = {
   },
 }
 
--- Debugging
--- =========================================
-if lvim.builtin.dap.active then
-  require("user.dap").config()
-end
-
 local code_actions = require "lvim.lsp.null-ls.code_actions"
 code_actions.setup {
   {
@@ -239,6 +233,12 @@ code_actions.setup {
     filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact", "vue" },
   },
 }
+
+-- Debugging
+-- =========================================
+if lvim.builtin.dap.active then
+  require("user.dap").config()
+end
 
 -- Additional Plugins
 lvim.plugins = {
@@ -282,33 +282,6 @@ lvim.plugins = {
       local _time = os.date "*t"
       return ((_time.hour >= 18 and _time.hour < 24) or (_time.hour >= 0 and _time.hour < 6))
     end,
-  },
-  {
-    "projekt0n/github-nvim-theme",
-    tag = "*",
-    config = function()
-      local ok, githubTheme = pcall(require, "github-theme")
-      if ok then
-        githubTheme.setup {
-          theme_style = "dark",
-          sidebars = { "qf", "vista_kind", "terminal", "packer" },
-
-          -- Change the "hint" color to the "orange" color, and make the "error" color bright red
-          colors = { hint = "orange", error = "#ff0000" },
-
-          -- Overwrite the highlight groups
-          overrides = function(c)
-            return {
-              htmlTag = { fg = c.red, bg = "#282c34", sp = c.hint, style = "underline" },
-              DiagnosticHint = { link = "LspDiagnosticsDefaultHint" },
-              -- this will remove the highlight groups
-              TSField = {},
-            }
-          end,
-        }
-      end
-    end,
-    disable = true,
   },
   {
     "nvim-telescope/telescope-dap.nvim",
@@ -534,11 +507,7 @@ lvim.plugins = {
   },
   {
     "mfussenegger/nvim-jdtls",
-    ft = "java",
     tag = "*",
-    -- setup = function()
-    --   require("lspconfig").jdtls.setup = function() end
-    -- end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -602,18 +571,18 @@ lvim.plugins = {
   -- {
   --   "~/workspace/luvcron/",
   -- },
-  {
-    "jay-babu/mason-null-ls.nvim",
-    after = "mason.nvim",
-    config = function()
-      require("mason-null-ls").setup {
-        automatic_installation = false,
-        automatic_setup = false,
-        ensure_installed = nil,
-      }
-    end,
-    disable = true,
-  },
+  -- {
+  --   "jay-babu/mason-null-ls.nvim",
+  --   after = "mason.nvim",
+  --   config = function()
+  --     require("mason-null-ls").setup {
+  --       automatic_installation = false,
+  --       automatic_setup = false,
+  --       ensure_installed = nil,
+  --     }
+  --   end,
+  --   disable = true,
+  -- },
   {
     "jay-babu/mason-nvim-dap.nvim",
     after = { "mason.nvim" },
@@ -770,6 +739,7 @@ lvim.plugins = {
   },
   {
     "ellisonleao/glow.nvim",
+    ft = { "markdown" },
     config = function()
       local status_ok, glow = pcall(require, "glow")
       if status_ok then
