@@ -12,15 +12,6 @@ if not status_ok then
   return
 end
 
-local function has_value(table, value)
-  for _, val in ipairs(table) do
-    if value == val then
-      return true
-    end
-  end
-  return false
-end
-
 local home = vim.env.HOME
 local MASON_BASEPATH = vim.fn.glob(vim.fn.stdpath "data" .. "/mason")
 local launcher_path = vim.fn.glob(MASON_BASEPATH .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
@@ -80,6 +71,11 @@ vim.list_extend(bundles, extra_bundles)
 -- local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
 local javaHome = home .. "/.local/lib/jvm-17"
 -- local javaHome = "/home/stefan/.sdkman/candidates/java/17.0.4-tem"
+-- "-Dosgi.checkConfiguration=true",
+-- "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
+-- "-Dosgi.sharedConfiguration.area.readOnly=true",
+-- "-Dosgi.configuration.cascaded=true",
+-- .. home .. "/.local/lib/lombok-1.18.26.jar"
 
 local config = {
   cmd = {
@@ -94,12 +90,13 @@ local config = {
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
     "-Xms1G",
+    "-Xmx2G",
+    "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
     "java.base/java.util=ALL-UNNAMED",
     "--add-opens",
     "java.base/java.lang=ALL-UNNAMED",
-    "-javaagent:" .. MASON_BASEPATH .. "/packages/jdtls/lombok.jar",
     "-jar",
     launcher_path,
     "-configuration",
@@ -110,21 +107,20 @@ local config = {
   on_attach = function(client, bufnr)
     local _, _ = pcall(vim.lsp.codelens.refresh)
     if lvim.builtin.dap.active then
-      -- abzcoding: require("jdtls.dap").setup_dap_main_class_configs()
       require("jdtls").setup_dap { hotcodereplace = "auto" }
       require("jdtls.setup").add_commands()
       require("lvim.lsp").on_attach(client, bufnr)
     end
   end,
-  on_init = require("lvim.lsp").common_on_init,
-  on_exit = require("lvim.lsp").common_on_exit,
   root_dir = root_dir,
   -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
   settings = {
     java = {
       jdt = {
         ls = {
-          lombokSupport = { enabled = true },
+          lombokSupport = { enabled = false },
+          protobufSupport = { enabled = true },
+          vmargs = "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
         },
       },
       eclipse = {
@@ -148,16 +144,8 @@ local config = {
         updateBuildConfiguration = "interactive",
         runtimes = {
           {
-            name = "JavaSE-1.8",
-            path = "/home/stefan/.local/lib/jvm-8/",
-          },
-          {
-            name = "JavaSE-11",
-            path = "/home/stefan/.local/lib/jvm-11/",
-          },
-          {
             name = "JavaSE-17",
-            path = "/home/stefan/.local/lib/jvm-17/",
+            path = home .. "/.local/lib/jvm-17/",
             default = true,
           },
         },

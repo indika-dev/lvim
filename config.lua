@@ -125,6 +125,7 @@ lvim.lsp.diagnostics.virtual_text = true
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
 lvim.lsp.installer.setup.automatic_installation = true
+vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
 lvim.lsp.installer.setup.ensure_installed = {
   "jdtls",
   "tsserver",
@@ -146,9 +147,6 @@ lvim.lsp.installer.setup.ensure_installed = {
 }
 
 -- Installer
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, {
-  "jdtls",
-})
 
 local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup {
@@ -508,6 +506,9 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     tag = "*",
+    setup = function()
+      require("lspconfig").jdtls.setup = function() end
+    end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -593,7 +594,7 @@ lvim.plugins = {
           "java-test",
         },
         automatic_installation = true,
-        automatic_setup = false,
+        automatic_setup = true,
       }
     end,
   },
@@ -777,6 +778,7 @@ lvim.plugins = {
   },
   {
     "jackMort/ChatGPT.nvim",
+    tag = "*",
     config = function()
       require("chatgpt").setup {
         -- optional configuration
