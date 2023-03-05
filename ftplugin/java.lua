@@ -89,8 +89,13 @@ local config = {
     "-Dosgi.configuration.cascaded=true",
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
-    "-Xms1G",
-    "-Xmx2G",
+    "-XX:+UseParallelGC",
+    "-XX:GCTimeRatio=4",
+    "-XX:AdaptiveSizePolicyWeight=90",
+    "-Dsun.zip.disableMemoryMapping=true",
+    "-Xmx1G",
+    "-Xms100m",
+    "-Xlog:disable",
     "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
@@ -99,8 +104,6 @@ local config = {
     "java.base/java.lang=ALL-UNNAMED",
     "-jar",
     launcher_path,
-    "-configuration",
-    MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
     "-data",
     workspace_dir,
   },
@@ -120,7 +123,6 @@ local config = {
         ls = {
           lombokSupport = { enabled = false },
           protobufSupport = { enabled = true },
-          vmargs = "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
         },
       },
       eclipse = {
@@ -149,6 +151,9 @@ local config = {
             default = true,
           },
         },
+      },
+      quickfix = {
+        showAt = "line",
       },
       rename = {
         enabled = true,
@@ -242,11 +247,20 @@ local config = {
   },
   init_options = {
     bundles = bundles,
-    extendedClientCapabilities = vim.tbl_deep_extend(
-      "keep",
-      { progressReportProvider = false, resolveAdditionalTextEditsSupport = true, classFileContentsSupport = false },
-      jdtls.extendedClientCapabilities
-    ),
+    extendedClientCapabilities = vim.tbl_deep_extend("keep", {
+      progressReportProvider = false,
+      resolveAdditionalTextEditsSupport = true,
+      classFileContentsSupport = false,
+      overrideMethodsPromptSupport = true,
+      advancedGenerateAccessorsSupport = true,
+      clientHoverProvider = true,
+      clientDocumentSymbolProvider = true,
+      gradleChecksumWrapperPromptSupport = true,
+      advancedIntroduceParameterRefactoringSupport = true,
+      actionableRuntimeNotificationSupport = true,
+      -- onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
+      extractInterfaceSupport = true,
+    }, jdtls.extendedClientCapabilities),
   },
   handlers = {
     ["language/status"] = vim.schedule_wrap(function(_, s)
