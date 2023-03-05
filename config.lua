@@ -268,12 +268,12 @@ lvim.plugins = {
     "rebelot/kanagawa.nvim",
     config = function()
       require("kanagawa").setup {
-        overrides = {
-          LspReferenceText = { fg = "NONE", bg = "NONE" },
-          -- LspReferenceRead = { bg = "#49443c" },
-          -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
-        },
+        -- overrides = {
+        --   LspReferenceText = { fg = "NONE", bg = "NONE" },
+        -- LspReferenceRead = { bg = "#49443c" },
+        -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
+        --   LspReferenceWrite = { link = "LspReferenceRead" },
+        -- },
       }
     end,
     cond = function()
