@@ -268,12 +268,14 @@ lvim.plugins = {
     "rebelot/kanagawa.nvim",
     config = function()
       require("kanagawa").setup {
-        -- overrides = {
-        --   LspReferenceText = { fg = "NONE", bg = "NONE" },
-        -- LspReferenceRead = { bg = "#49443c" },
-        -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
-        --   LspReferenceWrite = { link = "LspReferenceRead" },
-        -- },
+        overrides = function(colors)
+          return {
+            LspReferenceText = { fg = "NONE", bg = "NONE" },
+            -- LspReferenceRead = { bg = "#49443c" },
+            -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
+            LspReferenceWrite = { link = "LspReferenceRead" },
+          }
+        end,
       }
     end,
     cond = function()
@@ -789,6 +791,22 @@ lvim.plugins = {
       "nvim-lua/plenary.nvim",
       "nvim-telescope/telescope.nvim",
     },
+  },
+  {
+    "dense-analysis/neural",
+    requires = {
+      "muniftanjim/nui.nvim",
+      "elpiloto/significant.nvim",
+    },
+    config = function()
+      require("neural").setup {
+        source = {
+          openai = {
+            api_key = vim.env.OPENAI_API_KEY,
+          },
+        },
+      }
+    end,
   },
 }
 
