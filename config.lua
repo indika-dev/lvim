@@ -808,6 +808,15 @@ lvim.plugins = {
       }
     end,
   },
+  {
+    "VonHeikemen/fine-cmdline.nvim",
+    requires = {
+      { "MunifTanjim/nui.nvim" },
+    },
+    config = function()
+      vim.api.nvim_set_keymap("n", ":", "<cmd>FineCmdline<CR>", { noremap = true })
+    end,
+  },
 }
 
 if vim.g.neovide then
