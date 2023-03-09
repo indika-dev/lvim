@@ -686,34 +686,34 @@ lvim.plugins = {
       require("lsp_signature").on_attach()
     end,
   },
-  {
-    "rcarriga/nvim-notify",
-    tag = "*",
-    config = function()
-      local ok, notify = pcall(require, "nvim-notify")
-      if ok then
-        notify.setup {
-          stages = "fade_in_slide_out",
-          timeout = 3000,
-          background_colour = "NormalFloat",
-          render = function(...)
-            local notif = select(2, ...)
-            local style = notif.title[1] == "" and "minimal" or "default"
-            require("notify.render")[style](...)
-          end,
-          min_width = function()
-            return math.floor(vim.o.columns * 0.4)
-          end,
-          max_width = function()
-            return math.floor(vim.o.columns * 0.4)
-          end,
-          max_height = function()
-            return math.floor(vim.o.lines * 0.8)
-          end,
-        }
-      end
-    end,
-  },
+  -- {
+  --   "rcarriga/nvim-notify",
+  --   tag = "*",
+  --   config = function()
+  --     local ok, notify = pcall(require, "nvim-notify")
+  --     if ok then
+  --       notify.setup {
+  --         stages = "fade_in_slide_out",
+  --         timeout = 3000,
+  --         background_colour = "NormalFloat",
+  --         render = function(...)
+  --           local notif = select(2, ...)
+  --           local style = notif.title[1] == "" and "minimal" or "default"
+  --           require("notify.render")[style](...)
+  --         end,
+  --         min_width = function()
+  --           return math.floor(vim.o.columns * 0.4)
+  --         end,
+  --         max_width = function()
+  --           return math.floor(vim.o.columns * 0.4)
+  --         end,
+  --         max_height = function()
+  --           return math.floor(vim.o.lines * 0.8)
+  --         end,
+  --       }
+  --     end
+  --   end,
+  -- },
   {
     "gennaro-tedesco/nvim-peekup",
     tag = "*",
@@ -816,6 +816,52 @@ lvim.plugins = {
     config = function()
       vim.api.nvim_set_keymap("n", ":", "<cmd>FineCmdline<CR>", { noremap = true })
     end,
+    disable = true,
+  },
+  {
+    "folke/noice.nvim",
+    config = function()
+      require("noice").setup {
+        lsp = {
+          -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+          override = {
+            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+            ["vim.lsp.util.stylize_markdown"] = true,
+            ["cmp.entry.get_documentation"] = true,
+          },
+          signature = {
+            enabled = false,
+          },
+          progress = {
+            enabled = false,
+            -- Lsp Progress is formatted using the builtins for lsp_progress. See config.format.builtin
+            -- See the section on formatting for more details on how to customize.
+            --- @type NoiceFormat|string
+            format = "lsp_progress",
+            --- @type NoiceFormat|string
+            format_done = "lsp_progress_done",
+            throttle = 1000 / 30, -- frequency to update lsp progress message
+            view = "mini",
+          },
+        },
+        -- you can enable a preset for easier configuration
+        presets = {
+          bottom_search = true, -- use a classic bottom cmdline for search
+          command_palette = true, -- position the cmdline and popupmenu together
+          long_message_to_split = true, -- long messages will be sent to a split
+          inc_rename = false, -- enables an input dialog for inc-rename.nvim
+          lsp_doc_border = false, -- add a border to hover docs and signature help
+        },
+      }
+    end,
+    requires = {
+      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      "MunifTanjim/nui.nvim",
+      -- OPTIONAL:
+      --   `nvim-notify` is only needed, if you want to use the notification view.
+      --   If not available, we use `mini` as the fallback
+      "rcarriga/nvim-notify",
+    },
   },
 }
 
