@@ -136,7 +136,6 @@ lvim.lsp.installer.setup.ensure_installed = {
   "dockerls",
   "eslint",
   "html",
-  "zk",
   "pyright",
   "taplo",
   "vimls",
