@@ -42,6 +42,7 @@ local project_name = vim.fs.basename(root_dir)
 -- alternative from abzcoding: local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
 local workspace_dir = WORKSPACE_PATH .. project_name
+os.execute("rm -rf " .. workspace_dir)
 os.execute("mkdir -p " .. workspace_dir)
 
 -- Test bundle

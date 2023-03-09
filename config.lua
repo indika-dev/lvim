@@ -685,6 +685,7 @@ lvim.plugins = {
     config = function()
       require("lsp_signature").on_attach()
     end,
+    disable = true,
   },
   -- {
   --   "rcarriga/nvim-notify",
@@ -829,9 +830,9 @@ lvim.plugins = {
             ["vim.lsp.util.stylize_markdown"] = true,
             ["cmp.entry.get_documentation"] = true,
           },
-          signature = {
-            enabled = false,
-          },
+          -- signature = {
+          --   enabled = false,
+          -- },
           progress = {
             enabled = false,
             -- Lsp Progress is formatted using the builtins for lsp_progress. See config.format.builtin
