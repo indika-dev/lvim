@@ -73,12 +73,13 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
   "%.jar",
 }
 
--- local _time = os.date "*t"
--- if _time.hour >= 6 and _time.hour < 20 then
---   lvim.colorscheme = "tokyonight-storm"
--- else
---   lvim.colorscheme = "kanagawa"
--- end
+local _time = os.date "*t"
+if _time.hour >= 6 and _time.hour < 20 then
+  -- lvim.colorscheme = "tokyonight-moon"
+  lvim.colorscheme = "kanagawa"
+else
+  lvim.colorscheme = "kanagawa-dragon"
+end
 
 lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
@@ -124,25 +125,48 @@ end
 lvim.lsp.diagnostics.virtual_text = true
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
-lvim.lsp.installer.setup.automatic_installation = true
+-- lvim.lsp.installer.setup.automatic_installation = true
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
-lvim.lsp.installer.setup.ensure_installed = {
-  "jdtls",
-  "tsserver",
-  "jsonls",
-  "sumneko_lua",
-  "bashls",
-  "cssls",
-  "dockerls",
-  "eslint",
-  "html",
-  "pyright",
-  "taplo",
-  "vimls",
-  "vuels",
-  "yamlls",
-  "marksman",
-  "lemminx",
+require("mason-lspconfig").setup {
+  automatic_installation = true,
+  automatic_setup = true,
+  auto_enable = true,
+  ensure_installed = {
+    "rust_analyzer",
+    "jdtls",
+    "tsserver",
+    "jsonls",
+    "sumneko_lua",
+    "bashls",
+    "cssls",
+    "dockerls",
+    "eslint",
+    "html",
+    "pyright",
+    "taplo",
+    "vimls",
+    "vuels",
+    "yamlls",
+    "marksman",
+    "lemminx",
+  },
+}
+require("mason-lspconfig").setup_handlers {
+  -- The first entry (without a key) will be the default handler
+  -- and will be called for each installed server that doesn't have
+  -- a dedicated handler.
+  function(server_name) -- default handler (optional)
+    if "marksman" == server_name then
+      require("lspconfig")[server_name].setup {}
+    elseif "jdtls" == server_name then
+      require("lspconfig")[server_name].setup = function() end
+    end
+  end,
+  -- Next, you can provide a dedicated handler for specific servers.
+  -- For example, a handler override for the `rust_analyzer`:
+  ["rust_analyzer"] = function()
+    require("rust-tools").setup {}
+  end,
 }
 
 -- Installer
@@ -203,10 +227,10 @@ linters.setup {
     command = "eslint_d",
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
   },
-  {
-    command = "markdownlint",
-    filetypes = { "markdown" },
-  },
+  -- {
+  --   command = "markdownlint",
+  --   filetypes = { "markdown" },
+  -- },
 }
 
 lvim.custom = {
@@ -252,17 +276,17 @@ lvim.plugins = {
       end
     end,
   },
-  {
-    "folke/tokyonight.nvim",
-    tag = "*",
-    config = function()
-      vim.cmd [[colorscheme tokyonight-storm]]
-    end,
-    cond = function()
-      local _time = os.date "*t"
-      return (_time.hour >= 6 and _time.hour < 18)
-    end,
-  },
+  -- {
+  --   "folke/tokyonight.nvim",
+  --   tag = "*",
+  --   config = function()
+  --     vim.cmd [[colorscheme tokyonight-moon]]
+  --   end,
+  --   cond = function()
+  --     local _time = os.date "*t"
+  --     return (_time.hour >= 6 and _time.hour < 18)
+  --   end,
+  -- },
   {
     "rebelot/kanagawa.nvim",
     config = function()
@@ -277,10 +301,10 @@ lvim.plugins = {
         end,
       }
     end,
-    cond = function()
-      local _time = os.date "*t"
-      return ((_time.hour >= 18 and _time.hour < 24) or (_time.hour >= 0 and _time.hour < 6))
-    end,
+    -- cond = function()
+    --   local _time = os.date "*t"
+    --   return ((_time.hour >= 18 and _time.hour < 24) or (_time.hour >= 0 and _time.hour < 6))
+    -- end,
   },
   {
     "nvim-telescope/telescope-dap.nvim",
@@ -507,9 +531,9 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     tag = "*",
-    setup = function()
-      require("lspconfig").jdtls.setup = function() end
-    end,
+    -- setup = function()
+    --   require("lspconfig").jdtls.setup = function() end
+    -- end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -575,15 +599,15 @@ lvim.plugins = {
   -- },
   -- {
   --   "jay-babu/mason-null-ls.nvim",
-  --   after = "mason.nvim",
+  --   after = { "mason.nvim", "null-ls.nvim" },
   --   config = function()
   --     require("mason-null-ls").setup {
   --       automatic_installation = false,
-  --       automatic_setup = false,
-  --       ensure_installed = nil,
+  --       automatic_setup = true,
+  --       ensure_installed = {},
   --     }
+  --     require("mason-null-ls").setup_handlers()
   --   end,
-  --   disable = true,
   -- },
   {
     "jay-babu/mason-nvim-dap.nvim",
@@ -758,6 +782,31 @@ lvim.plugins = {
     end,
   },
   {
+    "mickael-menu/zk-nvim",
+    config = function()
+      require("zk").setup {
+        -- can be "telescope", "fzf" or "select" (`vim.ui.select`)
+        -- it's recommended to use "telescope" or "fzf"
+        picker = "select",
+
+        lsp = {
+          -- `config` is passed to `vim.lsp.start_client(config)`
+          config = {
+            cmd = { "zk", "lsp" },
+            name = "zk",
+            -- on_attach = ...
+            -- etc, see `:h vim.lsp.start_client()`
+          },
+          -- automatically attach buffers in a zk notebook that match the given filetypes
+          auto_attach = {
+            enabled = true,
+            filetypes = { "markdown" },
+          },
+        },
+      }
+    end,
+  },
+  {
     "fladson/vim-kitty",
   },
   {
@@ -805,15 +854,6 @@ lvim.plugins = {
           },
         },
       }
-    end,
-  },
-  {
-    "VonHeikemen/fine-cmdline.nvim",
-    requires = {
-      { "MunifTanjim/nui.nvim" },
-    },
-    config = function()
-      vim.api.nvim_set_keymap("n", ":", "<cmd>FineCmdline<CR>", { noremap = true })
     end,
   },
 }

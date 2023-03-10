@@ -129,6 +129,7 @@ augroup END
     callback = function()
       vim.opt_local.wrap = true
       vim.opt_local.spell = true
+      vim.cmd "set spelllang=de_20,en_us"
     end,
   })
 

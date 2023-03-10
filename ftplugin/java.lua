@@ -11,6 +11,56 @@ local status_ok, jdtls = pcall(require, "jdtls")
 if not status_ok then
   return
 end
+local handlers = require "vim.lsp.handlers"
+
+-- TextDocument version is reported as 0, override with nil so that
+-- the client doesn't think the document is newer and refuses to update
+-- See: https://github.com/eclipse/eclipse.jdt.ls/issues/1695
+local function fix_zero_version(workspace_edit)
+  if workspace_edit and workspace_edit.documentChanges then
+    for _, change in pairs(workspace_edit.documentChanges) do
+      local text_document = change.textDocument
+      if text_document and text_document.version and text_document.version == 0 then
+        text_document.version = nil
+      end
+    end
+  end
+  return workspace_edit
+end
+handlers["language/status"] = vim.schedule_wrap(function(_, s)
+  local command = vim.api.nvim_command
+  command "echohl ModeMsg"
+  command(string.format('echo "%s"', s.message))
+  command "echohl None"
+  if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.initial_debug_search == false then
+    require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
+    lvim.custom.jdtls.initial_debug_search = true
+  end
+end)
+handlers["textDocument/codeAction"] = function(err, actions, ctx)
+  for _, action in ipairs(actions) do
+    -- TODO: (steelsojka) Handle more than one edit?
+    if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
+      action.edit = fix_zero_version(action.edit or action.arguments[1])
+    elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
+      action.edit = fix_zero_version(action.edit or action.command.arguments[1])
+    end
+  end
+
+  handlers[ctx.method](err, actions, ctx)
+end
+handlers["textDocument/rename"] = function(err, workspace_edit, ctx)
+  handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+end
+handlers["workspace/applyEdit"] = function(err, workspace_edit, ctx)
+  handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+end
+handlers["$/progress"] = vim.schedule_wrap(function(_, result)
+  local command = vim.api.nvim_command
+  command "echohl ModeMsg"
+  command(string.format('echo "%s"', result.message))
+  command "echohl None"
+end)
 
 local home = vim.env.HOME
 local MASON_BASEPATH = vim.fn.glob(vim.fn.stdpath "data" .. "/mason")
@@ -42,6 +92,7 @@ local project_name = vim.fs.basename(root_dir)
 -- alternative from abzcoding: local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
 local workspace_dir = WORKSPACE_PATH .. project_name
+os.execute("rm -rf " .. workspace_dir)
 os.execute("mkdir -p " .. workspace_dir)
 
 -- Test bundle
@@ -262,18 +313,7 @@ local config = {
       extractInterfaceSupport = true,
     }, jdtls.extendedClientCapabilities),
   },
-  handlers = {
-    ["language/status"] = vim.schedule_wrap(function(_, s)
-      local command = vim.api.nvim_command
-      command "echohl ModeMsg"
-      command(string.format('echo "%s"', s.message))
-      command "echohl None"
-      if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.initial_debug_search == false then
-        require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
-        lvim.custom.jdtls.initial_debug_search = true
-      end
-    end),
-  },
+  handlers = handlers,
   capabilities = {
     workspace = {
       configuration = true,
