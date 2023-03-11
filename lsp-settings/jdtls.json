@@ -1,5 +1,6 @@
 {
     "java.jdt.ls.lombokSupport.enabled": false,
+"java.jdt.ls.protobufSupport.enabled": false,
     "java.eclipse.downloadSources": true,
     "java.templates.fileHeader": "/**\n* ${type_name}\n* @author ${user}\n*/",
     "java.templates.typeComment": "/**\n* ${type_name}\n* @author ${user}\n*/",
@@ -56,8 +57,7 @@
     "java.configuration.runtimes": [
         {
             "name": "JavaSE-11",
-            "path": "/home/stefan/.local/lib/jvm-11/",
-            "default": true
+            "path": "/home/stefan/.local/lib/jvm-11/"
         },
         {
             "name": "JavaSE-17",
