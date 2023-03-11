@@ -1,6 +1,5 @@
 {
-  "java.jdt.ls.lombokSupport.enabled": false,
-  "java.jdt.ls.vmargs": "-javaagent:/home/stefan/.local/lib/lombok-1.18.26.jar -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m -Xlog:disable",
+    "java.jdt.ls.lombokSupport.enabled": false,
     "java.eclipse.downloadSources": true,
     "java.templates.fileHeader": "/**\n* ${type_name}\n* @author ${user}\n*/",
     "java.templates.typeComment": "/**\n* ${type_name}\n* @author ${user}\n*/",
@@ -55,6 +54,11 @@
         "io.micrometer.shaded.*"
     ],
     "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-11",
+            "path": "/home/stefan/.local/lib/jvm-11/",
+            "default": true
+        },
         {
             "name": "JavaSE-17",
             "path": "/home/stefan/.local/lib/jvm-17/",

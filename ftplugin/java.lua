@@ -91,83 +91,19 @@ end
 local project_name = vim.fs.basename(root_dir)
 -- alternative from abzcoding: local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
-local workspace_dir = WORKSPACE_PATH .. project_name
-os.execute("rm -rf " .. workspace_dir)
-os.execute("mkdir -p " .. workspace_dir)
-
--- Test bundle
--- Run :MasonInstall java-test
-local bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
-if #bundles == 0 then
-  bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
-end
--- Debug bundle
--- Run :MasonInstall java-debug-adapter
-local extra_bundles = {
-  vim.fn.glob(
-    MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
-    true
-  ),
-}
-if #extra_bundles == 0 then
-  extra_bundles = {
-    vim.fn.glob(
-      MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
-      true
-    ),
-  }
-end
-vim.list_extend(bundles, extra_bundles)
-
--- local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
-local javaHome = home .. "/.local/lib/jvm-17"
--- local javaHome = "/home/stefan/.sdkman/candidates/java/17.0.4-tem"
--- "-Dosgi.checkConfiguration=true",
--- "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
--- "-Dosgi.sharedConfiguration.area.readOnly=true",
--- "-Dosgi.configuration.cascaded=true",
--- .. home .. "/.local/lib/lombok-1.18.26.jar"
-
-local config = {
-  cmd = {
-    javaHome .. "/bin/java",
-    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-    "-Dosgi.bundles.defaultStartLevel=4",
-    "-Declipse.product=org.eclipse.jdt.ls.core.product",
-    "-Dosgi.checkConfiguration=true",
-    "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
-    "-Dosgi.sharedConfiguration.area.readOnly=true",
-    "-Dosgi.configuration.cascaded=true",
-    "-Dlog.protocol=true",
-    "-Dlog.level=ALL",
-    "-XX:+UseParallelGC",
-    "-XX:GCTimeRatio=4",
-    "-XX:AdaptiveSizePolicyWeight=90",
-    "-Dsun.zip.disableMemoryMapping=true",
-    "-Xmx1G",
-    "-Xms100m",
-    "-Xlog:disable",
-    "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
-    "--add-modules=ALL-SYSTEM",
-    "--add-opens",
-    "java.base/java.util=ALL-UNNAMED",
-    "--add-opens",
-    "java.base/java.lang=ALL-UNNAMED",
-    "-jar",
-    launcher_path,
-    "-data",
-    workspace_dir,
-  },
-  on_attach = function(client, bufnr)
-    local _, _ = pcall(vim.lsp.codelens.refresh)
-    if lvim.builtin.dap.active then
-      require("jdtls").setup_dap { hotcodereplace = "auto" }
-      require("jdtls.setup").add_commands()
-      require("lvim.lsp").on_attach(client, bufnr)
-    end
-  end,
-  root_dir = root_dir,
-  -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
+local status_nlsp, nlsp = pcall(require, "nlspsettings")
+local settings = nil
+if status_nlsp then
+  settings = nlsp.get_settings(root_dir, "jdtls")
+  local command = vim.api.nvim_command
+  command "echohl ModeMsg"
+  command 'echo "got settings from nlsp"'
+  command "echohl None"
+else
+  local command = vim.api.nvim_command
+  command "echohl ModeMsg"
+  command 'echo "set settings to default"'
+  command "echohl None"
   settings = {
     java = {
       jdt = {
@@ -291,7 +227,87 @@ local config = {
         enabled = false,
       },
     },
+  }
+end
+
+local workspace_dir = WORKSPACE_PATH .. project_name
+os.execute("rm -rf " .. workspace_dir)
+os.execute("mkdir -p " .. workspace_dir)
+
+-- Test bundle
+-- Run :MasonInstall java-test
+local bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
+if #bundles == 0 then
+  bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
+end
+-- Debug bundle
+-- Run :MasonInstall java-debug-adapter
+local extra_bundles = {
+  vim.fn.glob(
+    MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
+    true
+  ),
+}
+if #extra_bundles == 0 then
+  extra_bundles = {
+    vim.fn.glob(
+      MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
+      true
+    ),
+  }
+end
+vim.list_extend(bundles, extra_bundles)
+
+-- local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
+local javaHome = home .. "/.local/lib/jvm-17"
+-- local javaHome = "/home/stefan/.sdkman/candidates/java/17.0.4-tem"
+-- "-Dosgi.checkConfiguration=true",
+-- "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
+-- "-Dosgi.sharedConfiguration.area.readOnly=true",
+-- "-Dosgi.configuration.cascaded=true",
+-- .. home .. "/.local/lib/lombok-1.18.26.jar"
+
+local config = {
+  cmd = {
+    javaHome .. "/bin/java",
+    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+    "-Dosgi.bundles.defaultStartLevel=4",
+    "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    "-Dosgi.checkConfiguration=true",
+    "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
+    "-Dosgi.sharedConfiguration.area.readOnly=true",
+    "-Dosgi.configuration.cascaded=true",
+    "-Dlog.protocol=true",
+    "-Dlog.level=ALL",
+    "-XX:+UseParallelGC",
+    "-XX:GCTimeRatio=4",
+    "-XX:AdaptiveSizePolicyWeight=90",
+    "-Dsun.zip.disableMemoryMapping=true",
+    "-Xmx1G",
+    "-Xms100m",
+    "-Xlog:disable",
+    "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
+    "--add-modules=ALL-SYSTEM",
+    "--add-opens",
+    "java.base/java.util=ALL-UNNAMED",
+    "--add-opens",
+    "java.base/java.lang=ALL-UNNAMED",
+    "-jar",
+    launcher_path,
+    "-data",
+    workspace_dir,
   },
+  on_attach = function(client, bufnr)
+    local _, _ = pcall(vim.lsp.codelens.refresh)
+    if lvim.builtin.dap.active then
+      require("jdtls").setup_dap { hotcodereplace = "auto" }
+      require("jdtls.setup").add_commands()
+      require("lvim.lsp").on_attach(client, bufnr)
+    end
+  end,
+  root_dir = root_dir,
+  -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
+  settings = settings,
   flags = {
     allow_incremental_sync = true,
     server_side_fuzzy_completion = true,
