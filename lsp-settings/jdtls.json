@@ -1,6 +1,6 @@
 {
     "java.jdt.ls.lombokSupport.enabled": false,
-"java.jdt.ls.protobufSupport.enabled": false,
+    "java.jdt.ls.protobufSupport.enabled": false,
     "java.eclipse.downloadSources": true,
     "java.templates.fileHeader": "/**\n* ${type_name}\n* @author ${user}\n*/",
     "java.templates.typeComment": "/**\n* ${type_name}\n* @author ${user}\n*/",
@@ -64,6 +64,5 @@
             "path": "/home/stefan/.local/lib/jvm-17/",
             "default": true
         }
-    ],
-    "java.format.enabled": true
+    ]
 }

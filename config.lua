@@ -102,6 +102,7 @@ lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "fzf")
   pcall(telescope.load_extension, "refactoring")
   pcall(telescope.load_extension, "asynctasks")
+  pcall(telescope.load_extension, "noice")
 end
 
 -- for some reasons, this is not working as I intended
@@ -125,12 +126,15 @@ end
 lvim.lsp.diagnostics.virtual_text = true
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
--- lvim.lsp.installer.setup.automatic_installation = true
+lvim.lsp.installer.setup.automatic_installation = true
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
-require("mason-lspconfig").setup {
+lvim.lsp.automatic_servers_installation = true
+lvim.lsp.null_ls.setup = {
+  highlight = {
+    enabled = true,
+  },
+  ignore_install = { "haskell" },
   automatic_installation = true,
-  automatic_setup = true,
-  auto_enable = true,
   ensure_installed = {
     "rust_analyzer",
     "jdtls",
@@ -150,23 +154,6 @@ require("mason-lspconfig").setup {
     "marksman",
     "lemminx",
   },
-}
-require("mason-lspconfig").setup_handlers {
-  -- The first entry (without a key) will be the default handler
-  -- and will be called for each installed server that doesn't have
-  -- a dedicated handler.
-  function(server_name) -- default handler (optional)
-    if "marksman" == server_name then
-      require("lspconfig")[server_name].setup {}
-    elseif "jdtls" == server_name then
-      require("lspconfig")[server_name].setup = function() end
-    end
-  end,
-  -- Next, you can provide a dedicated handler for specific servers.
-  -- For example, a handler override for the `rust_analyzer`:
-  ["rust_analyzer"] = function()
-    require("rust-tools").setup {}
-  end,
 }
 
 -- Installer
@@ -535,9 +522,9 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     tag = "*",
-    -- setup = function()
-    --   require("lspconfig").jdtls.setup = function() end
-    -- end,
+    config = function()
+      require("lspconfig").jdtls.setup = function() end
+    end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -601,34 +588,6 @@ lvim.plugins = {
   -- {
   --   "~/workspace/luvcron/",
   -- },
-  -- {
-  --   "jay-babu/mason-null-ls.nvim",
-  --   after = { "mason.nvim", "null-ls.nvim" },
-  --   config = function()
-  --     require("mason-null-ls").setup {
-  --       automatic_installation = true,
-  --       automatic_setup = true,
-  --       ensure_installed = {
-  --         "jsonlint",
-  --       },
-  --     }
-  --     require("mason-null-ls").setup_handlers()
-  --   end,
-  -- },
-  {
-    "jay-babu/mason-nvim-dap.nvim",
-    after = { "mason.nvim" },
-    config = function()
-      require("mason-nvim-dap").setup {
-        ensure_installed = {
-          "java-debug-adapter",
-          "java-test",
-        },
-        automatic_installation = true,
-        automatic_setup = true,
-      }
-    end,
-  },
   { "gpanders/editorconfig.nvim", tag = "*" },
   {
     "stevearc/dressing.nvim",

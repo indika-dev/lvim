@@ -63,6 +63,12 @@ M.config = function()
         ["vim.lsp.util.stylize_markdown"] = true,
         ["cmp.entry.get_documentation"] = true,
       },
+      message = {
+        -- Messages shown by lsp servers
+        enabled = true,
+        view = "mini",
+        opts = {},
+      },
     },
     cmdline = {
       format = {
