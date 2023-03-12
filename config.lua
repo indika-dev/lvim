@@ -806,6 +806,7 @@ lvim.plugins = {
   },
   {
     "folke/noice.nvim",
+    tag = "*",
     config = function()
       require("user.noice").config()
     end,
