@@ -53,16 +53,5 @@
         "jdk.*",
         "org.graalvm.*",
         "io.micrometer.shaded.*"
-    ],
-    "java.configuration.runtimes": [
-        {
-            "name": "JavaSE-11",
-            "path": "/home/stefan/.local/lib/jvm-11/"
-        },
-        {
-            "name": "JavaSE-17",
-            "path": "/home/stefan/.local/lib/jvm-17/",
-            "default": true
-        }
     ]
 }

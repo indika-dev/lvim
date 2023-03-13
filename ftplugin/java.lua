@@ -11,6 +11,7 @@ local status_ok, jdtls = pcall(require, "jdtls")
 if not status_ok then
   return
 end
+local sha1 = require "sha1"
 local handlers = require "vim.lsp.handlers"
 
 -- TextDocument version is reported as 0, override with nil so that
@@ -97,8 +98,16 @@ if status_nlsp then
   settings = nlsp.get_settings(root_dir, "jdtls")
   local command = vim.api.nvim_command
   command "echohl ModeMsg"
-  command 'echo "got settings from nlsp"'
+  command 'echo "loaded settings from nlsp"'
   command "echohl None"
+  if settings.java.configuration.runtimes == nil then
+    settings.java.configuration.runtimes =
+      { {
+        name = "JavaSE-17",
+        path = home .. "/.local/lib/jvm-17/",
+        default = true,
+      } }
+  end
 else
   local command = vim.api.nvim_command
   command "echohl ModeMsg"
@@ -230,7 +239,7 @@ else
   }
 end
 
-local workspace_dir = WORKSPACE_PATH .. project_name
+local workspace_dir = WORKSPACE_PATH .. sha1.sha1(project_name)
 os.execute("rm -rf " .. workspace_dir)
 os.execute("mkdir -p " .. workspace_dir)
 
