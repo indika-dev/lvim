@@ -155,6 +155,23 @@ lvim.lsp.null_ls.setup = {
     "lemminx",
   },
 }
+require("mason-lspconfig").setup_handlers {
+  -- The first entry (without a key) will be the default handler
+  -- and will be called for each installed server that doesn't have
+  -- a dedicated handler.
+  function(server_name) -- default handler (optional)
+    if "marksman" == server_name then
+      require("lspconfig")[server_name].setup {}
+    elseif "jdtls" == server_name then
+      require("lspconfig")[server_name].setup = function() end
+    end
+  end,
+  -- Next, you can provide a dedicated handler for specific servers.
+  -- For example, a handler override for the `rust_analyzer`:
+  ["rust_analyzer"] = function()
+    require("rust-tools").setup {}
+  end,
+}
 
 -- Installer
 
@@ -522,9 +539,9 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     tag = "*",
-    config = function()
-      require("lspconfig").jdtls.setup = function() end
-    end,
+    -- config = function()
+    --   require("lspconfig").jdtls.setup = function() end
+    -- end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
