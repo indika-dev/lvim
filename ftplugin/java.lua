@@ -75,6 +75,11 @@ if status_nlsp then
         default = true,
       } }
   end
+  if settings.java.format.settings.profile == "GoogleStyle" then
+    settings.java.format.settings.url = home .. "/.config/lvim/.java-google-formatter.xml"
+  else
+    settings.java.format.settings.url = home .. "/.config/lvim/.eclipse-formatter.xml"
+  end
 else
   local command = vim.api.nvim_command
   command "echohl ModeMsg"
