@@ -160,10 +160,10 @@ require("mason-lspconfig").setup_handlers {
   -- and will be called for each installed server that doesn't have
   -- a dedicated handler.
   function(server_name) -- default handler (optional)
-    if "marksman" == server_name then
-      require("lspconfig")[server_name].setup {}
-    elseif "jdtls" == server_name then
+    if "jdtls" == server_name then
       require("lspconfig")[server_name].setup = function() end
+    else
+      require("lspconfig")[server_name].setup {}
     end
   end,
   -- Next, you can provide a dedicated handler for specific servers.

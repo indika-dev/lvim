@@ -28,40 +28,7 @@ local function fix_zero_version(workspace_edit)
   end
   return workspace_edit
 end
-handlers["language/status"] = vim.schedule_wrap(function(_, s)
-  local command = vim.api.nvim_command
-  command "echohl ModeMsg"
-  command(string.format('echo "%s"', s.message))
-  command "echohl None"
-  if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.initial_debug_search == false then
-    require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
-    lvim.custom.jdtls.initial_debug_search = true
-  end
-end)
-handlers["textDocument/codeAction"] = function(err, actions, ctx)
-  for _, action in ipairs(actions) do
-    -- TODO: (steelsojka) Handle more than one edit?
-    if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
-      action.edit = fix_zero_version(action.edit or action.arguments[1])
-    elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
-      action.edit = fix_zero_version(action.edit or action.command.arguments[1])
-    end
-  end
-
-  handlers[ctx.method](err, actions, ctx)
-end
-handlers["textDocument/rename"] = function(err, workspace_edit, ctx)
-  handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
-end
-handlers["workspace/applyEdit"] = function(err, workspace_edit, ctx)
-  handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
-end
-handlers["$/progress"] = vim.schedule_wrap(function(_, result)
-  local command = vim.api.nvim_command
-  command "echohl ModeMsg"
-  command(string.format('echo "%s"', result.message))
-  command "echohl None"
-end)
+-- handlers
 
 local home = vim.env.HOME
 local MASON_BASEPATH = vim.fn.glob(vim.fn.stdpath "data" .. "/mason")
@@ -324,21 +291,51 @@ local config = {
   init_options = {
     bundles = bundles,
     extendedClientCapabilities = vim.tbl_deep_extend("keep", {
-      progressReportProvider = false,
       resolveAdditionalTextEditsSupport = true,
       classFileContentsSupport = false,
       overrideMethodsPromptSupport = true,
       advancedGenerateAccessorsSupport = true,
-      clientHoverProvider = true,
-      clientDocumentSymbolProvider = true,
       gradleChecksumWrapperPromptSupport = true,
       advancedIntroduceParameterRefactoringSupport = true,
       actionableRuntimeNotificationSupport = true,
-      -- onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
       extractInterfaceSupport = true,
     }, jdtls.extendedClientCapabilities),
   },
-  handlers = handlers,
+  handlers = {
+    ["language/status"] = vim.schedule_wrap(function(_, s)
+      if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.initial_debug_search == false then
+        require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
+        lvim.custom.jdtls.initial_debug_search = true
+      end
+      local command = vim.api.nvim_command
+      command "echohl ModeMsg"
+      command(string.format('echo "%s"', s.message))
+      command "echohl None"
+    end),
+    ["textDocument/codeAction"] = function(err, actions, ctx)
+      for _, action in ipairs(actions) do
+        -- TODO: (steelsojka) Handle more than one edit?
+        if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
+          action.edit = fix_zero_version(action.edit or action.arguments[1])
+        elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
+          action.edit = fix_zero_version(action.edit or action.command.arguments[1])
+        end
+      end
+      handlers[ctx.method](err, actions, ctx)
+    end,
+    ["textDocument/rename"] = function(err, workspace_edit, ctx)
+      handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+    end,
+    ["workspace/applyEdit"] = function(err, workspace_edit, ctx)
+      handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
+    end,
+    ["$/progress"] = vim.schedule_wrap(function(_, result)
+      local command = vim.api.nvim_command
+      command "echohl ModeMsg"
+      command(string.format('echo "%s"', result.message))
+      command "echohl None"
+    end),
+  },
   capabilities = {
     workspace = {
       configuration = true,
