@@ -28,7 +28,7 @@ else
   return
 end
 
-local launcher_path = vim.fn.glob(jdtls_install_path .. "plugins/org.eclipse.equinox.launcher_*.jar")
+local launcher_path = vim.fn.glob(jdtls_install_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
 if #launcher_path == 0 then
   command "echohl ErrorMsg"
   command 'echo "jdtls launcher not found"'

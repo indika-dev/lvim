@@ -559,6 +559,21 @@ lvim.plugins = {
     end,
   },
   {
+    "jay-babu/mason-null-ls.nvim",
+    after = { "mason.nvim" },
+    config = function()
+      require("mason-nvim-dap").setup {
+        ensure_installed = {
+          "shellcheck",
+          "shfmt",
+          "prettier",
+          "eslint_d",
+        },
+        automatic_installation = true,
+      }
+    end,
+  },
+  {
     "jay-babu/mason-nvim-dap.nvim",
     after = { "mason.nvim" },
     config = function()
@@ -568,7 +583,6 @@ lvim.plugins = {
           "java-test",
         },
         automatic_installation = true,
-        automatic_setup = true,
       }
     end,
   },
