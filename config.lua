@@ -80,6 +80,7 @@ if _time.hour >= 6 and _time.hour < 20 then
 else
   lvim.colorscheme = "kanagawa-dragon"
 end
+local user = vim.env.USER
 
 lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
@@ -128,15 +129,29 @@ lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
 lvim.lsp.installer.setup.automatic_installation = true
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
-lvim.lsp.automatic_servers_installation = true
-lvim.lsp.null_ls.setup = {
-  highlight = {
-    enabled = true,
-  },
-  ignore_install = { "haskell" },
+lvim.lsp.installer.setup.ensure_installed.ensure_installed = {
+  "rust_analyzer",
+  "jdtls",
+  "tsserver",
+  "jsonls",
+  "sumneko_lua",
+  "bashls",
+  "cssls",
+  "dockerls",
+  "eslint",
+  "html",
+  "pyright",
+  "taplo",
+  "vimls",
+  "vuels",
+  "yamlls",
+  "marksman",
+  "lemminx",
+}
+
+require("mason-lspconfig").setup {
   automatic_installation = true,
   ensure_installed = {
-    "rust_analyzer",
     "jdtls",
     "tsserver",
     "jsonls",
@@ -539,9 +554,23 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     tag = "*",
-    -- config = function()
-    --   require("lspconfig").jdtls.setup = function() end
-    -- end,
+    setup = function()
+      require("lspconfig").jdtls.setup = function() end
+    end,
+  },
+  {
+    "jay-babu/mason-nvim-dap.nvim",
+    after = { "mason.nvim" },
+    config = function()
+      require("mason-nvim-dap").setup {
+        ensure_installed = {
+          "java-debug-adapter",
+          "java-test",
+        },
+        automatic_installation = true,
+        automatic_setup = true,
+      }
+    end,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -737,31 +766,6 @@ lvim.plugins = {
     end,
   },
   {
-    "mickael-menu/zk-nvim",
-    config = function()
-      require("zk").setup {
-        -- can be "telescope", "fzf" or "select" (`vim.ui.select`)
-        -- it's recommended to use "telescope" or "fzf"
-        picker = "select",
-
-        lsp = {
-          -- `config` is passed to `vim.lsp.start_client(config)`
-          config = {
-            cmd = { "zk", "lsp" },
-            name = "zk",
-            -- on_attach = ...
-            -- etc, see `:h vim.lsp.start_client()`
-          },
-          -- automatically attach buffers in a zk notebook that match the given filetypes
-          auto_attach = {
-            enabled = true,
-            filetypes = { "markdown" },
-          },
-        },
-      }
-    end,
-  },
-  {
     "fladson/vim-kitty",
   },
   {
@@ -812,16 +816,6 @@ lvim.plugins = {
     end,
   },
   {
-    "VonHeikemen/fine-cmdline.nvim",
-    requires = {
-      { "MunifTanjim/nui.nvim" },
-    },
-    config = function()
-      vim.api.nvim_set_keymap("n", ":", "<cmd>FineCmdline<CR>", { noremap = true })
-    end,
-    disable = true,
-  },
-  {
     "folke/noice.nvim",
     tag = "*",
     config = function()
@@ -835,18 +829,19 @@ lvim.plugins = {
       --   If not available, we use `mini` as the fallback
       "rcarriga/nvim-notify",
     },
+    cond = function()
+      return not vim.g.neovide
+    end,
   },
   {
-    "RishabhRD/nvim-cheat.sh",
-    dependencies = "RishabhRD/popfix",
+    "ethanholz/nvim-lastplace",
     config = function()
-      vim.g.cheat_default_window_layout = "vertical_split"
+      require("nvim-lastplace").setup {
+        lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
+        lastplace_ignore_filetype = { "gitcommit", "gitrebase", "svn", "hgcommit" },
+        lastplace_open_folds = true,
+      }
     end,
-    lazy = true,
-    cmd = { "Cheat", "CheatWithoutComments", "CheatList", "CheatListWithoutComments" },
-    keys = "<leader>?",
-    -- enabled = lvim.builtin.cheat.active,
-    disable = true,
   },
 }
 
@@ -860,7 +855,11 @@ if vim.g.neovide then
   -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
   -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
   -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
-  vim.o.guifont = "FiraCode Nerd Font:h12"
+  if "stefan" == user then
+    vim.o.guifont = "FiraCode Nerd Font:h16"
+  else
+    vim.o.guifont = "FiraCode Nerd Font:h14"
+  end
   -- vim.o.guifont ="GoMono NF:h16"
   -- vim.o.guifont ="FuraCode NF:h16"
   -- vim.o.guifont ="Hack Nerd Font:h16"
@@ -880,7 +879,11 @@ if vim.g.nvui then
   -- Configure nvui here
   vim.cmd [[NvuiCmdFontFamily FiraCode Nerd Font]]
   vim.cmd [[set linespace=1]]
-  vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+  if "stefan" == user then
+    vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h16]]
+  else
+    vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
+  end
   vim.cmd [[NvuiPopupMenuDefaultIconFg white]]
   vim.cmd [[NvuiCmdBg #1e2125]]
   vim.cmd [[NvuiCmdFg #abb2bf]]

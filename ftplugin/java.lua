@@ -12,59 +12,48 @@ if not status_ok then
   return
 end
 local sha1 = require "sha1"
-local handlers = require "vim.lsp.handlers"
-
--- TextDocument version is reported as 0, override with nil so that
--- the client doesn't think the document is newer and refuses to update
--- See: https://github.com/eclipse/eclipse.jdt.ls/issues/1695
-local function fix_zero_version(workspace_edit)
-  if workspace_edit and workspace_edit.documentChanges then
-    for _, change in pairs(workspace_edit.documentChanges) do
-      local text_document = change.textDocument
-      if text_document and text_document.version and text_document.version == 0 then
-        text_document.version = nil
-      end
-    end
-  end
-  return workspace_edit
-end
--- handlers
-
 local home = vim.env.HOME
-local MASON_BASEPATH = vim.fn.glob(vim.fn.stdpath "data" .. "/mason")
-local launcher_path = vim.fn.glob(MASON_BASEPATH .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar")
-if #launcher_path == 0 then
-  launcher_path =
-    vim.fn.glob(MASON_BASEPATH .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", true, true)[1]
-end
-local WORKSPACE_PATH = home .. "/.cache/jdtls/workspace/"
+local command = vim.api.nvim_command
+local jdtls_install_path = require("mason-registry").get_package("jdtls"):get_install_path()
 -- Determine OS
 local CONFIG = ""
 if vim.fn.has "mac" == 1 then
   CONFIG = "mac"
 elseif vim.fn.has "unix" == 1 then
   CONFIG = "linux"
+elseif vim.fn.has "win32" == 1 then
+  CONFIG = "win"
 else
   vim.notify("Unsupported system", vim.log.levels.ERROR)
   return
 end
 
--- Find root of project
-local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }
-local root_dir = require("jdtls.setup").find_root(root_markers)
-if root_dir == "" then
+local launcher_path = vim.fn.glob(jdtls_install_path .. "plugins/org.eclipse.equinox.launcher_*.jar")
+if #launcher_path == 0 then
+  command "echohl ErrorMsg"
+  command 'echo "jdtls launcher not found"'
+  command "echohl None"
   return
 end
 
-local project_name = vim.fs.basename(root_dir)
--- alternative from abzcoding: local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+-- Find root of project
+local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", ".project" }
+local root_dir = require("jdtls.setup").find_root(root_markers)
+if root_dir == "" then
+  command "echohl ErrorMsg"
+  command 'echo "couldn\'t determine root directory of project"'
+  command "echohl None"
+  return
+end
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+local workspace_dir = vim.fn.stdpath "data" .. "/site/jdtls/workspace/" .. sha1.sha1(project_name)
+os.execute("mkdir " .. workspace_dir)
 
 local status_nlsp, nlsp = pcall(require, "nlspsettings")
 local settings = nil
 if status_nlsp then
   settings = nlsp.get_settings(root_dir, "jdtls")
-  local command = vim.api.nvim_command
-  command "echohl ModeMsg"
+  command "echohl InfoMsg"
   command 'echo "loaded settings from nlsp"'
   command "echohl None"
   if settings.java.configuration.runtimes == nil then
@@ -81,8 +70,7 @@ if status_nlsp then
     settings.java.format.settings.url = home .. "/.config/lvim/.eclipse-formatter.xml"
   end
 else
-  local command = vim.api.nvim_command
-  command "echohl ModeMsg"
+  command "echohl InfoMsg"
   command 'echo "set settings to default"'
   command "echohl None"
   settings = {
@@ -211,42 +199,35 @@ else
   }
 end
 
-local workspace_dir = WORKSPACE_PATH .. sha1.sha1(project_name)
-os.execute("rm -rf " .. workspace_dir)
-os.execute("mkdir -p " .. workspace_dir)
-
 -- Test bundle
 -- Run :MasonInstall java-test
-local bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
+local bundles = {
+  vim.fn.glob(
+    require("mason-registry").get_package("java-debug-adapter"):get_install_path()
+      .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
+  ),
+}
 if #bundles == 0 then
-  bundles = { vim.fn.glob(MASON_BASEPATH .. "/packages/java-test/extension/server/*.jar", true) }
+  command "echohl WarningMsg"
+  command 'echo "java-debug-adapter not found. Install it via mason"'
+  command "echohl None"
 end
 -- Debug bundle
 -- Run :MasonInstall java-debug-adapter
-local extra_bundles = {
-  vim.fn.glob(
-    MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
-    true
-  ),
-}
+local extra_bundles = vim.split(
+  vim.fn.glob(require("mason-registry").get_package("java-test"):get_install_path() .. "/extension/server/*.jar"),
+  "\n",
+  {}
+)
+
 if #extra_bundles == 0 then
-  extra_bundles = {
-    vim.fn.glob(
-      MASON_BASEPATH .. "/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar",
-      true
-    ),
-  }
+  command "echohl WarningMsg"
+  command 'echo "java-test adapter not found. Install it via mason"'
+  command "echohl None"
 end
 vim.list_extend(bundles, extra_bundles)
 
--- local javaHome = home .. "/.local/lib/vscode-jdtls/jre"
 local javaHome = home .. "/.local/lib/jvm-17"
--- local javaHome = "/home/stefan/.sdkman/candidates/java/17.0.4-tem"
--- "-Dosgi.checkConfiguration=true",
--- "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
--- "-Dosgi.sharedConfiguration.area.readOnly=true",
--- "-Dosgi.configuration.cascaded=true",
--- .. home .. "/.local/lib/lombok-1.18.26.jar"
 
 local config = {
   cmd = {
@@ -255,18 +236,15 @@ local config = {
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dosgi.checkConfiguration=true",
-    "-Dosgi.sharedConfiguration.area=" .. MASON_BASEPATH .. "/packages/jdtls/config_" .. CONFIG,
+    "-Dosgi.sharedConfiguration.area=" .. jdtls_install_path .. "/config_" .. CONFIG,
     "-Dosgi.sharedConfiguration.area.readOnly=true",
     "-Dosgi.configuration.cascaded=true",
-    "-Dlog.protocol=true",
-    "-Dlog.level=ALL",
     "-XX:+UseParallelGC",
     "-XX:GCTimeRatio=4",
     "-XX:AdaptiveSizePolicyWeight=90",
     "-Dsun.zip.disableMemoryMapping=true",
     "-Xmx1G",
     "-Xms100m",
-    "-Xlog:disable",
     "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
@@ -279,11 +257,11 @@ local config = {
     workspace_dir,
   },
   on_attach = function(client, bufnr)
-    local _, _ = pcall(vim.lsp.codelens.refresh)
+    -- local _, _ = pcall(vim.lsp.codelens.refresh)
     if lvim.builtin.dap.active then
       require("jdtls").setup_dap { hotcodereplace = "auto" }
       require("jdtls.setup").add_commands()
-      require("lvim.lsp").on_attach(client, bufnr)
+      require("lvim.lsp").common_on_attach(client, bufnr)
     end
   end,
   root_dir = root_dir,
@@ -317,23 +295,6 @@ local config = {
       command(string.format('echo "%s"', s.message))
       command "echohl None"
     end),
-    ["textDocument/codeAction"] = function(err, actions, ctx)
-      for _, action in ipairs(actions) do
-        -- TODO: (steelsojka) Handle more than one edit?
-        if action.command == "java.apply.workspaceEdit" then -- 'action' is Command in java format
-          action.edit = fix_zero_version(action.edit or action.arguments[1])
-        elseif type(action.command) == "table" and action.command.command == "java.apply.workspaceEdit" then -- 'action' is CodeAction in java format
-          action.edit = fix_zero_version(action.edit or action.command.arguments[1])
-        end
-      end
-      handlers[ctx.method](err, actions, ctx)
-    end,
-    ["textDocument/rename"] = function(err, workspace_edit, ctx)
-      handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
-    end,
-    ["workspace/applyEdit"] = function(err, workspace_edit, ctx)
-      handlers[ctx.method](err, fix_zero_version(workspace_edit), ctx)
-    end,
     ["$/progress"] = vim.schedule_wrap(function(_, result)
       local command = vim.api.nvim_command
       command "echohl ModeMsg"
