@@ -47,15 +47,18 @@ if root_dir == "" then
 end
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = vim.fn.stdpath "data" .. "/site/jdtls/workspace/" .. sha1.sha1(project_name)
-os.execute("mkdir " .. workspace_dir)
+-- os.execute("rm -rf " .. workspace_dir)
+os.execute("mkdir -p " .. workspace_dir)
 
 local status_nlsp, nlsp = pcall(require, "nlspsettings")
 local settings = nil
 if status_nlsp then
   settings = nlsp.get_settings(root_dir, "jdtls")
-  command "echohl InfoMsg"
-  command 'echo "loaded settings from nlsp"'
-  command "echohl None"
+  if not lvim.custom.jdtls.initial_debug_search or lvim.custom.jdtls.initial_debug_search == false then
+    command "echohl InfoMsg"
+    command 'echo "loaded settings from nlsp"'
+    command "echohl None"
+  end
   if settings.java.configuration.runtimes == nil then
     settings.java.configuration.runtimes =
       { {
@@ -70,9 +73,11 @@ if status_nlsp then
     settings.java.format.settings.url = home .. "/.config/lvim/.eclipse-formatter.xml"
   end
 else
-  command "echohl InfoMsg"
-  command 'echo "set settings to default"'
-  command "echohl None"
+  if not lvim.custom.jdtls.initial_debug_search or lvim.custom.jdtls.initial_debug_search == false then
+    command "echohl InfoMsg"
+    command 'echo "set settings to default"'
+    command "echohl None"
+  end
   settings = {
     java = {
       jdt = {
@@ -258,11 +263,14 @@ local config = {
   },
   on_attach = function(client, bufnr)
     -- local _, _ = pcall(vim.lsp.codelens.refresh)
+    require("jdtls.setup").add_commands()
     if lvim.builtin.dap.active then
       require("jdtls").setup_dap { hotcodereplace = "auto" }
-      require("jdtls.setup").add_commands()
-      require("lvim.lsp").common_on_attach(client, bufnr)
     end
+    require("lvim.lsp").common_on_attach(client, bufnr)
+  end,
+  on_init = function(client, _)
+    client.notify("workspace/didChangeConfiguration", { settings = settings })
   end,
   root_dir = root_dir,
   -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
@@ -278,9 +286,9 @@ local config = {
       classFileContentsSupport = false,
       overrideMethodsPromptSupport = true,
       advancedGenerateAccessorsSupport = true,
-      gradleChecksumWrapperPromptSupport = true,
+      -- gradleChecksumWrapperPromptSupport = true,
       advancedIntroduceParameterRefactoringSupport = true,
-      actionableRuntimeNotificationSupport = true,
+      -- actionableRuntimeNotificationSupport = true,
       extractInterfaceSupport = true,
     }, jdtls.extendedClientCapabilities),
   },
@@ -290,16 +298,14 @@ local config = {
         require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
         lvim.custom.jdtls.initial_debug_search = true
       end
-      local command = vim.api.nvim_command
-      command "echohl ModeMsg"
-      command(string.format('echo "%s"', s.message))
-      command "echohl None"
+      -- command "echohl ModeMsg"
+      -- command(string.format('echo "%s"', s.message))
+      -- command "echohl None"
     end),
     ["$/progress"] = vim.schedule_wrap(function(_, result)
-      local command = vim.api.nvim_command
-      command "echohl ModeMsg"
-      command(string.format('echo "%s"', result.message))
-      command "echohl None"
+      -- command "echohl ModeMsg"
+      -- command(string.format('echo "%s"', result.message))
+      -- command "echohl None"
     end),
   },
   capabilities = {
@@ -319,7 +325,7 @@ jdtls.start_or_attach(config)
 
 local wkstatus_ok, which_key = pcall(require, "which-key")
 if wkstatus_ok then
-  local opts = {
+  local nopts = {
     mode = "n",
     prefix = "<leader>",
     buffer = vim.fn.bufnr(),
@@ -362,6 +368,6 @@ if wkstatus_ok then
     },
   }
 
-  which_key.register(mappings, opts)
+  which_key.register(mappings, nopts)
   which_key.register(vmappings, vopts)
 end

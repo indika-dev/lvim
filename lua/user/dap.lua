@@ -20,10 +20,10 @@ M.config = function()
       type = "java",
       request = "launch",
       name = "Debug Shoo sync with init",
-      args = '-r /home/stefan/workspace/architecture-management/test-repo -t sync \
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t sync \
       --init \
-      -c /home/stefan/workspace/architecture-management/ts01_single.toml \
-      -c /home/stefan/workspace/architecture-management/listeItSysteme.html \
+      -c /home/maassens/workspace/architecture-management/ts01_single.toml \
+      -c /home/maassens/workspace/architecture-management/listeItSysteme.html \
       "TestSystem 01"',
       vmargs = "-Xms2G -Xmx2G",
       mainClass = "de.creditreform.architecture.management.shoo.Shoo",
@@ -33,8 +33,19 @@ M.config = function()
     {
       type = "java",
       request = "launch",
+      name = "Debug Shoo sync Business Adapter CTA",
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t sync \
+      "Business Adapter CTA"',
+      vmargs = "-Xms2G -Xmx2G",
+      mainClass = "de.creditreform.architecture.management.shoo.Shoo",
+      projectName = "shoo",
+      console = "integratedTerminal",
+    },
+    {
+      type = "java",
+      request = "launch",
       name = "Debug Shoo pull TestSystem 01",
-      args = '-r /home/stefan/workspace/architecture-management/test-repo -t pull "TestSystem 01"',
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t pull "TestSystem 01"',
       vmargs = "-Xms2G -Xmx2G",
       mainClass = "de.creditreform.architecture.management.shoo.Shoo",
       projectName = "shoo",
@@ -44,7 +55,7 @@ M.config = function()
       type = "java",
       request = "launch",
       name = "Debug Shoo merge TestSystem 01",
-      args = '-r /home/stefan/workspace/architecture-management/test-repo -t merge "TestSystem 01"',
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t merge "TestSystem 01"',
       vmargs = "-Xms2G -Xmx2G",
       mainClass = "de.creditreform.architecture.management.shoo.Shoo",
       projectName = "shoo",
@@ -54,7 +65,7 @@ M.config = function()
       type = "java",
       request = "launch",
       name = "Debug Shoo add TestSystem 01",
-      args = '-r /home/stefan/workspace/architecture-management/test-repo -t add "TestSystem 01"',
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t add "TestSystem 01"',
       vmargs = "-Xms2G -Xmx2G",
       mainClass = "de.creditreform.architecture.management.shoo.Shoo",
       projectName = "shoo",
@@ -64,7 +75,7 @@ M.config = function()
       type = "java",
       request = "launch",
       name = "Debug Shoo commit",
-      args = '-r /home/stefan/workspace/architecture-management/test-repo -t commit "TestSystem 01"',
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t commit "TestSystem 01"',
       vmargs = "-Xms2G -Xmx2G",
       mainClass = "de.creditreform.architecture.management.shoo.Shoo",
       projectName = "shoo",
@@ -74,7 +85,17 @@ M.config = function()
       type = "java",
       request = "launch",
       name = "Debug Shoo push",
-      args = "-r /home/stefan/workspace/architecture-management/test-repo -t push",
+      args = "-r /home/maassens/workspace/architecture-management/test-repo -t push",
+      vmargs = "-Xms2G -Xmx2G",
+      mainClass = "de.creditreform.architecture.management.shoo.Shoo",
+      projectName = "shoo",
+      console = "integratedTerminal",
+    },
+    {
+      type = "java",
+      request = "launch",
+      name = "Debug Shoo status",
+      args = "-r /home/maassens/workspace/architecture-management/test-repo -t status",
       vmargs = "-Xms2G -Xmx2G",
       mainClass = "de.creditreform.architecture.management.shoo.Shoo",
       projectName = "shoo",

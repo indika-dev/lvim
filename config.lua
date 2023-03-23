@@ -555,7 +555,7 @@ lvim.plugins = {
     "mfussenegger/nvim-jdtls",
     tag = "*",
     setup = function()
-      require("lspconfig").jdtls.setup = function() end
+      require("lspconfig").jdtls.setup = function(...) end
     end,
   },
   {
