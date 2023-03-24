@@ -19,6 +19,16 @@ M.config = function()
     {
       type = "java",
       request = "launch",
+      name = "Debug Shoo init on special repo",
+      args = "-r /home/maassens/workspace/architecture-management/test-init init",
+      vmargs = "-Xms2G -Xmx2G",
+      mainClass = "de.creditreform.architecture.management.shoo.Shoo",
+      projectName = "shoo",
+      console = "integratedTerminal",
+    },
+    {
+      type = "java",
+      request = "launch",
       name = "Debug Shoo sync with init",
       args = '-r /home/maassens/workspace/architecture-management/test-repo -t sync \
       --init \

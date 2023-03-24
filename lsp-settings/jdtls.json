@@ -57,7 +57,13 @@
   "java.configuration.maven.globalSettings": null,
   "java.configuration.maven.notCoveredPluginExecutionSeverity": "warning",
   "java.configuration.maven.userSettings": null,
-  "java.configuration.runtimes": [],
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-17",
+      "path": "/home/maassens/.local/lib/jvm-17",
+      "default": true
+    }
+  ],
   "java.configuration.updateBuildConfiguration": "interactive",
   "java.configuration.workspaceCacheLimit": 90,
   "java.contentProvider.preferred": "fernflower",
@@ -68,7 +74,7 @@
   "java.format.enabled": true,
   "java.format.onType.enabled": true,
   "java.format.settings.profile": "GoogleStyle",
-  "java.format.settings.url": "/home/stefan/.config/lvim/.java-google-formatter.xml",
+  "java.format.settings.url": "/home/maassens/.config/lvim/.java-google-formatter.xml",
   "java.home": null,
   "java.implementationsCodeLens.enabled": true,
   "java.import.exclusions": [
@@ -95,7 +101,7 @@
   "java.jdt.ls.androidSupport.enabled": "auto",
   "java.jdt.ls.java.home": null,
   "java.jdt.ls.lombokSupport.enabled": false,
-  "java.jdt.ls.protobufSupport.enabled": true,
+  "java.jdt.ls.protobufSupport.enabled": false,
   "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m -Xlog:disable",
   "java.maven.downloadSources": false,
   "java.maven.updateSnapshots": false,
@@ -131,5 +137,5 @@
   "java.templates.fileHeader": [],
   "java.templates.typeComment": [],
   "java.trace.server": "off",
-  "java.typeHierarchy.lazyLoad": false
+  "java.typeHierarchy.lazyLoad": true
 }

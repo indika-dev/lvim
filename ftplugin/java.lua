@@ -47,37 +47,78 @@ if root_dir == "" then
 end
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = vim.fn.stdpath "data" .. "/site/jdtls/workspace/" .. sha1.sha1(project_name)
--- os.execute("rm -rf " .. workspace_dir)
-os.execute("mkdir -p " .. workspace_dir)
+if not lvim.custom.jdtls.first_start or lvim.custom.jdtls.first_start == false then
+  os.execute("rm -rf " .. workspace_dir)
+  os.execute("mkdir -p " .. workspace_dir)
+end
 
-local status_nlsp, nlsp = pcall(require, "nlspsettings")
-local settings = nil
-if status_nlsp then
-  settings = nlsp.get_settings(root_dir, "jdtls")
-  if not lvim.custom.jdtls.initial_debug_search or lvim.custom.jdtls.initial_debug_search == false then
-    command "echohl InfoMsg"
-    command 'echo "loaded settings from nlsp"'
-    command "echohl None"
-  end
-  if settings.java.configuration.runtimes == nil then
-    settings.java.configuration.runtimes =
-      { {
-        name = "JavaSE-17",
-        path = home .. "/.local/lib/jvm-17/",
-        default = true,
-      } }
-  end
-  if settings.java.format.settings.profile == "GoogleStyle" then
-    settings.java.format.settings.url = home .. "/.config/lvim/.java-google-formatter.xml"
-  else
-    settings.java.format.settings.url = home .. "/.config/lvim/.eclipse-formatter.xml"
-  end
-else
-  if not lvim.custom.jdtls.initial_debug_search or lvim.custom.jdtls.initial_debug_search == false then
-    command "echohl InfoMsg"
-    command 'echo "set settings to default"'
-    command "echohl None"
-  end
+-- Test bundle
+-- Run :MasonInstall java-test
+local bundles = {
+  vim.fn.glob(
+    require("mason-registry").get_package("java-debug-adapter"):get_install_path()
+      .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
+  ),
+}
+if #bundles == 0 then
+  command "echohl WarningMsg"
+  command 'echo "java-debug-adapter not found. Install it via mason"'
+  command "echohl None"
+end
+-- Debug bundle
+-- Run :MasonInstall java-debug-adapter
+local extra_bundles = vim.split(
+  vim.fn.glob(require("mason-registry").get_package("java-test"):get_install_path() .. "/extension/server/*.jar"),
+  "\n",
+  {}
+)
+
+if #extra_bundles == 0 then
+  command "echohl WarningMsg"
+  command 'echo "java-test adapter not found. Install it via mason"'
+  command "echohl None"
+end
+vim.list_extend(bundles, extra_bundles)
+
+local javaHome = home .. "/.local/lib/jvm-17"
+
+local config = {
+  cmd = {
+    javaHome .. "/bin/java",
+    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+    "-Dosgi.bundles.defaultStartLevel=4",
+    "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    "-Dosgi.checkConfiguration=true",
+    "-Dosgi.sharedConfiguration.area=" .. jdtls_install_path .. "/config_" .. CONFIG,
+    "-Dosgi.sharedConfiguration.area.readOnly=true",
+    "-Dosgi.configuration.cascaded=true",
+    "-XX:+UseParallelGC",
+    "-XX:GCTimeRatio=4",
+    "-XX:AdaptiveSizePolicyWeight=90",
+    "-Dsun.zip.disableMemoryMapping=true",
+    "-Xmx1G",
+    "-Xms100m",
+    "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
+    "--add-modules=ALL-SYSTEM",
+    "--add-opens",
+    "java.base/java.util=ALL-UNNAMED",
+    "--add-opens",
+    "java.base/java.lang=ALL-UNNAMED",
+    "-jar",
+    launcher_path,
+    "-data",
+    workspace_dir,
+  },
+  on_attach = function(client, bufnr)
+    local _, _ = pcall(vim.lsp.codelens.refresh)
+    require("jdtls.setup").add_commands()
+    if lvim.builtin.dap.active then
+      require("jdtls").setup_dap { hotcodereplace = "auto" }
+    end
+    require("lvim.lsp").common_on_attach(client, bufnr)
+  end,
+  root_dir = root_dir,
+  -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
   settings = {
     java = {
       jdt = {
@@ -201,80 +242,7 @@ else
         enabled = false,
       },
     },
-  }
-end
-
--- Test bundle
--- Run :MasonInstall java-test
-local bundles = {
-  vim.fn.glob(
-    require("mason-registry").get_package("java-debug-adapter"):get_install_path()
-      .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
-  ),
-}
-if #bundles == 0 then
-  command "echohl WarningMsg"
-  command 'echo "java-debug-adapter not found. Install it via mason"'
-  command "echohl None"
-end
--- Debug bundle
--- Run :MasonInstall java-debug-adapter
-local extra_bundles = vim.split(
-  vim.fn.glob(require("mason-registry").get_package("java-test"):get_install_path() .. "/extension/server/*.jar"),
-  "\n",
-  {}
-)
-
-if #extra_bundles == 0 then
-  command "echohl WarningMsg"
-  command 'echo "java-test adapter not found. Install it via mason"'
-  command "echohl None"
-end
-vim.list_extend(bundles, extra_bundles)
-
-local javaHome = home .. "/.local/lib/jvm-17"
-
-local config = {
-  cmd = {
-    javaHome .. "/bin/java",
-    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-    "-Dosgi.bundles.defaultStartLevel=4",
-    "-Declipse.product=org.eclipse.jdt.ls.core.product",
-    "-Dosgi.checkConfiguration=true",
-    "-Dosgi.sharedConfiguration.area=" .. jdtls_install_path .. "/config_" .. CONFIG,
-    "-Dosgi.sharedConfiguration.area.readOnly=true",
-    "-Dosgi.configuration.cascaded=true",
-    "-XX:+UseParallelGC",
-    "-XX:GCTimeRatio=4",
-    "-XX:AdaptiveSizePolicyWeight=90",
-    "-Dsun.zip.disableMemoryMapping=true",
-    "-Xmx1G",
-    "-Xms100m",
-    "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
-    "--add-modules=ALL-SYSTEM",
-    "--add-opens",
-    "java.base/java.util=ALL-UNNAMED",
-    "--add-opens",
-    "java.base/java.lang=ALL-UNNAMED",
-    "-jar",
-    launcher_path,
-    "-data",
-    workspace_dir,
   },
-  on_attach = function(client, bufnr)
-    -- local _, _ = pcall(vim.lsp.codelens.refresh)
-    require("jdtls.setup").add_commands()
-    if lvim.builtin.dap.active then
-      require("jdtls").setup_dap { hotcodereplace = "auto" }
-    end
-    require("lvim.lsp").common_on_attach(client, bufnr)
-  end,
-  on_init = function(client, _)
-    client.notify("workspace/didChangeConfiguration", { settings = settings })
-  end,
-  root_dir = root_dir,
-  -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
-  settings = settings,
   flags = {
     allow_incremental_sync = true,
     server_side_fuzzy_completion = true,
@@ -284,19 +252,19 @@ local config = {
     extendedClientCapabilities = vim.tbl_deep_extend("keep", {
       resolveAdditionalTextEditsSupport = true,
       classFileContentsSupport = false,
-      overrideMethodsPromptSupport = true,
-      advancedGenerateAccessorsSupport = true,
+      -- overrideMethodsPromptSupport = true,
+      -- advancedGenerateAccessorsSupport = true,
       -- gradleChecksumWrapperPromptSupport = true,
-      advancedIntroduceParameterRefactoringSupport = true,
+      -- advancedIntroduceParameterRefactoringSupport = true,
       -- actionableRuntimeNotificationSupport = true,
-      extractInterfaceSupport = true,
+      -- extractInterfaceSupport = true,
     }, jdtls.extendedClientCapabilities),
   },
   handlers = {
     ["language/status"] = vim.schedule_wrap(function(_, s)
-      if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.initial_debug_search == false then
+      if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.first_start == false then
         require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
-        lvim.custom.jdtls.initial_debug_search = true
+        lvim.custom.jdtls.first_start = true
       end
       -- command "echohl ModeMsg"
       -- command(string.format('echo "%s"', s.message))
