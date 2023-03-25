@@ -102,8 +102,9 @@ lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "neoclip")
   pcall(telescope.load_extension, "fzf")
   pcall(telescope.load_extension, "refactoring")
-  pcall(telescope.load_extension, "asynctasks")
+  -- pcall(telescope.load_extension, "asynctasks")
   pcall(telescope.load_extension, "noice")
+  -- pcall(telescope.load_extension, "project")
 end
 
 -- for some reasons, this is not working as I intended
@@ -128,52 +129,52 @@ lvim.lsp.diagnostics.virtual_text = true
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
 lvim.lsp.installer.setup.automatic_installation = true
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
-lvim.lsp.installer.setup.ensure_installed.ensure_installed = {
-  "rust_analyzer",
-  "jdtls",
-  "tsserver",
-  "jsonls",
-  "sumneko_lua",
-  "bashls",
-  "cssls",
-  "dockerls",
-  "eslint",
-  "html",
-  "pyright",
-  "taplo",
-  "vimls",
-  "vuels",
-  "yamlls",
-  "marksman",
-  "lemminx",
-}
-
-require("mason-lspconfig").setup {
-  automatic_installation = true,
-  ensure_installed = {
-    "jdtls",
-    "tsserver",
-    "jsonls",
-    "sumneko_lua",
-    "bashls",
-    "cssls",
-    "dockerls",
-    "eslint",
-    "html",
-    "pyright",
-    "taplo",
-    "vimls",
-    "vuels",
-    "yamlls",
-    "marksman",
-    "lemminx",
-  },
-}
+-- vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
+-- lvim.lsp.installer.setup.ensure_installed.ensure_installed = {
+--   "rust_analyzer",
+--   "jdtls",
+--   "tsserver",
+--   "jsonls",
+--   "sumneko_lua",
+--   "bashls",
+--   "cssls",
+--   "dockerls",
+--   "eslint",
+--   "html",
+--   "pyright",
+--   "taplo",
+--   "vimls",
+--   "vuels",
+--   "yamlls",
+--   "marksman",
+--   "lemminx",
+-- }
+--
+-- require("mason-lspconfig").setup {
+--   automatic_installation = true,
+--   ensure_installed = {
+--     "jdtls",
+--     "tsserver",
+--     "jsonls",
+--     "sumneko_lua",
+--     "bashls",
+--     "cssls",
+--     "dockerls",
+--     "eslint",
+--     "html",
+--     "pyright",
+--     "taplo",
+--     "vimls",
+--     "vuels",
+--     "yamlls",
+--     "marksman",
+--     "lemminx",
+--   },
+-- }
 require("mason-lspconfig").setup_handlers {
-  -- The first entry (without a key) will be the default handler
-  -- and will be called for each installed server that doesn't have
-  -- a dedicated handler.
+  --   -- The first entry (without a key) will be the default handler
+  --   -- and will be called for each installed server that doesn't have
+  --   -- a dedicated handler.
   function(server_name) -- default handler (optional)
     if "jdtls" == server_name then
       require("lspconfig")[server_name].setup = function() end
@@ -181,8 +182,8 @@ require("mason-lspconfig").setup_handlers {
       require("lspconfig")[server_name].setup {}
     end
   end,
-  -- Next, you can provide a dedicated handler for specific servers.
-  -- For example, a handler override for the `rust_analyzer`:
+  --   -- Next, you can provide a dedicated handler for specific servers.
+  --   -- For example, a handler override for the `rust_analyzer`:
   ["rust_analyzer"] = function()
     require("rust-tools").setup {}
   end,
@@ -263,7 +264,7 @@ lvim.custom = {
     serverVersion = "0.10.9+271-a8bb69f6-SNAPSHOT",
   },
   async_tasks = {
-    active = true,
+    active = false,
   },
   jdtls = {
     initial_debug_search = false,
@@ -301,7 +302,7 @@ lvim.plugins = {
   },
   -- {
   --   "folke/tokyonight.nvim",
-  --   tag = "*",
+  --   version = "*",
   --   config = function()
   --     vim.cmd [[colorscheme tokyonight-moon]]
   --   end,
@@ -334,7 +335,7 @@ lvim.plugins = {
   },
   {
     "folke/trouble.nvim",
-    tag = "*",
+    version = "*",
     cmd = "TroubleToggle",
   },
   {
@@ -353,7 +354,7 @@ lvim.plugins = {
   },
   {
     "wfxr/minimap.vim",
-    run = "cargo install --locked code-minimap",
+    build = "cargo install --locked code-minimap",
     -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
     config = function()
       vim.cmd [[
@@ -362,14 +363,14 @@ lvim.plugins = {
         let g:minimap_auto_start_win_enter = 0
       ]]
     end,
-    disable = true,
+    enabled = false,
   },
   {
     "skywind3000/asynctasks.vim",
-    requires = { "skywind3000/asyncrun.vim" },
+    dependencies = { "skywind3000/asyncbuild.vim" },
     config = function()
       vim.cmd [[
-          let g:asyncrun_open = 8
+          let g:asyncbuild_open = 8
           let g:asynctask_template = '~/.config/lvim/task_template.ini'
           let g:asynctasks_extra_config = ['~/.config/lvim/tasks.ini']
         ]]
@@ -381,16 +382,16 @@ lvim.plugins = {
         l = { "<cmd>AsyncTaskList<cr>", "List" },
       }
       lvim.builtin.which_key.mappings["r"] = {
-        name = " Run",
-        f = { "<cmd>AsyncTask file-run<cr>", "File" },
-        p = { "<cmd>AsyncTask project-run<cr>", "Project" },
+        name = " build",
+        f = { "<cmd>AsyncTask file-build<cr>", "File" },
+        p = { "<cmd>AsyncTask project-build<cr>", "Project" },
       }
     end,
-    disable = not lvim.custom.async_tasks.active,
+    enabled = lvim.custom.async_tasks.active,
   },
   {
     "GustavoKatel/telescope-asynctasks.nvim",
-    disable = not lvim.custom.async_tasks.active,
+    enabled = lvim.custom.async_tasks.active,
   },
   {
     "sindrets/diffview.nvim",
@@ -398,7 +399,7 @@ lvim.plugins = {
   },
   {
     "folke/zen-mode.nvim",
-    tag = "*",
+    version = "*",
     config = function()
       require("zen-mode").setup {
         -- your configuration comes here
@@ -409,7 +410,7 @@ lvim.plugins = {
   },
   {
     "sidebar-nvim/sidebar.nvim",
-    requires = { "sidebar-nvim/sections-dap" },
+    dependencies = { "sidebar-nvim/sections-dap" },
     config = function()
       lvim.builtin.which_key.mappings["S"] = {
         "<cmd>SidebarNvimToggle<CR>",
@@ -470,20 +471,20 @@ lvim.plugins = {
   },
   {
     "vim-pandoc/vim-pandoc",
-    disable = true,
+    enabled = false,
   },
   {
     "vim-pandoc/vim-pandoc-syntax",
-    disable = true,
+    enabled = false,
   },
   {
     "dhruvasagar/vim-table-mode",
     commit = "9555a3e6e5bcf285ec181b7fc983eea90500feb4",
-    disable = true,
+    enabled = false,
   },
   {
     "kevinhwang91/nvim-bqf",
-    tag = "*",
+    version = "*",
     event = { "BufRead", "BufNew" },
     config = function()
       require("bqf").setup {
@@ -510,10 +511,10 @@ lvim.plugins = {
   },
   {
     "nvim-telescope/telescope-project.nvim",
-    event = "BufWinEnter",
-    config = function()
-      vim.cmd [[packadd telescope.nvim]]
-    end,
+    -- event = "BufWinEnter",
+    -- config = function()
+    --   vim.cmd [[packadd telescope.nvim]]
+    -- end,
   },
   {
     "nvim-telescope/telescope-ui-select.nvim",
@@ -531,8 +532,8 @@ lvim.plugins = {
         respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
         cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
         easing_function = nil, -- Default easing function
-        pre_hook = nil, -- Function to run before the scrolling animation starts
-        post_hook = nil, -- Function to run after the scrolling animation ends
+        pre_hook = nil, -- Function to build before the scrolling animation starts
+        post_hook = nil, -- Function to build after the scrolling animation ends
       }
     end,
     cond = function()
@@ -541,21 +542,14 @@ lvim.plugins = {
   },
   {
     "folke/persistence.nvim",
-    tag = "*",
+    version = "*",
     event = "BufReadPre", -- this will only start session saving when an actual file was opened
-    module = "persistence",
+    lazy = true,
     config = function()
       require("persistence").setup {
         dir = vim.fn.expand(vim.fn.stdpath "config" .. "/session/"),
         options = { "buffers", "curdir", "tabpages", "winsize" },
       }
-    end,
-  },
-  {
-    "mfussenegger/nvim-jdtls",
-    tag = "*",
-    setup = function()
-      require("lspconfig").jdtls.setup = function(...) end
     end,
   },
   {
@@ -587,16 +581,377 @@ lvim.plugins = {
     end,
   },
   {
+    "mfussenegger/nvim-jdtls",
+    lazy = true,
+    -- opts = function(_, opts)
+    --   vim.opt_local.shiftwidth = 2
+    --   vim.opt_local.tabstop = 2
+    --   vim.opt_local.cmdheight = 2 -- more space in the neovim command line for displaying messages
+    --   vim.opt.cc = ""
+    --   vim.opt_local.foldcolumn = "1"
+    --   vim.opt_local.foldenable = true
+    --   vim.opt_local.signcolumn = "yes"
+
+    --   -- credit: https://github.com/ChristianChiarulli/nvim
+    --   local status_ok, jdtls = pcall(require, "jdtls")
+    --   if not status_ok then
+    --     return
+    --   end
+    --   local sha1 = require "sha1"
+    --   local home = vim.env.HOME
+    --   local jdtls_install_path = require("mason-registry").get_package("jdtls"):get_install_path()
+    --   -- Determine OS
+    --   local CONFIG = ""
+    --   if vim.fn.has "mac" == 1 then
+    --     CONFIG = "mac"
+    --   elseif vim.fn.has "unix" == 1 then
+    --     CONFIG = "linux"
+    --   elseif vim.fn.has "win32" == 1 then
+    --     CONFIG = "win"
+    --   else
+    --     vim.notify("Unsupported system", vim.log.levels.ERROR)
+    --     return
+    --   end
+
+    --   local launcher_path = vim.fn.glob(jdtls_install_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+    --   if #launcher_path == 0 then
+    --     vim.notify("jdtls: launcher not found", vim.log.levels.ERROR)
+    --     return
+    --   end
+
+    --   -- Find root of project
+    --   local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", ".project" }
+    --   local root_dir = require("jdtls.setup").find_root(root_markers)
+    --   if root_dir == "" then
+    --     vim.notify("jdtls: couldn't determine root directory of project", vim.log.levels.ERROR)
+    --     return
+    --   end
+    --   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+    --   local workspace_dir = vim.fn.stdpath "data" .. "/site/jdtls/workspace/" .. sha1.sha1(project_name)
+    --   -- os.execute("rm -rf " .. workspace_dir)
+    --   -- os.execute("mkdir -p " .. workspace_dir)
+    --   vim.notify("root dir: " .. root_dir)
+
+    --   -- Test bundle
+    --   -- Run :MasonInstall java-test
+    --   local bundles = {
+    --     vim.fn.glob(
+    --       require("mason-registry").get_package("java-debug-adapter"):get_install_path()
+    --         .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
+    --     ),
+    --   }
+    --   if #bundles == 0 then
+    --     require("astronvim.utils").notify("jdtls: java-debug-adapter not found", vim.log.levels.WARN)
+    --   end
+    --   -- Debug bundle
+    --   -- Run :MasonInstall java-debug-adapter
+    --   local extra_bundles = vim.split(
+    --     vim.fn.glob(require("mason-registry").get_package("java-test"):get_install_path() .. "/extension/server/*.jar"),
+    --     "\n",
+    --     {}
+    --   )
+
+    --   if #extra_bundles == 0 then
+    --     vim.notify("jdtls: java-test adapter not found", vim.log.levels.WARN)
+    --   end
+    --   vim.list_extend(bundles, extra_bundles)
+
+    --   local javaHome = home .. "/.local/lib/jvm-17"
+
+    --   local defaults = {
+    --     cmd = {
+    --       javaHome .. "/bin/java",
+    --       "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+    --       "-Dosgi.bundles.defaultStartLevel=4",
+    --       "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    --       "-Dosgi.checkConfiguration=true",
+    --       "-Dosgi.sharedConfiguration.area=" .. jdtls_install_path .. "/config_" .. CONFIG,
+    --       "-Dosgi.sharedConfiguration.area.readOnly=true",
+    --       "-Dosgi.configuration.cascaded=true",
+    --       "-XX:+UseParallelGC",
+    --       "-XX:GCTimeRatio=4",
+    --       "-XX:AdaptiveSizePolicyWeight=90",
+    --       "-Dsun.zip.disableMemoryMapping=true",
+    --       "-Xmx1G",
+    --       "-Xms100m",
+    --       "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
+    --       "--add-modules=ALL-SYSTEM",
+    --       "--add-opens",
+    --       "java.base/java.util=ALL-UNNAMED",
+    --       "--add-opens",
+    --       "java.base/java.lang=ALL-UNNAMED",
+    --       "-jar",
+    --       launcher_path,
+    --       "-data",
+    --       workspace_dir,
+    --     },
+    --     root_dir = root_dir,
+    --     -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
+    --     settings = {
+    --       java = {
+    --         jdt = {
+    --           ls = {
+    --             lombokSupport = { enabled = false },
+    --             protobufSupport = { enabled = false },
+    --           },
+    --         },
+    --         eclipse = {
+    --           downloadSources = true,
+    --         },
+    --         templates = {
+    --           fileHeader = {
+    --             "/**",
+    --             " * ${type_name}",
+    --             " * @author ${user}",
+    --             " */",
+    --           },
+    --           typeComment = {
+    --             "/**",
+    --             " * ${type_name}",
+    --             " * @author ${user}",
+    --             " */",
+    --           },
+    --         },
+    --         configuration = {
+    --           updateBuildConfiguration = "interactive",
+    --           runtimes = {
+    --             {
+    --               name = "JavaSE-17",
+    --               path = home .. "/.local/lib/jvm-17/",
+    --               default = true,
+    --             },
+    --           },
+    --         },
+    --         quickfix = {
+    --           showAt = "line",
+    --         },
+    --         rename = {
+    --           enabled = true,
+    --         },
+    --         import = {
+    --           enabled = true,
+    --         },
+    --         maven = {
+    --           downloadSources = true,
+    --         },
+    --         implementationsCodeLens = {
+    --           enabled = true,
+    --         },
+    --         referencesCodeLens = {
+    --           enabled = true,
+    --         },
+    --         references = {
+    --           includeDecompiledSources = true,
+    --         },
+    --         inlayHints = {
+    --           parameterNames = {
+    --             enabled = true,
+    --           },
+    --         },
+    --         format = {
+    --           enabled = true,
+    --           settings = {
+    --             profile = "GoogleStyle",
+    --             url = home .. "/.config/lvim/.java-google-formatter.xml",
+    --           },
+    --         },
+    --         signatureHelp = { enabled = true },
+    --         completion = {
+    --           favoriteStaticMembers = {
+    --             "java.util.Objects.requireNonNull",
+    --             "java.util.Objects.requireNonNullElse",
+    --             "org.mockito.Mockito.*",
+    --             "org.junit.jupiter.api.DynamicTest.*",
+    --             "org.junit.jupiter.api.Assertions.*",
+    --             "org.junit.jupiter.api.Assumptions.*",
+    --             "org.junit.jupiter.api.DynamicContainer.*",
+    --             "org.junit.Assert.*",
+    --             "org.junit.Assume.*",
+    --             "org.mockito.ArgumentMatchers.*",
+    --             "org.mockito.Mockito.*",
+    --             "org.mockito.Answers.*",
+    --           },
+    --           filteredTypes = {
+    --             "com.sun.*",
+    --             "io.micrometer.shaded.*",
+    --             "java.awt.*",
+    --             "jdk.*",
+    --             "sun.*",
+    --           },
+    --         },
+    --         contentProvider = { preferred = "fernflower" },
+    --         sources = {
+    --           organizeImports = {
+    --             starThreshold = 9999,
+    --             staticStarThreshold = 9999,
+    --           },
+    --         },
+    --         codeGeneration = {
+    --           toString = {
+    --             listArrayContents = true,
+    --             skipNullValues = true,
+    --             template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+    --           },
+    --           hashCodeEquals = {
+    --             useInstanceof = true,
+    --             useJava7Objects = true,
+    --           },
+    --           useBlocks = true,
+    --           generateComments = true,
+    --           insertLocation = true,
+    --         },
+    --         saveActions = {
+    --           organizeImports = false,
+    --         },
+    --         autobuild = {
+    --           enabled = true,
+    --         },
+    --         progressReports = {
+    --           enabled = false,
+    --         },
+    --       },
+    --     },
+    --     flags = {
+    --       allow_incremental_sync = true,
+    --       server_side_fuzzy_completion = true,
+    --     },
+    --     init_options = {
+    --       bundles = bundles,
+    --       extendedClientCapabilities = vim.tbl_deep_extend("keep", {
+    --         resolveAdditionalTextEditsSupport = true,
+    --         classFileContentsSupport = false,
+    --         overrideMethodsPromptSupport = true,
+    --         advancedGenerateAccessorsSupport = true,
+    --         gradleChecksumWrapperPromptSupport = true,
+    --         advancedIntroduceParameterRefactoringSupport = true,
+    --         actionableRuntimeNotificationSupport = true,
+    --         extractInterfaceSupport = true,
+    --       }, jdtls.extendedClientCapabilities),
+    --     },
+    --     handlers = {
+    --       ["language/status"] = vim.schedule_wrap(function(_, s)
+    --         if "ServiceReady" == s.type then
+    --           require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
+    --         end
+    --       end),
+    --       ["$/progress"] = function() end,
+    --     },
+    --     capabilities = {
+    --       workspace = {
+    --         configuration = true,
+    --       },
+    --       textDocument = {
+    --         completion = {
+    --           completionItem = {
+    --             snippetSupport = true,
+    --           },
+    --         },
+    --       },
+    --     },
+    --   }
+
+    --   -- ensure that table is valid
+    --   if not opts then
+    --     opts = {}
+    --   end
+
+    --   -- extend the current table with the defaults keeping options in the user opts
+    --   -- this allows users to pass opts through an opts table in community.lua
+    --   opts = vim.tbl_deep_extend("keep", opts, defaults or {})
+
+    --   -- send opts to config
+    --   return opts
+    -- end,
+    -- config = function(_, opts)
+    --   -- setup autocmd on filetype detect java
+    --   vim.api.nvim_create_autocmd("Filetype", {
+    --     pattern = "java", -- autocmd to start jdtls
+    --     callback = function()
+    --       vim.notify("root dir: " .. opts.root_dir)
+    --       if opts.root_dir and opts.root_dir ~= "" then
+    --         require("jdtls").start_or_attach(opts)
+    --         local wkstatus_ok, which_key = pcall(require, "which-key")
+    --         if wkstatus_ok then
+    --           local nopts = {
+    --             mode = "n",
+    --             prefix = "<leader>",
+    --             buffer = vim.fn.bufnr(),
+    --             silent = true,
+    --             noremap = true,
+    --             nowait = true,
+    --           }
+
+    --           local vopts = {
+    --             mode = "v",
+    --             prefix = "<leader>",
+    --             buffer = vim.fn.bufnr(),
+    --             silent = true,
+    --             noremap = true,
+    --             nowait = true,
+    --           }
+
+    --           local mappings = {
+    --             j = {
+    --               name = " Java",
+    --               o = { "<Cmd>lua require'jdtls'.organize_imports()<CR>", "Organize Imports" },
+    --               v = { "<Cmd>lua require('jdtls').extract_variable()<CR>", "Extract Variable" },
+    --               c = { "<Cmd>lua require('jdtls').extract_constant()<CR>", "Extract Constant" },
+    --               t = { "<Cmd>lua require'jdtls'.test_nearest_method()<CR>", "Test Method" },
+    --               T = { "<Cmd>lua require'jdtls'.test_class()<CR>", "Test Class" },
+    --               u = { "<Cmd>JdtUpdateConfig<CR>", "Update Config" },
+    --               i = { "<Cmd>JdtCompile incremental<CR>", "Compile incrementaly" },
+    --               f = { "<Cmd>JdtCompile full<CR>", "Compile fully" },
+    --               s = { "<Cmd>lua require'jdtls'.super_implementation()<CR>", "Go to super implementation" },
+    --               r = { "<Cmd>JdtSetRuntime<CR>", "Set runtime" },
+    --             },
+    --           }
+
+    --           local vmappings = {
+    --             j = {
+    --               name = " Java",
+    --               v = { "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>", "Extract Variable" },
+    --               c = { "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>", "Extract Constant" },
+    --               m = { "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>", "Extract Method" },
+    --             },
+    --           }
+
+    --           which_key.register(mappings, nopts)
+    --           which_key.register(vmappings, vopts)
+    --         end
+    --       else
+    --         vim.notify("jdtls: root_dir not found. Please specify a root marker", vim.log.levels.ERROR)
+    --       end
+    --     end,
+    --   })
+
+    --   -- create autocmd to load main class configs on LspAttach.
+    --   -- This ensures that the LSP is fully attached.
+    --   -- See https://github.com/mfussenegger/nvim-jdtls#nvim-dap-configuration
+    --   vim.api.nvim_create_autocmd("LspAttach", {
+    --     pattern = "*.java",
+    --     callback = function(args)
+    --       local client = vim.lsp.get_client_by_id(args.data.client_id)
+    --       -- ensure that only the jdtls client is activated
+    --       if client.name == "jdtls" then
+    --         require("jdtls.setup").add_commands()
+    --         require("jdtls").setup_dap { hotcodereplace = "auto" }
+    --         require("jdtls.dap").setup_dap_main_class_configs()
+    --       end
+    --     end,
+    --   })
+    -- end,
+  },
+  {
     "theHamsta/nvim-dap-virtual-text",
     after = "nvim-dap",
     config = function()
       require("nvim-dap-virtual-text").setup()
     end,
-    disable = not lvim.builtin.dap.active,
+    enabled = lvim.builtin.dap.active,
   },
   {
     "AckslD/nvim-neoclip.lua",
-    requires = { { "tami5/sqlite.lua", module = "sqlite" } },
+    dependencies = { { "tami5/sqlite.lua", module = "sqlite" } },
     config = function()
       require("neoclip").setup {
         history = 1000,
@@ -648,7 +1003,7 @@ lvim.plugins = {
   -- {
   --   "~/workspace/luvcron/",
   -- },
-  { "gpanders/editorconfig.nvim", tag = "*" },
+  { "gpanders/editorconfig.nvim", version = "*" },
   {
     "stevearc/dressing.nvim",
     config = function()
@@ -710,14 +1065,14 @@ lvim.plugins = {
         " let g:vista_fzf_preview = ['right:50%']
         " let g:vista_fzf_opt = []
         " let g:vista_keep_fzf_colors = 0
-        " let g:vista_ctags_executable = 'ctags'
-        " let g:vista_ctags_cmd = {}
+        " let g:vista_cversions_executable = 'cversions'
+        " let g:vista_cversions_cmd = {}
         " let g:vista_highlight_whole_line = 0
         " let g:vista_floating_delay = 100
         " let g:vista#renderer#enable_icon = exists('g:vista#renderer#icons') || exists('g:airline_powerline_fonts')
         " let g:vista#renderer#enable_kind = !g:vista#renderer#enable_icon
         " let g:vista#renderer#icons = {}
-        " let g:vista#renderer#ctags = 'default'
+        " let g:vista#renderer#cversions = 'default'
       ]]
       lvim.builtin.which_key.mappings.l.o = {
         "<cmd>SymbolsOutline<CR>",
@@ -728,16 +1083,16 @@ lvim.plugins = {
   },
   {
     "ray-x/lsp_signature.nvim",
-    tag = "*",
+    version = "*",
     event = "BufRead",
     config = function()
       require("lsp_signature").on_attach()
     end,
-    disable = true,
+    enabled = false,
   },
   {
     "gennaro-tedesco/nvim-peekup",
-    tag = "*",
+    version = "*",
   },
   {
     "ggandor/leap.nvim",
@@ -784,7 +1139,7 @@ lvim.plugins = {
   },
   {
     "simrat39/rust-tools.nvim",
-    requires = { "nvim-lua/plenary.nvim", "mfussenegger/nvim-dap" },
+    dependencies = { "nvim-lua/plenary.nvim", "mfussenegger/nvim-dap" },
     config = function()
       local rt = require "rust-tools"
       rt.setup {
@@ -801,13 +1156,13 @@ lvim.plugins = {
   },
   {
     "jackMort/ChatGPT.nvim",
-    tag = "*",
+    version = "*",
     config = function()
       require("chatgpt").setup {
         -- optional configuration
       }
     end,
-    requires = {
+    dependencies = {
       "MunifTanjim/nui.nvim",
       "nvim-lua/plenary.nvim",
       "nvim-telescope/telescope.nvim",
@@ -815,8 +1170,8 @@ lvim.plugins = {
   },
   {
     "dense-analysis/neural",
-    requires = {
-      "muniftanjim/nui.nvim",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
       "elpiloto/significant.nvim",
     },
     config = function()
@@ -831,11 +1186,11 @@ lvim.plugins = {
   },
   {
     "folke/noice.nvim",
-    tag = "*",
+    version = "*",
     config = function()
       require("user.noice").config()
     end,
-    requires = {
+    dependencies = {
       -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
       "MunifTanjim/nui.nvim",
       -- OPTIONAL:
