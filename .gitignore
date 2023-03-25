@@ -50,5 +50,8 @@ luac.out
 
 # LunarVim
 plugin/
+lazy-lock.json
 
 .luacheckcache
+.luarc.json
+lsp-settings/jdtls.json
