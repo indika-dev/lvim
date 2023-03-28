@@ -128,35 +128,35 @@ end
 lvim.lsp.diagnostics.virtual_text = true
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
-lvim.lsp.installer.setup.automatic_installation = true
--- vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
--- lvim.lsp.installer.setup.ensure_installed.ensure_installed = {
---   "rust_analyzer",
---   "jdtls",
---   "tsserver",
---   "jsonls",
---   "sumneko_lua",
---   "bashls",
---   "cssls",
---   "dockerls",
---   "eslint",
---   "html",
---   "pyright",
---   "taplo",
---   "vimls",
---   "vuels",
---   "yamlls",
---   "marksman",
---   "lemminx",
--- }
+lvim.lsp.installer.setup.automatic_installation = false
+vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
+lvim.lsp.installer.setup.ensure_installed.ensure_installed = {
+  "rust_analyzer",
+  "jdtls",
+  "tsserver",
+  "jsonls",
+  "sumneko_lua",
+  "bashls",
+  "cssls",
+  "dockerls",
+  "eslint",
+  "html",
+  "pyright",
+  "taplo",
+  "vimls",
+  "vuels",
+  "yamlls",
+  "marksman",
+  "lemminx",
+}
 --
 -- require("mason-lspconfig").setup {
 --   automatic_installation = true,
 --   ensure_installed = {
---     "jdtls",
+--     -- "jdtls",
 --     "tsserver",
 --     "jsonls",
---     "sumneko_lua",
+--     "lua_ls",
 --     "bashls",
 --     "cssls",
 --     "dockerls",
@@ -554,22 +554,32 @@ lvim.plugins = {
   },
   {
     "jay-babu/mason-null-ls.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+      "williamboman/mason.nvim",
+      "jose-elias-alvarez/null-ls.nvim",
+    },
     after = { "mason.nvim" },
     config = function()
-      require("mason-nvim-dap").setup {
+      require("mason-null-ls").setup {
         ensure_installed = {
           "shellcheck",
           "shfmt",
           "prettier",
           "eslint_d",
+          "fixjson",
         },
-        automatic_installation = true,
+        automatic_installation = false,
+        automatic_setup = true,
       }
     end,
   },
   {
     "jay-babu/mason-nvim-dap.nvim",
-    after = { "mason.nvim" },
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+      "williamboman/mason.nvim",
+    },
     config = function()
       require("mason-nvim-dap").setup {
         ensure_installed = {
@@ -577,6 +587,7 @@ lvim.plugins = {
           "java-test",
         },
         automatic_installation = true,
+        automatic_setup = true,
       }
     end,
   },
