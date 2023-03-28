@@ -130,12 +130,12 @@ lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
 lvim.lsp.installer.setup.automatic_installation = false
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
-lvim.lsp.installer.setup.ensure_installed.ensure_installed = {
+lvim.lsp.installer.setup.ensure_installed = {
   "rust_analyzer",
   "jdtls",
   "tsserver",
   "jsonls",
-  "sumneko_lua",
+  "lua_ls",
   "bashls",
   "cssls",
   "dockerls",
