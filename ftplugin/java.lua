@@ -108,6 +108,8 @@ local config = {
     launcher_path,
     "-data",
     workspace_dir,
+    "-configuration",
+    jdtls_install_path .. "/config_" .. CONFIG,
   },
   on_attach = function(client, bufnr)
     local _, _ = pcall(vim.lsp.codelens.refresh)
@@ -233,7 +235,7 @@ local config = {
         insertLocation = true,
       },
       saveActions = {
-        organizeImports = false,
+        organizeImports = true,
       },
       autobuild = {
         enabled = true,
@@ -252,19 +254,18 @@ local config = {
     extendedClientCapabilities = vim.tbl_deep_extend("keep", {
       resolveAdditionalTextEditsSupport = true,
       classFileContentsSupport = false,
-      -- overrideMethodsPromptSupport = true,
-      -- advancedGenerateAccessorsSupport = true,
+      overrideMethodsPromptSupport = true,
+      advancedGenerateAccessorsSupport = true,
       -- gradleChecksumWrapperPromptSupport = true,
-      -- advancedIntroduceParameterRefactoringSupport = true,
+      advancedIntroduceParameterRefactoringSupport = true,
       -- actionableRuntimeNotificationSupport = true,
-      -- extractInterfaceSupport = true,
+      extractInterfaceSupport = true,
     }, jdtls.extendedClientCapabilities),
   },
   handlers = {
     ["language/status"] = vim.schedule_wrap(function(_, s)
-      if "ServiceReady" == s.type and lvim.custom.jdtls and lvim.custom.jdtls.first_start == false then
+      if "ServiceReady" == s.type then
         require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
-        lvim.custom.jdtls.first_start = true
       end
       -- command "echohl ModeMsg"
       -- command(string.format('echo "%s"', s.message))
