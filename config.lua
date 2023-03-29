@@ -289,14 +289,15 @@ end
 lvim.plugins = {
   {
     "Shatur/neovim-ayu",
-    config = function()
+    opts = {
+      options = {
+        theme = "ayu",
+      },
+    },
+    config = function(_, opts)
       local status_ok, lualine = pcall(require, "lualine")
       if status_ok then
-        lualine.setup {
-          options = {
-            theme = "ayu",
-          },
-        }
+        lualine.setup(opts)
       end
     end,
   },
@@ -313,17 +314,18 @@ lvim.plugins = {
   -- },
   {
     "rebelot/kanagawa.nvim",
-    config = function()
-      require("kanagawa").setup {
-        overrides = function(colors)
-          return {
-            LspReferenceText = { fg = "NONE", bg = "NONE" },
-            -- LspReferenceRead = { bg = "#49443c" },
-            -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
-            LspReferenceWrite = { link = "LspReferenceRead" },
-          }
-        end,
-      }
+    opts = {
+      overrides = function(colors)
+        return {
+          LspReferenceText = { fg = "NONE", bg = "NONE" },
+          -- LspReferenceRead = { bg = "#49443c" },
+          -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
+          LspReferenceWrite = { link = "LspReferenceRead" },
+        }
+      end,
+    },
+    config = function(_, opts)
+      require("kanagawa").setup(opts)
     end,
     -- cond = function()
     --   local _time = os.date "*t"
@@ -340,23 +342,15 @@ lvim.plugins = {
   },
   {
     "norcalli/nvim-colorizer.lua",
-    config = function()
-      require("colorizer").setup({ "*" }, {
-        RGB = true, -- #RGB hex codes
-        RRGGBB = true, -- #RRGGBB hex codes
-        RRGGBBAA = true, -- #RRGGBBAA hex codes
-        rgb_fn = true, -- CSS rgb() and rgba() functions
-        hsl_fn = true, -- CSS hsl() and hsla() functions
-        css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-        css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
-      })
+    config = function(_, _)
+      require("colorizer").setup()
     end,
   },
   {
     "wfxr/minimap.vim",
     build = "cargo install --locked code-minimap",
     -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
-    config = function()
+    config = function(_, _)
       vim.cmd [[
         let g:minimap_width = 10
         let g:minimap_auto_start = 0
@@ -368,7 +362,7 @@ lvim.plugins = {
   {
     "skywind3000/asynctasks.vim",
     dependencies = { "skywind3000/asyncbuild.vim" },
-    config = function()
+    config = function(_, _)
       vim.cmd [[
           let g:asyncbuild_open = 8
           let g:asynctask_template = '~/.config/lvim/task_template.ini'
@@ -400,18 +394,67 @@ lvim.plugins = {
   {
     "folke/zen-mode.nvim",
     version = "*",
-    config = function()
-      require("zen-mode").setup {
-        -- your configuration comes here
-        -- or leave it empty to use the default settings
-        -- refer to the configuration section below
-      }
+    opts = {
+      window = {
+        backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
+        -- height and width can be:
+        -- * an absolute number of cells when > 1
+        -- * a percentage of the width / height of the editor when <= 1
+        -- * a function that returns the width or the height
+        width = 120, -- width of the Zen window
+        height = 1, -- height of the Zen window
+        -- by default, no options are changed for the Zen window
+        -- uncomment any of the options below, or add other vim.wo options you want to apply
+        options = {
+          -- signcolumn = "no", -- disable signcolumn
+          -- number = false, -- disable number column
+          -- relativenumber = false, -- disable relative numbers
+          -- cursorline = false, -- disable cursorline
+          -- cursorcolumn = false, -- disable cursor column
+          -- foldcolumn = "0", -- disable fold column
+          -- list = false, -- disable whitespace characters
+        },
+      },
+      plugins = {
+        -- disable some global vim options (vim.o...)
+        -- comment the lines to not apply the options
+        options = {
+          enabled = true,
+          ruler = false, -- disables the ruler text in the cmd line area
+          showcmd = false, -- disables the command in the last line of the screen
+        },
+        twilight = { enabled = true }, -- enable to start Twilight when zen mode opens
+        gitsigns = { enabled = false }, -- disables git signs
+        tmux = { enabled = false }, -- disables the tmux statusline
+        -- this will change the font size on kitty when in zen mode
+        -- to make this work, you need to set the following kitty options:
+        -- - allow_remote_control socket-only
+        -- - listen_on unix:/tmp/kitty
+        kitty = {
+          enabled = false,
+          font = "+4", -- font size increment
+        },
+        -- this will change the font size on alacritty when in zen mode
+        -- requires  Alacritty Version 0.10.0 or higher
+        -- uses `alacritty msg` subcommand to change font size
+        alacritty = {
+          enabled = false,
+          font = "14", -- font size
+        },
+      },
+      -- callback where you can add custom code when the Zen window opens
+      on_open = function(win) end,
+      -- callback where you can add custom code when the Zen window closes
+      on_close = function() end,
+    },
+    config = function(_, opts)
+      require("zen-mode").setup(opts)
     end,
   },
   {
     "sidebar-nvim/sidebar.nvim",
     dependencies = { "sidebar-nvim/sections-dap" },
-    config = function()
+    config = function(_, _)
       lvim.builtin.which_key.mappings["S"] = {
         "<cmd>SidebarNvimToggle<CR>",
         require("user.lsp_kind").cmp_kind.Struct .. "Sidebar",
@@ -451,7 +494,8 @@ lvim.plugins = {
     "ThePrimeagen/refactoring.nvim",
     ft = { "typescript", "javascript", "lua", "c", "cpp", "go", "python", "java", "php" },
     event = "BufRead",
-    config = function()
+    opts = {},
+    config = function(_, opts)
       -- -- remap to open the Telescope refactoring menu in visual mode
       -- vim.api.nvim_set_keymap(
       --   "v",
@@ -466,7 +510,7 @@ lvim.plugins = {
       --   "<Cmd>lua require('refactoring').select_refactor()<CR>",
       --   { noremap = true, silent = true, expr = false }
       -- )
-      require("refactoring").setup {}
+      require("refactoring").setup(opts)
     end,
   },
   {
@@ -486,27 +530,28 @@ lvim.plugins = {
     "kevinhwang91/nvim-bqf",
     version = "*",
     event = { "BufRead", "BufNew" },
-    config = function()
-      require("bqf").setup {
-        auto_enable = true,
-        preview = {
-          win_height = 12,
-          win_vheight = 12,
-          delay_syntax = 80,
-          border_chars = { "┃", "┃", "━", "━", "┏", "┓", "┗", "┛", "█" },
+    opts = {
+      auto_enable = true,
+      preview = {
+        win_height = 12,
+        win_vheight = 12,
+        delay_syntax = 80,
+        border_chars = { "┃", "┃", "━", "━", "┏", "┓", "┗", "┛", "█" },
+      },
+      func_map = {
+        vsplit = "",
+        ptogglemode = "z,",
+        stoggleup = "",
+      },
+      filter = {
+        fzf = {
+          action_for = { ["ctrl-s"] = "split" },
+          extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", "> " },
         },
-        func_map = {
-          vsplit = "",
-          ptogglemode = "z,",
-          stoggleup = "",
-        },
-        filter = {
-          fzf = {
-            action_for = { ["ctrl-s"] = "split" },
-            extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", "> " },
-          },
-        },
-      }
+      },
+    },
+    config = function(_, opts)
+      require("bqf").setup(opts)
     end,
   },
   {
@@ -522,19 +567,20 @@ lvim.plugins = {
   {
     "karb94/neoscroll.nvim",
     event = "WinScrolled",
-    config = function()
-      require("neoscroll").setup {
-        -- All these keys will be mapped to their corresponding default scrolling animation
-        mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
-        hide_cursor = true, -- Hide cursor while scrolling
-        stop_eof = true, -- Stop at <EOF> when scrolling downwards
-        use_local_scrolloff = false, -- Use the local scope of scrolloff instead of the global scope
-        respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
-        cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-        easing_function = nil, -- Default easing function
-        pre_hook = nil, -- Function to build before the scrolling animation starts
-        post_hook = nil, -- Function to build after the scrolling animation ends
-      }
+    opts = {
+      -- All these keys will be mapped to their corresponding default scrolling animation
+      mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
+      hide_cursor = true, -- Hide cursor while scrolling
+      stop_eof = true, -- Stop at <EOF> when scrolling downwards
+      use_local_scrolloff = false, -- Use the local scope of scrolloff instead of the global scope
+      respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+      cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+      easing_function = nil, -- Default easing function
+      pre_hook = nil, -- Function to build before the scrolling animation starts
+      post_hook = nil, -- Function to build after the scrolling animation ends
+    },
+    config = function(_, opts)
+      require("neoscroll").setup(opts)
     end,
     cond = function()
       return not vim.g.neovide and not vim.g.nvui
@@ -545,11 +591,12 @@ lvim.plugins = {
     version = "*",
     event = "BufReadPre", -- this will only start session saving when an actual file was opened
     lazy = true,
-    config = function()
-      require("persistence").setup {
-        dir = vim.fn.expand(vim.fn.stdpath "config" .. "/session/"),
-        options = { "buffers", "curdir", "tabpages", "winsize" },
-      }
+    opts = {
+      dir = vim.fn.expand(vim.fn.stdpath "config" .. "/session/"),
+      options = { "buffers", "curdir", "tabpages", "winsize" },
+    },
+    config = function(_, opts)
+      require("persistence").setup(opts)
     end,
   },
   {
@@ -559,19 +606,19 @@ lvim.plugins = {
       "williamboman/mason.nvim",
       "jose-elias-alvarez/null-ls.nvim",
     },
-    after = { "mason.nvim" },
-    config = function()
-      require("mason-null-ls").setup {
-        ensure_installed = {
-          "shellcheck",
-          "shfmt",
-          "prettier",
-          "eslint_d",
-          "fixjson",
-        },
-        automatic_installation = false,
-        automatic_setup = true,
-      }
+    opts = {
+      ensure_installed = {
+        "shellcheck",
+        "shfmt",
+        "prettier",
+        "eslint_d",
+        "fixjson",
+      },
+      automatic_installation = false,
+      automatic_setup = true,
+    },
+    config = function(_, opts)
+      require("mason-null-ls").setup(opts)
     end,
   },
   {
@@ -580,78 +627,106 @@ lvim.plugins = {
     dependencies = {
       "williamboman/mason.nvim",
     },
-    config = function()
-      require("mason-nvim-dap").setup {
-        ensure_installed = {
-          "java-debug-adapter",
-          "java-test",
-        },
-        automatic_installation = true,
-        automatic_setup = true,
-      }
+    opts = {
+      ensure_installed = {
+        "javadbg",
+        "javatest",
+      },
+      automatic_installation = true,
+      automatic_setup = true,
+    },
+    config = function(_, opts)
+      require("mason-nvim-dap").setup(opts)
     end,
   },
   {
     "mfussenegger/nvim-jdtls",
+    ft = { "java" },
     lazy = true,
   },
   {
     "theHamsta/nvim-dap-virtual-text",
-    after = "nvim-dap",
-    config = function()
-      require("nvim-dap-virtual-text").setup()
+    dependencies = { "mfussenegger/nvim-dap" },
+    opts = {
+      enabled = true, -- enable this plugin (the default)
+      enabled_commands = true, -- create commands DapVirtualTextEnable, DapVirtualTextDisable, DapVirtualTextToggle, (DapVirtualTextForceRefresh for refreshing when debug adapter did not notify its termination)
+      highlight_changed_variables = true, -- highlight changed values with NvimDapVirtualTextChanged, else always NvimDapVirtualText
+      highlight_new_as_changed = false, -- highlight new variables in the same way as changed variables (if highlight_changed_variables)
+      show_stop_reason = true, -- show stop reason when stopped for exceptions
+      commented = false, -- prefix virtual text with comment string
+      only_first_definition = true, -- only show virtual text at first definition (if there are multiple)
+      all_references = false, -- show virtual text on all all references of the variable (not only definitions)
+      --- A callback that determines how a variable is displayed or whether it should be omitted
+      --- @param variable Variable https://microsoft.github.io/debug-adapter-protocol/specification#Types_Variable
+      --- @param buf number
+      --- @param stackframe dap.StackFrame https://microsoft.github.io/debug-adapter-protocol/specification#Types_StackFrame
+      --- @param node userdata tree-sitter node identified as variable definition of reference (see `:h tsnode`)
+      --- @return string|nil A text how the virtual text should be displayed or nil, if this variable shouldn't be displayed
+      display_callback = function(variable, _buf, _stackframe, _node)
+        return variable.name .. " = " .. variable.value
+      end,
+
+      -- experimental features:
+      virt_text_pos = "eol", -- position of virtual text, see `:h nvim_buf_set_extmark()`
+      all_frames = false, -- show virtual text for all stack frames not only current. Only works for debugpy on my machine.
+      virt_lines = false, -- show virtual lines instead of virtual text (will flicker!)
+      virt_text_win_col = nil, -- position the virtual text at a fixed window column (starting from the first text column) ,
+    },
+    config = function(_, opts)
+      require("nvim-dap-virtual-text").setup(opts)
     end,
     enabled = lvim.builtin.dap.active,
   },
   {
     "AckslD/nvim-neoclip.lua",
     dependencies = { { "tami5/sqlite.lua", module = "sqlite" } },
-    config = function()
-      require("neoclip").setup {
-        history = 1000,
-        enable_persistent_history = false,
-        length_limit = 1048576,
-        continuous_sync = false,
-        db_path = vim.fn.stdpath "data" .. "/databases/neoclip.sqlite3",
-        filter = nil,
-        preview = true,
-        default_register = '"',
-        default_register_macros = "q",
-        enable_macro_history = true,
-        content_spec_column = false,
-        on_paste = {
-          set_reg = false,
-        },
-        on_replay = {
-          set_reg = false,
-        },
-        keys = {
-          telescope = {
-            i = {
-              select = "<cr>",
-              paste = "<c-p>",
-              paste_behind = "<c-k>",
-              replay = "<c-q>", -- replay a macro
-              delete = "<c-d>", -- delete an entry
-              custom = {},
-            },
-            n = {
-              select = "<cr>",
-              paste = "p",
-              paste_behind = "P",
-              replay = "q",
-              delete = "d",
-              custom = {},
-            },
+    opts = {
+      history = 1000,
+      enable_persistent_history = false,
+      length_limit = 1048576,
+      continuous_sync = false,
+      db_path = vim.fn.stdpath "data" .. "/databases/neoclip.sqlite3",
+      filter = nil,
+      preview = true,
+      default_register = '"',
+      default_register_macros = "q",
+      enable_macro_history = true,
+      content_spec_column = false,
+      on_paste = {
+        set_reg = false,
+      },
+      on_replay = {
+        set_reg = false,
+      },
+      keys = {
+        telescope = {
+          i = {
+            select = "<cr>",
+            paste = "<c-p>",
+            paste_behind = "<c-k>",
+            replay = "<c-q>", -- replay a macro
+            delete = "<c-d>", -- delete an entry
+            custom = {},
           },
-          fzf = {
-            select = "default",
-            paste = "ctrl-p",
-            paste_behind = "ctrl-k",
+          n = {
+            select = "<cr>",
+            paste = "p",
+            paste_behind = "P",
+            replay = "q",
+            delete = "d",
             custom = {},
           },
         },
-      }
+        fzf = {
+          select = "default",
+          paste = "ctrl-p",
+          paste_behind = "ctrl-k",
+          custom = {},
+        },
+      },
+    },
+    config = function(_, opts)
+      require("neoclip").setup(opts)
     end,
   },
   -- {
@@ -660,30 +735,31 @@ lvim.plugins = {
   { "gpanders/editorconfig.nvim", version = "*" },
   {
     "stevearc/dressing.nvim",
-    config = function()
-      require("dressing").setup {
-        input = {
-          get_config = function()
-            if vim.api.nvim_buf_get_option(0, "filetype") == "neo-tree" then
-              return { enabled = false }
-            end
+    opts = {
+      input = {
+        get_config = function()
+          if vim.api.nvim_buf_get_option(0, "filetype") == "neo-tree" then
+            return { enabled = false }
+          end
+        end,
+      },
+      select = {
+        format_item_override = {
+          codeaction = function(action_tuple)
+            local title = action_tuple[2].title:gsub("\r\n", "\\r\\n")
+            local client = vim.lsp.get_client_by_id(action_tuple[1])
+            return string.format("%s\t[%s]", title:gsub("\n", "\\n"), client.name)
           end,
         },
-        select = {
-          format_item_override = {
-            codeaction = function(action_tuple)
-              local title = action_tuple[2].title:gsub("\r\n", "\\r\\n")
-              local client = vim.lsp.get_client_by_id(action_tuple[1])
-              return string.format("%s\t[%s]", title:gsub("\n", "\\n"), client.name)
-            end,
-          },
-        },
-      }
+      },
+    },
+    config = function(_, opts)
+      require("dressing").setup(opts)
     end,
   },
   {
     "liuchengxu/vista.vim",
-    config = function()
+    config = function(_, _)
       vim.g.vista_default_executive = "nvim_lsp"
       vim.g.vista_echo_cursor_strategy = "floating_win"
       vim.g.vista_floating_delay = 100
@@ -739,8 +815,14 @@ lvim.plugins = {
     "ray-x/lsp_signature.nvim",
     version = "*",
     event = "BufRead",
-    config = function()
-      require("lsp_signature").on_attach()
+    opts = {
+      bind = true, -- This is mandatory, otherwise border config won't get registered.
+      handler_opts = {
+        border = "rounded",
+      },
+    },
+    config = function(_, opts)
+      require("lsp_signature").setup(opts)
     end,
     enabled = false,
   },
@@ -750,7 +832,8 @@ lvim.plugins = {
   },
   {
     "ggandor/leap.nvim",
-    config = function()
+    dependencies = { "tpope/vim-repeat" },
+    config = function(_, _)
       local status_ok, leap = pcall(require, "leap")
       if status_ok then
         leap.add_default_mappings()
@@ -759,7 +842,7 @@ lvim.plugins = {
   },
   {
     "ggandor/leap-ast.nvim",
-    config = function()
+    config = function(_, _)
       lvim.builtin.which_key.mappings.s.l = {
         function()
           require("leap-ast").leap()
@@ -773,18 +856,19 @@ lvim.plugins = {
   {
     "ellisonleao/glow.nvim",
     ft = { "markdown" },
-    config = function()
+    opts = {
+      border = "shadow", -- floating window border config
+      style = "dark|light", -- filled automatically with your current editor background, you can override using glow json style
+      pager = false,
+      width = 80,
+      height = 100,
+      width_ratio = 0.7, -- maximum width of the Glow window compared to the nvim window size (overrides `width`)
+      height_ratio = 0.7,
+    },
+    config = function(_, opts)
       local status_ok, glow = pcall(require, "glow")
       if status_ok then
-        glow.setup {
-          border = "shadow", -- floating window border config
-          style = "dark|light", -- filled automatically with your current editor background, you can override using glow json style
-          pager = false,
-          width = 80,
-          height = 100,
-          width_ratio = 0.7, -- maximum width of the Glow window compared to the nvim window size (overrides `width`)
-          height_ratio = 0.7,
-        }
+        glow.setup(opts)
       end
     end,
   },
@@ -794,7 +878,7 @@ lvim.plugins = {
   {
     "simrat39/rust-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "mfussenegger/nvim-dap" },
-    config = function()
+    config = function(_, _)
       local rt = require "rust-tools"
       rt.setup {
         server = {
@@ -811,16 +895,15 @@ lvim.plugins = {
   {
     "jackMort/ChatGPT.nvim",
     version = "*",
-    config = function()
-      require("chatgpt").setup {
-        -- optional configuration
-      }
-    end,
     dependencies = {
       "MunifTanjim/nui.nvim",
       "nvim-lua/plenary.nvim",
       "nvim-telescope/telescope.nvim",
     },
+    opts = {},
+    config = function(_, opts)
+      require("chatgpt").setup(opts)
+    end,
   },
   {
     "dense-analysis/neural",
@@ -828,20 +911,21 @@ lvim.plugins = {
       "MunifTanjim/nui.nvim",
       "elpiloto/significant.nvim",
     },
-    config = function()
-      require("neural").setup {
-        source = {
-          openai = {
-            api_key = vim.env.OPENAI_API_KEY,
-          },
+    opts = {
+      source = {
+        openai = {
+          api_key = vim.env.OPENAI_API_KEY,
         },
-      }
+      },
+    },
+    config = function(_, opts)
+      require("neural").setup(opts)
     end,
   },
   {
     "folke/noice.nvim",
     version = "*",
-    config = function()
+    config = function(_, _)
       require("user.noice").config()
     end,
     dependencies = {
@@ -858,12 +942,13 @@ lvim.plugins = {
   },
   {
     "ethanholz/nvim-lastplace",
-    config = function()
-      require("nvim-lastplace").setup {
-        lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
-        lastplace_ignore_filetype = { "gitcommit", "gitrebase", "svn", "hgcommit" },
-        lastplace_open_folds = true,
-      }
+    opts = {
+      lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
+      lastplace_ignore_filetype = { "gitcommit", "gitrebase", "svn", "hgcommit" },
+      lastplace_open_folds = true,
+    },
+    config = function(_, opts)
+      require("nvim-lastplace").setup(opts)
     end,
   },
 }
