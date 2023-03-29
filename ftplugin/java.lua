@@ -46,11 +46,11 @@ if root_dir == "" then
   return
 end
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
-local workspace_dir = vim.fn.stdpath "data" .. "/site/jdtls/workspace/" .. sha1.sha1(project_name)
-if not lvim.custom.jdtls.first_start or lvim.custom.jdtls.first_start == false then
-  os.execute("rm -rf " .. workspace_dir)
-  os.execute("mkdir -p " .. workspace_dir)
-end
+local workspace_dir = vim.fn.stdpath "cache" .. "/jdtls/workspace/" .. project_name
+-- if not lvim.custom.jdtls.first_start or lvim.custom.jdtls.first_start == false then
+--   os.execute("rm -rf " .. workspace_dir)
+--   os.execute("mkdir -p " .. workspace_dir)
+-- end
 
 -- Test bundle
 -- Run :MasonInstall java-test
@@ -114,7 +114,6 @@ local config = {
   },
   on_attach = function(client, bufnr)
     local _, _ = pcall(vim.lsp.codelens.refresh)
-    require("jdtls").setup_dap { hotcodereplace = "auto" }
     require("jdtls.setup").add_commands()
     require("lvim.lsp").common_on_attach(client, bufnr)
   end,
@@ -273,6 +272,7 @@ local config = {
             command "echohl None"
           end,
         }
+        require("jdtls").setup_dap { hotcodereplace = "auto" }
       end
     end),
     ["$/progress"] = vim.schedule_wrap(function(_, result)
