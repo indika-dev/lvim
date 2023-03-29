@@ -80,7 +80,8 @@ if #extra_bundles == 0 then
 end
 vim.list_extend(bundles, extra_bundles)
 
-local javaHome = home .. "/.local/lib/jvm-17"
+-- local javaHome = home .. "/.local/lib/jvm-17"
+local javaHome = home .. "/.sdkman/candidates/java/17.0.6-tem"
 
 local config = {
   cmd = {
@@ -113,10 +114,8 @@ local config = {
   },
   on_attach = function(client, bufnr)
     local _, _ = pcall(vim.lsp.codelens.refresh)
+    require("jdtls").setup_dap { hotcodereplace = "auto" }
     require("jdtls.setup").add_commands()
-    if lvim.builtin.dap.active then
-      require("jdtls").setup_dap { hotcodereplace = "auto" }
-    end
     require("lvim.lsp").common_on_attach(client, bufnr)
   end,
   root_dir = root_dir,
@@ -260,16 +259,21 @@ local config = {
       advancedIntroduceParameterRefactoringSupport = true,
       -- actionableRuntimeNotificationSupport = true,
       extractInterfaceSupport = true,
+      onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
     }, jdtls.extendedClientCapabilities),
   },
   handlers = {
     ["language/status"] = vim.schedule_wrap(function(_, s)
       if "ServiceReady" == s.type then
-        require("jdtls.dap").setup_dap_main_class_configs { verbose = true }
+        require("jdtls.dap").setup_dap_main_class_configs {
+          verbose = true,
+          on_ready = function()
+            command "echohl ModeMsg"
+            command(string.format('echo "jdt.ls %s"', s.message))
+            command "echohl None"
+          end,
+        }
       end
-      -- command "echohl ModeMsg"
-      -- command(string.format('echo "%s"', s.message))
-      -- command "echohl None"
     end),
     ["$/progress"] = vim.schedule_wrap(function(_, result)
       -- command "echohl ModeMsg"
