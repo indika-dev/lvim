@@ -289,6 +289,7 @@ end
 lvim.plugins = {
   {
     "Shatur/neovim-ayu",
+    priority = 1000, -- Ensure it loads first
     opts = {
       options = {
         theme = "ayu",
@@ -314,6 +315,7 @@ lvim.plugins = {
   -- },
   {
     "rebelot/kanagawa.nvim",
+    priority = 1000, -- Ensure it loads first
     opts = {
       overrides = function(colors)
         return {
@@ -333,11 +335,15 @@ lvim.plugins = {
     -- end,
   },
   {
+    "olimorris/onedarkpro.nvim",
+    priority = 1000, -- Ensure it loads first
+  },
+  {
     "nvim-telescope/telescope-dap.nvim",
   },
   {
     "folke/trouble.nvim",
-    version = "*",
+    tag = "^2.2.1",
     cmd = "TroubleToggle",
   },
   {
@@ -393,7 +399,7 @@ lvim.plugins = {
   },
   {
     "folke/zen-mode.nvim",
-    version = "*",
+    tag = "^1.1.1",
     opts = {
       window = {
         backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
@@ -842,6 +848,10 @@ lvim.plugins = {
             vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
           end,
         },
+        {
+          "olimorris/onedarkpro.nvim",
+          priority = 1000, -- Ensure it loads first
+        },
       }
     end,
   },
@@ -885,6 +895,34 @@ lvim.plugins = {
     config = function(_, opts)
       require("nvim-lastplace").setup(opts)
     end,
+  },
+  {
+    "chikko80/error-lens.nvim",
+    event = "LspAttach",
+    opts = {
+      -- this setting tries to auto adjust the colors
+      -- based on the diagnostic-highlight groups and your
+      -- theme background color with a color blender
+      enabled = true,
+      auto_adjust = {
+        enable = false,
+        theme_bg = nil, -- mandatory if enable true (e.g. #281478)
+        step = 5, -- inc: colors should be brighter/darker
+        total = 30, -- steps of blender
+      },
+      prefix = 4, -- distance code <-> diagnostic message
+      -- default colors
+      colors = {
+        error_fg = "#FF6363", -- diagnostic font color
+        error_bg = "#4B252C", -- diagnostic line color
+        warn_fg = "#FA973A",
+        warn_bg = "#403733",
+        info_fg = "#5B38E8",
+        info_bg = "#281478",
+        hint_fg = "#25E64B",
+        hint_bg = "#147828",
+      },
+    },
   },
 }
 
