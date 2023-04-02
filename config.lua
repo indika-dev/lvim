@@ -317,12 +317,30 @@ lvim.plugins = {
     "rebelot/kanagawa.nvim",
     priority = 1000, -- Ensure it loads first
     opts = {
+      -- overrides = function(colors)
+      --   return {
+      --     LspReferenceText = { fg = "NONE", bg = "NONE" },
+      --     -- LspReferenceRead = { bg = "#49443c" },
+      --     -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
+      --     LspReferenceWrite = { link = "LspReferenceRead" },
+      --   }
+      -- end,
+      -- Block-like modern Telescope UI
       overrides = function(colors)
+        local theme = colors.theme
         return {
-          LspReferenceText = { fg = "NONE", bg = "NONE" },
-          -- LspReferenceRead = { bg = "#49443c" },
-          -- LspReferenceRead = { bg = "#A3D4D5", fg = "NONE" },
-          LspReferenceWrite = { link = "LspReferenceRead" },
+          TelescopeTitle = { fg = theme.ui.special, bold = true },
+          TelescopePromptNormal = { bg = theme.ui.bg_p1 },
+          TelescopePromptBorder = { fg = theme.ui.bg_p1, bg = theme.ui.bg_p1 },
+          TelescopeResultsNormal = { fg = theme.ui.fg_dim, bg = theme.ui.bg_m1 },
+          TelescopeResultsBorder = { fg = theme.ui.bg_m1, bg = theme.ui.bg_m1 },
+          TelescopePreviewNormal = { bg = theme.ui.bg_dim },
+          TelescopePreviewBorder = { bg = theme.ui.bg_dim, fg = theme.ui.bg_dim },
+          -- More uniform colors for the popup menu.
+          Pmenu = { fg = theme.ui.shade0, bg = theme.ui.bg_p1 },
+          PmenuSel = { fg = "NONE", bg = theme.ui.bg_p2 },
+          PmenuSbar = { bg = theme.ui.bg_m1 },
+          PmenuThumb = { bg = theme.ui.bg_p2 },
         }
       end,
     },
@@ -343,7 +361,7 @@ lvim.plugins = {
   },
   {
     "folke/trouble.nvim",
-    tag = "^2.2.1",
+    version = "^2.2.1",
     cmd = "TroubleToggle",
   },
   {
@@ -399,7 +417,7 @@ lvim.plugins = {
   },
   {
     "folke/zen-mode.nvim",
-    tag = "^1.1.1",
+    version = "^1.1.1",
     opts = {
       window = {
         backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
