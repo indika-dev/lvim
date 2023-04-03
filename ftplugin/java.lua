@@ -148,6 +148,10 @@ local config = {
         updateBuildConfiguration = "interactive",
         runtimes = {
           {
+            name = "JavaSE-1.8",
+            path = home .. "/.local/lib/jvm-8/",
+          },
+          {
             name = "JavaSE-17",
             path = home .. "/.local/lib/jvm-17/",
             default = true,
