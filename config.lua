@@ -949,7 +949,6 @@ lvim.plugins = {
       -- "godlygeek/tabular",
     },
     opts = {
-      dir = "~/Dokumente/obsidian/my-vault",
       completion = {
         nvim_cmp = true, -- if using nvim-cmp, otherwise set to false
       },
@@ -968,7 +967,6 @@ lvim.plugins = {
         return tostring(os.time()) .. "-" .. suffix
       end,
       templates = {
-        subdir = "my-templates-folder",
         date_format = "%Y-%m-%d-%a",
         time_format = "%H:%M",
       },
@@ -986,6 +984,13 @@ lvim.plugins = {
       use_advanced_uri = false,
     },
     config = function(_, opts)
+      if user == "stefan" then
+        opts.dir = "~/Dokumente/obsidian/my-vault"
+        opts.templates.subdir = "my-templates-folder"
+      else
+        opts.dir = ""
+        opts.templates.subdir = "my-templates-folder"
+      end
       require("obsidian").setup(opts)
       require("nvim-treesitter.configs").setup {
         ensure_installed = { "markdown", "markdown_inline" },
