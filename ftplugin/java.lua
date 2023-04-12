@@ -181,7 +181,7 @@ local config = {
       },
       inlayHints = {
         parameterNames = {
-          enabled = true,
+          enabled = "none",
         },
       },
       format = {
