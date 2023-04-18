@@ -149,11 +149,11 @@ local config = {
         runtimes = {
           {
             name = "JavaSE-1.8",
-            path = home .. "/.local/lib/jvm-8/",
+            path = home .. "/.local/lib/jvm-8",
           },
           {
             name = "JavaSE-17",
-            path = home .. "/.local/lib/jvm-17/",
+            path = home .. "/.local/lib/jvm-17",
             default = true,
           },
         },
@@ -276,7 +276,6 @@ local config = {
             command "echohl None"
           end,
         }
-        require("jdtls").setup_dap { hotcodereplace = "auto" }
       end
     end),
     ["$/progress"] = vim.schedule_wrap(function(_, result)
@@ -299,6 +298,7 @@ local config = {
   },
 }
 jdtls.start_or_attach(config)
+jdtls.setup_dap { hotcodereplace = "auto" }
 
 local wkstatus_ok, which_key = pcall(require, "which-key")
 if wkstatus_ok then

@@ -648,7 +648,6 @@ lvim.plugins = {
   {
     "mfussenegger/nvim-jdtls",
     ft = { "java" },
-    lazy = true,
     config = function(_, _)
       require("lspconfig").jdtls.setup = function() end
     end,
@@ -941,6 +940,7 @@ lvim.plugins = {
         hint_bg = "#147828",
       },
     },
+    enabled = false,
   },
   {
     "epwalsh/obsidian.nvim",
@@ -1030,7 +1030,7 @@ lvim.plugins = {
       -- whether to wrap to opposite side when cursor is at an edge
       -- e.g. by default, moving left at the left edge will jump
       -- to the rightmost window, and vice versa, same for up/down.
-      wrap_at_edge = true,
+      at_edge = "wrap",
       -- when moving cursor between splits left or right,
       -- place the cursor on the same row of the *screen*
       -- regardless of line numbers. False by default.
