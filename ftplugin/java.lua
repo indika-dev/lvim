@@ -114,6 +114,7 @@ local config = {
   },
   on_attach = function(client, bufnr)
     local _, _ = pcall(vim.lsp.codelens.refresh)
+    jdtls.setup_dap { hotcodereplace = "auto" }
     require("jdtls.setup").add_commands()
     require("lvim.lsp").common_on_attach(client, bufnr)
   end,
@@ -298,7 +299,6 @@ local config = {
   },
 }
 jdtls.start_or_attach(config)
-jdtls.setup_dap { hotcodereplace = "auto" }
 
 local wkstatus_ok, which_key = pcall(require, "which-key")
 if wkstatus_ok then
