@@ -82,6 +82,10 @@ else
 end
 local user = vim.env.USER
 
+vim.keymap.set("n", "T", function()
+  vim.lsp.buf.hover()
+end, { noremap = true, silent = true })
+-- lvim.builtin.which_key.mappings["T"] = { "<cmd>lua vim.lsp.buf.hover()<cr>", "Show typeinfo" }
 lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
 lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["L"].K = { "<cmd>Telescope commands<CR>", "View commands" }
@@ -149,6 +153,15 @@ lvim.lsp.installer.setup.ensure_installed = {
   "marksman",
   "lemminx",
 }
+
+local jdtls_ok, _ = pcall(require, "jdtls")
+if jdtls_ok then
+  require("lspconfig").jdtls.setup = function() end
+end
+local marksman_ok, _ = pcall(require, "marksman")
+if marksman_ok then
+  require("lspconfig").marksman.setup {}
+end
 --
 -- require("mason-lspconfig").setup {
 --   automatic_installation = true,
@@ -647,10 +660,10 @@ lvim.plugins = {
   -- },
   {
     "mfussenegger/nvim-jdtls",
-    ft = { "java" },
-    config = function(_, _)
-      require("lspconfig").jdtls.setup = function() end
-    end,
+    -- ft = { "java" },
+    -- config = function(_, _)
+    --   require("lspconfig").jdtls.setup = function() end
+    -- end,
   },
   {
     "AckslD/nvim-neoclip.lua",

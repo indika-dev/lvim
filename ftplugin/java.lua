@@ -29,6 +29,7 @@ else
 end
 
 local launcher_path = vim.fn.glob(jdtls_install_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+-- local binary_path = vim.fn.glob(jdtls_install_path .. "/bin/jdtls")
 if #launcher_path == 0 then
   command "echohl ErrorMsg"
   command 'echo "jdtls launcher not found"'
@@ -84,6 +85,14 @@ vim.list_extend(bundles, extra_bundles)
 local javaHome = home .. "/.sdkman/candidates/java/17.0.6-tem"
 
 local config = {
+  -- cmd = {
+  --   binary_path,
+  --   "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
+  --   "-data",
+  --   workspace_dir,
+  --   "-configuration",
+  --   jdtls_install_path .. "/config_" .. CONFIG,
+  -- },
   cmd = {
     javaHome .. "/bin/java",
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
