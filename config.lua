@@ -1,6 +1,7 @@
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
+vim.opt.rtp:append "/home/linuxbrew/.linuxbrew/opt/fzf"
 -- vim.opt.termguicolors = true
 lvim.format_on_save = true
 lvim.leader = "space"
@@ -129,7 +130,7 @@ end
 -- end
 
 -- generic LSP settings
-lvim.lsp.diagnostics.virtual_text = true
+vim.diagnostic.config { virtual_text = true }
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
 lvim.lsp.installer.setup.automatic_installation = false
@@ -158,10 +159,10 @@ local jdtls_ok, _ = pcall(require, "jdtls")
 if jdtls_ok then
   require("lspconfig").jdtls.setup = function() end
 end
-local marksman_ok, _ = pcall(require, "marksman")
-if marksman_ok then
-  require("lspconfig").marksman.setup {}
-end
+-- local marksman_ok, _ = pcall(require, "marksman")
+-- if marksman_ok then
+require("lspconfig").marksman.setup {}
+-- end
 --
 -- require("mason-lspconfig").setup {
 --   automatic_installation = true,

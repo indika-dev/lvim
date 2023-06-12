@@ -108,7 +108,7 @@ local config = {
     "-Dsun.zip.disableMemoryMapping=true",
     "-Xmx1G",
     "-Xms100m",
-    "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
+    "-javaagent:" .. jdtls_install_path .. "/lombok.jar",
     "--add-modules=ALL-SYSTEM",
     "--add-opens",
     "java.base/java.util=ALL-UNNAMED",
@@ -133,7 +133,7 @@ local config = {
     java = {
       jdt = {
         ls = {
-          lombokSupport = { enabled = false },
+          lombokSupport = { enabled = true },
           protobufSupport = { enabled = true },
         },
       },
