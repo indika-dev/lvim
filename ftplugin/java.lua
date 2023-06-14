@@ -58,7 +58,7 @@ local workspace_dir = vim.fn.stdpath "cache" .. "/jdtls/workspace/" .. project_n
 local bundles = {
   vim.fn.glob(
     require("mason-registry").get_package("java-debug-adapter"):get_install_path()
-    .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
+      .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
   ),
 }
 if #bundles == 0 then
@@ -190,7 +190,8 @@ local config = {
       },
       inlayHints = {
         parameterNames = {
-          enabled = "none",
+          enabled = true,
+          exclusions = {},
         },
       },
       format = {

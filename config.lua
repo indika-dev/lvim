@@ -8,6 +8,7 @@ lvim.leader = "space"
 lvim.builtin.alpha.active = true
 lvim.builtin.terminal.active = true
 lvim.builtin.dap.active = true
+lvim.builtin.inlay_hints = { active = true }
 lvim.builtin.treesitter.rainbow.enable = false
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
@@ -100,6 +101,10 @@ lvim.builtin.which_key.mappings["t"] = {
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Diagnostics" },
 }
+if lvim.builtin.inlay_hints.active then
+  lvim.builtin.which_key.mappings["I"] = { "<cmd>lua require('lsp-inlayhints').toggle()<cr>", " Toggle Inlay" }
+  -- lvim.builtin.which_key.mappings["I"] = { "<cmd>lua require('vim.lsp._inlay_hint').refresh()<cr>", " Toggle Inlay" }
+end
 
 lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "dap")
@@ -109,7 +114,7 @@ lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "refactoring")
   -- pcall(telescope.load_extension, "asynctasks")
   --  pcall(telescope.load_extension, "noice")
-  -- pcall(telescope.load_extension, "project")
+  pcall(telescope.load_extension, "project")
 end
 
 -- for some reasons, this is not working as I intended
@@ -1112,6 +1117,13 @@ lvim.plugins = {
       vim.keymap.set("n", "<leader><leader>k", require("smart-splits").swap_buf_up)
       vim.keymap.set("n", "<leader><leader>l", require("smart-splits").swap_buf_right)
     end,
+  },
+  {
+    "lvimuser/lsp-inlayhints.nvim",
+    config = function()
+      require("lsp-inlayhints").setup()
+    end,
+    enabled = lvim.builtin.inlay_hints.active,
   },
 }
 
