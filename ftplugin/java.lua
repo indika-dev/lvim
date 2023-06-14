@@ -58,7 +58,7 @@ local workspace_dir = vim.fn.stdpath "cache" .. "/jdtls/workspace/" .. project_n
 local bundles = {
   vim.fn.glob(
     require("mason-registry").get_package("java-debug-adapter"):get_install_path()
-      .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
+    .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
   ),
 }
 if #bundles == 0 then
@@ -81,8 +81,7 @@ if #extra_bundles == 0 then
 end
 vim.list_extend(bundles, extra_bundles)
 
--- local javaHome = home .. "/.local/lib/jvm-17"
-local javaHome = home .. "/.sdkman/candidates/java/17.0.6-tem"
+local javaHome = home .. "/.local/lib/jvm-17"
 
 local config = {
   -- cmd = {
@@ -272,6 +271,9 @@ local config = {
       advancedIntroduceParameterRefactoringSupport = true,
       -- actionableRuntimeNotificationSupport = true,
       extractInterfaceSupport = true,
+      skipTextEventPropagation = false,
+      skipProjectConfiguration = false,
+      excludedMarkerTypes = {},
       onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
     }, jdtls.extendedClientCapabilities),
   },
