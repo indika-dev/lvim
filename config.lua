@@ -160,16 +160,6 @@ lvim.lsp.installer.setup.ensure_installed = {
   "lemminx",
 }
 
--- require("mason-lspconfig").setup_handlers {
---   function(server_name)
---     require("lspconfig")[server_name].setup {
---       on_attach = function(client, bufnr) end,
---       capabilities = require("cmp_nvim_lsp").default_capabilities(),
---     }
---   end,
---   ["jdtls"] = function() end,
--- }
-
 local jdtls_ok, _ = pcall(require, "jdtls")
 if jdtls_ok then
   require("lspconfig").jdtls.setup = function() end
