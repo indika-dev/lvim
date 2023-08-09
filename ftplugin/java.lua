@@ -8,13 +8,14 @@ vim.opt_local.signcolumn = "yes"
 
 local home = vim.env.HOME
 local command = vim.api.nvim_command
-local jdtls_install_path = require("mason-registry").get_package("jdtls"):get_install_path()
--- credit: https://github.com/ChristianChiarulli/nvim
-local status_ok, jdtls = pcall(require, "jdtls")
-if not status_ok then
+local status_jdtls, jdtls = pcall(require, "jdtls")
+if not status_jdtls then
   return
 end
+local jdtls_install_path = require("mason-registry").get_package("jdtls"):get_install_path()
+local status_nlsp, nlsp = pcall(require, "nlspsettings")
 
+-- credit: https://github.com/ChristianChiarulli/nvim
 -- Determine OS
 local CONFIG = ""
 if vim.fn.has "mac" == 1 then
@@ -52,6 +53,27 @@ local workspace_dir = vim.fn.stdpath "cache" .. "/jdtls/workspace/" .. project_n
 --   os.execute("rm -rf " .. workspace_dir)
 --   os.execute("mkdir -p " .. workspace_dir)
 -- end
+
+-- load local settings
+local settings = nil
+if status_nlsp then
+  settings = nlsp.get_settings(root_dir, "jdtls")
+  command 'echo "loaded jdtls settings from nlsp"'
+  if settings.java.configuration.runtimes == nil then
+    settings.java.configuration.runtimes = {
+      {
+        name = "JavaSE-17",
+        path = home .. "/.local/lib/jvm-17/",
+        default = true,
+      },
+    }
+  end
+  if settings.java.format.settings.profile == "GoogleStyle" then
+    settings.java.format.settings.url = home .. "/.config/lvim/.java-google-formatter.xml"
+  else
+    settings.java.format.settings.url = home .. "/.config/lvim/.eclipse-formatter.xml"
+  end
+end
 
 -- Test bundle
 -- Run :MasonInstall java-test
@@ -128,7 +150,7 @@ local config = {
   end,
   root_dir = root_dir,
   -- @see https://github.com/eclipse/eclipse.jdt.ls/wiki/running-the-java-ls-server-from-the-command-line#initialize-request
-  -- settings = {},
+  settings = settings,
   flags = {
     allow_incremental_sync = true,
     server_side_fuzzy_completion = true,
@@ -153,7 +175,7 @@ local config = {
   handlers = {
     ["language/status"] = vim.schedule_wrap(function(_, s)
       if "ServiceReady" == s.type then
-        command "LspSettings update jdtls"
+        -- command "LspSettings update jdtls"
         require("jdtls.dap").setup_dap_main_class_configs {
           verbose = true,
           on_ready = function()
