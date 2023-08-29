@@ -100,7 +100,7 @@ lvim.builtin.which_key.mappings["t"] = {
   name = "+Trouble",
   r = { "<cmd>Trouble lsp_references<cr>", "References" },
   f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
-  d = { "<cmd>Trouble lsp_document_diagnostics<cr>", "Diagnostics" },
+  d = { "<cmd>Trouble document_diagnostics<cr>", "Diagnostics" },
   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Diagnostics" },
@@ -208,15 +208,15 @@ require("mason-lspconfig").setup_handlers {
   function(server_name) -- default handler (optional)
     if "jdtls" == server_name then
       require("lspconfig")[server_name].setup = function() end
-    else
+    elseif "rust_analyzer" ~= server_name then
       require("lspconfig")[server_name].setup {}
     end
   end,
   -- Next, you can provide a dedicated handler for specific servers.
   -- For example, a handler override for the `rust_analyzer`:
-  ["rust_analyzer"] = function()
-    require("rust-tools").setup {}
-  end,
+  -- ["rust_analyzer"] = function()
+  --   require("rust-tools").setup {}
+  -- end,
 }
 
 -- Installer
@@ -1066,7 +1066,7 @@ lvim.plugins = {
       dap = {
         adapter = require("rust-tools.dap").get_codelldb_adapter(
           vim.env.HOME .. "/.local/lib/codelldb/extension/adapter/codelldb",
-          vim.env.HOME .. "/.local/lib/codelldb/extension/adapter/libcodelldb.so"
+          vim.env.HOME .. "/.local/lib/codelldb/extension/lldb/lib/liblldb.so"
         ),
       },
       -- dap = {
