@@ -1343,9 +1343,10 @@ if vim.g.neovide then
   -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
   -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
   if "stefan" == user then
-    vim.o.guifont = "FiraCode Nerd Font:h16"
+    vim.o.guifont = "FiraCode Nerd Font Mono:h16"
   else
-    vim.o.guifont = "FiraCode Nerd Font:h14"
+    -- vim.o.guifont = "IntoneMono Nerd Font Mono:h14"
+    vim.o.guifont = "FiraCode Nerd Font Mono:h14"
   end
   -- vim.o.guifont ="GoMono NF:h16"
   -- vim.o.guifont ="FuraCode NF:h16"
