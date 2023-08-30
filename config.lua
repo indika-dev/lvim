@@ -1060,6 +1060,62 @@ lvim.plugins = {
           vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
           -- Code action groups
           vim.keymap.set("n", "<leader>lA", rt.code_action_group.code_action_group, { buffer = bufnr })
+          local wkstatus_ok, which_key = pcall(require, "which-key")
+          if wkstatus_ok then
+            local nopts = {
+              mode = "n",
+              prefix = "<leader>",
+              buffer = vim.fn.bufnr(),
+              silent = true,
+              noremap = true,
+              nowait = true,
+            }
+
+            local vopts = {
+              mode = "v",
+              prefix = "<leader>",
+              buffer = vim.fn.bufnr(),
+              silent = true,
+              noremap = true,
+              nowait = true,
+            }
+
+            local mappings = {
+              r = {
+                name = " Rust",
+                a = { "<Cmd>lua require'rust-tools'.hover_actions.hover_actions()<CR>", "Hover actions" },
+                c = { "<Cmd>lua require'rust-tools'.open_cargo_toml.open_cargo_toml()<CR>", "Open Cargo.toml" },
+                t = { "<Cmd>lua require'rust-tools'.hover_range.hover_range()<CR>", "Show type" },
+                g = {
+                  "<Cmd>lua require'rust-tools'.crate_graph.view_crate_graph('x11', nil)()<CR>",
+                  "Show Crate graph",
+                },
+                S = {
+                  "<Cmd>lua require'rust-tools'.crate_graph.view_crate_graph('svg', 'crategraph.svg')()<CR>",
+                  "Save Crate graph",
+                },
+                u = { "<Cmd>lua require'rust-tools'.move_item.move_item(true)<CR>", "Move Item up" },
+                d = { "<Cmd>lua require'rust-tools'.move_item.move_item(false)<CR>", "Move Item down" },
+                p = { "<Cmd>lua require'rust-tools'.parent_module.parent_module()<CR>", "Go to Parent Module" },
+                f = { "<Cmd>lua require'rust-tools'.join_lines.join_lines()<CR>", "Join lines" },
+                r = { "<Cmd>lua require'rust-tools'.expand_macro.expand_macro()<CR>", "Expand Macro recursivly" },
+                D = { "<Cmd>RustDebuggables<CR>", "Start Debug" },
+                s = { "<Cmd>require'rust-tools'.ssr.ssr()<CR>", "Structural Search Replace" },
+              },
+            }
+
+            -- local vmappings = {
+            --   r = {
+            --     name = " Rust",
+            --     v = { "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>", "Extract Variable" },
+            --     c = { "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>", "Extract Constant" },
+            --     m = { "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>", "Extract Method" },
+            --   },
+            -- }
+
+            which_key.register(mappings, nopts)
+            -- which_key.register(vmappings, vopts)
+          end
         end,
       }, -- rust-analyzer options
       -- debugging stuff
@@ -1195,10 +1251,10 @@ lvim.plugins = {
         use_advanced_uri = false,
       }
       if user == "stefan" then
-        options.dir = "~/Dokumente/obsidian/my-vault"
+        options.dir = vim.env.HOME .. "/Dokumente/obsidian/my-vault"
         options.templates.subdir = "my-templates-folder"
       else
-        options.dir = "~/Dokumente/obsidian-vault/Makroarchitektur"
+        options.dir = vim.env.HOME .. "/Dokumente/obsidian-vault/Makroarchitektur"
         options.templates.subdir = "Templates"
       end
       return options
