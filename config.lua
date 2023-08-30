@@ -1,8 +1,12 @@
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
-vim.opt.rtp:append "/home/linuxbrew/.linuxbrew/opt/fzf"
--- vim.opt.termguicolors = true
+if "stefan" == user then
+  vim.opt.rtp:append "/usr/bin/fzf"
+else
+  vim.opt.rtp:append "/home/linuxbrew/.linuxbrew/opt/fzf"
+end
+vim.opt.termguicolors = true
 lvim.format_on_save = true
 lvim.leader = "space"
 lvim.builtin.alpha.active = true
@@ -96,7 +100,7 @@ lvim.builtin.which_key.mappings["t"] = {
   name = "+Trouble",
   r = { "<cmd>Trouble lsp_references<cr>", "References" },
   f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
-  d = { "<cmd>Trouble lsp_document_diagnostics<cr>", "Diagnostics" },
+  d = { "<cmd>Trouble document_diagnostics<cr>", "Diagnostics" },
   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Diagnostics" },
@@ -138,7 +142,7 @@ end
 vim.diagnostic.config { virtual_text = true }
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
-lvim.lsp.installer.setup.automatic_installation = false
+lvim.lsp.installer.setup.automatic_installation = true
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
 lvim.lsp.installer.setup.ensure_installed = {
   "rust_analyzer",
@@ -160,17 +164,26 @@ lvim.lsp.installer.setup.ensure_installed = {
   "lemminx",
 }
 
-local jdtls_ok, _ = pcall(require, "jdtls")
-if jdtls_ok then
-  require("lspconfig").jdtls.setup = function() end
-end
-require("lspconfig").marksman.setup {}
+-- require("mason-lspconfig").setup_handlers {
+--   function(server_name)
+--     require("lspconfig")[server_name].setup {
+--       on_attach = function(client, bufnr) end,
+--       capabilities = require("cmp_nvim_lsp").default_capabilities(),
+--     }
+--   end,
+--   ["jdtls"] = function() end,
+-- }
 
---
+-- local jdtls_ok, _ = pcall(require, "jdtls")
+-- if jdtls_ok then
+--   require("lspconfig").jdtls.setup = function() end
+-- end
+-- require("lspconfig").marksman.setup {}
+
 -- require("mason-lspconfig").setup {
 --   automatic_installation = true,
 --   ensure_installed = {
---     -- "jdtls",
+--     "jdtls",
 --     "tsserver",
 --     "jsonls",
 --     "lua_ls",
@@ -188,23 +201,23 @@ require("lspconfig").marksman.setup {}
 --     "lemminx",
 --   },
 -- }
--- require("mason-lspconfig").setup_handlers {
---   --   -- The first entry (without a key) will be the default handler
---   --   -- and will be called for each installed server that doesn't have
---   --   -- a dedicated handler.
---   function(server_name) -- default handler (optional)
---     if "jdtls" == server_name then
---       require("lspconfig")[server_name].setup = function() end
---     else
---       require("lspconfig")[server_name].setup {}
---     end
---   end,
---   --   -- Next, you can provide a dedicated handler for specific servers.
---   --   -- For example, a handler override for the `rust_analyzer`:
---   ["rust_analyzer"] = function()
---     require("rust-tools").setup {}
---   end,
--- }
+require("mason-lspconfig").setup_handlers {
+  -- The first entry (without a key) will be the default handler
+  -- and will be called for each installed server that doesn't have
+  -- a dedicated handler.
+  function(server_name) -- default handler (optional)
+    if "jdtls" == server_name then
+      require("lspconfig")[server_name].setup = function() end
+    elseif "rust_analyzer" ~= server_name then
+      require("lspconfig")[server_name].setup {}
+    end
+  end,
+  -- Next, you can provide a dedicated handler for specific servers.
+  -- For example, a handler override for the `rust_analyzer`:
+  -- ["rust_analyzer"] = function()
+  --   require("rust-tools").setup {}
+  -- end,
+}
 
 -- Installer
 
@@ -871,22 +884,202 @@ lvim.plugins = {
   {
     "simrat39/rust-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "mfussenegger/nvim-dap" },
-    config = function(_, _)
+    opts = {
+      tools = { -- rust-tools options
+
+        -- how to execute terminal commands
+        -- options right now: termopen / quickfix / toggleterm / vimux
+        executor = require("rust-tools.executors").termopen,
+
+        -- callback to execute once rust-analyzer is done initializing the workspace
+        -- The callback receives one parameter indicating the `health` of the server: "ok" | "warning" | "error"
+        on_initialized = nil,
+
+        -- automatically call RustReloadWorkspace when writing to a Cargo.toml file.
+        reload_workspace_from_cargo_toml = true,
+
+        -- These apply to the default RustSetInlayHints command
+        inlay_hints = {
+          -- automatically set inlay hints (type hints)
+          -- default: true
+          auto = false,
+
+          -- Only show inlay hints for the current line
+          only_current_line = false,
+
+          -- whether to show parameter hints with the inlay hints or not
+          -- default: true
+          show_parameter_hints = true,
+
+          -- prefix for parameter hints
+          -- default: "<-"
+          parameter_hints_prefix = "<- ",
+
+          -- prefix for all the other hints (type, chaining)
+          -- default: "=>"
+          other_hints_prefix = "=> ",
+
+          -- whether to align to the length of the longest line in the file
+          max_len_align = false,
+
+          -- padding from the left if max_len_align is true
+          max_len_align_padding = 1,
+
+          -- whether to align to the extreme right or not
+          right_align = false,
+
+          -- padding from the right if right_align is true
+          right_align_padding = 7,
+
+          -- The color of the hints
+          highlight = "Comment",
+        },
+
+        -- options same as lsp hover / vim.lsp.util.open_floating_preview()
+        hover_actions = {
+
+          -- the border that is used for the hover window
+          -- see vim.api.nvim_open_win()
+          border = {
+            { "╭", "FloatBorder" },
+            { "─", "FloatBorder" },
+            { "╮", "FloatBorder" },
+            { "│", "FloatBorder" },
+            { "╯", "FloatBorder" },
+            { "─", "FloatBorder" },
+            { "╰", "FloatBorder" },
+            { "│", "FloatBorder" },
+          },
+
+          -- Maximal width of the hover window. Nil means no max.
+          max_width = nil,
+
+          -- Maximal height of the hover window. Nil means no max.
+          max_height = nil,
+
+          -- whether the hover action window gets automatically focused
+          -- default: false
+          auto_focus = false,
+        },
+
+        -- settings for showing the crate graph based on graphviz and the dot
+        -- command
+        crate_graph = {
+          -- Backend used for displaying the graph
+          -- see: https://graphviz.org/docs/outputs/
+          -- default: x11
+          backend = "x11",
+          -- where to store the output, nil for no output stored (relative
+          -- path from pwd)
+          -- default: nil
+          output = nil,
+          -- true for all crates.io and external crates, false only the local
+          -- crates
+          -- default: true
+          full = true,
+
+          -- List of backends found on: https://graphviz.org/docs/outputs/
+          -- Is used for input validation and autocompletion
+          -- Last updated: 2021-08-26
+          enabled_graphviz_backends = {
+            "bmp",
+            "cgimage",
+            "canon",
+            "dot",
+            "gv",
+            "xdot",
+            "xdot1.2",
+            "xdot1.4",
+            "eps",
+            "exr",
+            "fig",
+            "gd",
+            "gd2",
+            "gif",
+            "gtk",
+            "ico",
+            "cmap",
+            "ismap",
+            "imap",
+            "cmapx",
+            "imap_np",
+            "cmapx_np",
+            "jpg",
+            "jpeg",
+            "jpe",
+            "jp2",
+            "json",
+            "json0",
+            "dot_json",
+            "xdot_json",
+            "pdf",
+            "pic",
+            "pct",
+            "pict",
+            "plain",
+            "plain-ext",
+            "png",
+            "pov",
+            "ps",
+            "ps2",
+            "psd",
+            "sgi",
+            "svg",
+            "svgz",
+            "tga",
+            "tiff",
+            "tif",
+            "tk",
+            "vml",
+            "vmlz",
+            "wbmp",
+            "webp",
+            "xlib",
+            "x11",
+          },
+        },
+      },
+
+      -- all the opts to send to nvim-lspconfig
+      -- these override the defaults set by rust-tools.nvim
+      -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#rust_analyzer
+      server = {
+        -- standalone file support
+        -- setting it to false may improve startup time
+        standalone = true,
+        settings = {
+          ["rust-analyzer"] = {
+            inlayHints = { locationLinks = false },
+          },
+        },
+        on_init = require("lvim.lsp").common_on_init,
+        on_attach = function(client, bufnr)
+          require("lvim.lsp").common_on_attach(client, bufnr)
+          local rt = require "rust-tools"
+          -- Hover actions
+          vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+          -- Code action groups
+          vim.keymap.set("n", "<leader>lA", rt.code_action_group.code_action_group, { buffer = bufnr })
+        end,
+      }, -- rust-analyzer options
+      -- debugging stuff
+      dap = {
+        adapter = require("rust-tools.dap").get_codelldb_adapter(
+          vim.env.HOME .. "/.local/lib/codelldb/extension/adapter/codelldb",
+          vim.env.HOME .. "/.local/lib/codelldb/extension/lldb/lib/liblldb.so"
+        ),
+      },
+      -- dap = {
+      --   adapter = {
+      --     type = "executable",
+      --     command = "lldb-vscode",
+      --     name = "rt_lldb",
+      --   },
+      -- },
+    },
+    config = function(_, opts)
       local rt = require "rust-tools"
-      rt.setup {
-        server = {
-          on_attach = function(_, bufnr)
-            -- Hover actions
-            vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-            -- Code action groups
-            vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-          end,
-        },
-        {
-          "olimorris/onedarkpro.nvim",
-          priority = 1000, -- Ensure it loads first
-        },
-      }
+      rt.setup(opts)
     end,
   },
   {
@@ -1122,7 +1315,7 @@ lvim.plugins = {
     config = function()
       require("lsp-inlayhints").setup()
     end,
-    enabled = lvim.builtin.inlay_hints.active,
+    -- enabled = lvim.builtin.inlay_hints.active,
   },
 }
 
