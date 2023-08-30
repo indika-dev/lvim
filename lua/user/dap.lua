@@ -74,6 +74,16 @@ M.config = function()
     {
       type = "java",
       request = "launch",
+      name = "Debug Shoo pull CrefoTEAM Vertrieb",
+      args = '-r /home/maassens/workspace/architecture-management/test-repo -t pull "CrefoTEAM Vertrieb"',
+      vmargs = "-Xms2G -Xmx2G",
+      mainClass = "de.creditreform.architecture.management.shoo.Shoo",
+      projectName = "shoo",
+      console = "integratedTerminal",
+    },
+    {
+      type = "java",
+      request = "launch",
       name = "Debug Shoo merge TestSystem 01",
       args = '-r /home/maassens/workspace/architecture-management/test-repo -t merge "TestSystem 01"',
       vmargs = "-Xms2G -Xmx2G",
