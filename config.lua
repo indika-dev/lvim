@@ -737,7 +737,6 @@ lvim.plugins = {
   -- {
   --   "~/workspace/luvcron/",
   -- },
-  { "gpanders/editorconfig.nvim", version = "*", enabled = true },
   {
     "stevearc/dressing.nvim",
     opts = {
