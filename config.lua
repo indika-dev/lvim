@@ -82,7 +82,7 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
 local _time = os.date "*t"
 if _time.hour >= 6 and _time.hour < 20 then
   -- lvim.colorscheme = "tokyonight-moon"
-  lvim.colorscheme = "kanagawa"
+  lvim.colorscheme = "kanagawa-lotus"
 else
   lvim.colorscheme = "kanagawa-dragon"
 end
@@ -162,6 +162,8 @@ lvim.lsp.installer.setup.ensure_installed = {
   "yamlls",
   "marksman",
   "lemminx",
+  "clangd",
+  "cmake",
 }
 
 -- require("mason-lspconfig").setup_handlers {
@@ -256,6 +258,10 @@ formatters.setup {
     name = "rustfmt",
     filetypes = { "rust" },
   },
+  -- {
+  --   name = "clang-format",
+  --   filetypes = { "c", "objc", "objcpp", "cpp" },
+  -- },
 }
 
 local linters = require "lvim.lsp.null-ls.linters"
@@ -281,6 +287,10 @@ linters.setup {
     command = "eslint_d",
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
   },
+  -- {
+  --   command = "cmakelint",
+  --   filetypes = { "cmake" },
+  -- },
   -- {
   --   command = "markdownlint",
   --   filetypes = { "markdown" },
@@ -737,7 +747,7 @@ lvim.plugins = {
   -- {
   --   "~/workspace/luvcron/",
   -- },
-  { "gpanders/editorconfig.nvim", version = "*", enabled = true },
+  { "gpanders/editorconfig.nvim", version = "*", enabled = false },
   {
     "stevearc/dressing.nvim",
     opts = {
@@ -1083,7 +1093,8 @@ lvim.plugins = {
             local mappings = {
               r = {
                 name = " Rust",
-                a = { "<Cmd>lua require'rust-tools'.hover_actions.hover_actions()<CR>", "Hover actions" },
+                a = { "<Cmd>lua require'rust-tools'.hover_actions.hover_actions(bufnr)<CR>", "Hover actions" },
+                A = { "<Cmd>lua require'rust-tools'.code_action_group.code_action_group(bufnr)<CR>", "Code actions" },
                 c = { "<Cmd>lua require'rust-tools'.open_cargo_toml.open_cargo_toml()<CR>", "Open Cargo.toml" },
                 t = { "<Cmd>lua require'rust-tools'.hover_range.hover_range()<CR>", "Show type" },
                 g = {
@@ -1109,12 +1120,12 @@ lvim.plugins = {
             --     name = " Rust",
             --     v = { "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>", "Extract Variable" },
             --     c = { "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>", "Extract Constant" },
-            --     m = { "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>", "Extract Method" },
+            --     m = { "<Esc><Cmd>lua vim.lsp.buf.range_code_action()<CR>", "Extract Method" },
             --   },
             -- }
 
             which_key.register(mappings, nopts)
-            -- which_key.register(vmappings, vopts)
+            which_key.register(vmappings, vopts)
           end
         end,
       }, -- rust-analyzer options
