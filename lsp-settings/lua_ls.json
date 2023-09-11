@@ -1,15 +1,4 @@
 {
-    "Lua.workspace.library": [
-        "/home/maassens/.local/share/bob/v0.8.3/nvim-linux64/share/nvim/runtime",
-        "/home/maassens/.local/share/lunarvim/lvim",
-        "/home/maassens/.local/share/lunarvim/site/pack/lazy/opt/neodev.nvim/types/stable",
-        "${3rd}/busted/library",
-        "${3rd}/luassert/library",
-        "/home/maassens/.local/share/lunarvim/site/pack/lazy/opt/plenary.nvim/lua",
-        "/home/maassens/.local/share/lunarvim/site/pack/lazy/opt/telescope.nvim/lua",
-        "/home/maassens/.local/share/lunarvim/site/pack/lazy/opt/LuaSnip/lua",
-        "${3rd}/luv/library"
-    ],
     "Lua.hint.enable": true,
     "Lua.hint.paramName": "All",
     "Lua.hint.paramType": false,
