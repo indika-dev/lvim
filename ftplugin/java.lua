@@ -12,6 +12,7 @@ local status_jdtls, jdtls = pcall(require, "jdtls")
 if not status_jdtls then
   return
 end
+local path_sep = package.config:sub(1, 1)
 local jdtls_install_path = require("mason-registry").get_package("jdtls"):get_install_path()
 local status_nlsp, nlsp = pcall(require, "nlspsettings")
 
@@ -75,45 +76,38 @@ if status_nlsp then
   end
 end
 
--- Test bundle
--- Run :MasonInstall java-test
-local bundles = {
+local jar_patterns = {
+  vim.fn.glob(
+    require("mason-registry").get_package("vscode-java-decompiler"):get_install_path() .. "/server/dg.jdt*.jar"
+  ),
   vim.fn.glob(
     require("mason-registry").get_package("java-debug-adapter"):get_install_path()
       .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
   ),
+  vim.fn.glob(
+    require("mason-registry").get_package("java-test"):get_install_path()
+      .. "/extension/server/com.microsoft.java.test.runner-jar-with-dependencies.jar"
+  ),
+  vim.fn.glob(
+    require("mason-registry").get_package("java-test"):get_install_path()
+      .. "/extension/server/com.microsoft.java.test.plugin-*.jar"
+  ),
 }
-if #bundles == 0 then
-  command "echohl WarningMsg"
-  command 'echo "java-debug-adapter not found. Install it via mason"'
-  command "echohl None"
+local bundles = {}
+for _, jar_pattern in ipairs(jar_patterns) do
+  for _, bundle in ipairs(vim.split(jar_pattern, "\n", {})) do
+    if bundle ~= {} then
+      command "echohl ModeMsg"
+      command(string.format('echo "jdt.ls %s"', bundle))
+      command "echohl None"
+      table.insert(bundles, bundle)
+    end
+  end
 end
--- Debug bundle
--- Run :MasonInstall java-debug-adapter
-local extra_bundles = vim.split(
-  vim.fn.glob(require("mason-registry").get_package("java-test"):get_install_path() .. "/extension/server/*.jar"),
-  "\n",
-  {}
-)
-
-if #extra_bundles == 0 then
-  command "echohl WarningMsg"
-  command 'echo "java-test adapter not found. Install it via mason"'
-  command "echohl None"
-end
-vim.list_extend(bundles, extra_bundles)
 
 local javaHome = home .. "/.local/lib/jvm-17"
 
 local config = {
-  -- cmd = {
-  --   binary_path,
-  --   "-javaagent:" .. home .. "/.local/lib/lombok-1.18.26.jar",
-  --   "-data",
-  --   workspace_dir,
-  --   "-configuration",
-  --   jdtls_install_path .. "/config_" .. CONFIG,
-  -- },
   cmd = {
     javaHome .. "/bin/java",
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
@@ -159,17 +153,15 @@ local config = {
     bundles = bundles,
     extendedClientCapabilities = vim.tbl_deep_extend("keep", {
       resolveAdditionalTextEditsSupport = true,
-      classFileContentsSupport = false,
-      overrideMethodsPromptSupport = true,
-      advancedGenerateAccessorsSupport = true,
-      -- gradleChecksumWrapperPromptSupport = true,
-      advancedIntroduceParameterRefactoringSupport = true,
-      -- actionableRuntimeNotificationSupport = true,
-      extractInterfaceSupport = true,
-      skipTextEventPropagation = false,
-      skipProjectConfiguration = false,
-      excludedMarkerTypes = {},
-      onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
+      classFileContentsSupport = true,
+      -- overrideMethodsPromptSupport = true,
+      -- advancedGenerateAccessorsSupport = true,
+      -- advancedIntroduceParameterRefactoringSupport = true,
+      -- extractInterfaceSupport = true,
+      -- skipTextEventPropagation = false,
+      -- skipProjectConfiguration = false,
+      -- excludedMarkerTypes = {},
+      -- onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
     }, jdtls.extendedClientCapabilities),
   },
   handlers = {
