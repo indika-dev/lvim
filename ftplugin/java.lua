@@ -97,9 +97,6 @@ local bundles = {}
 for _, jar_pattern in ipairs(jar_patterns) do
   for _, bundle in ipairs(vim.split(jar_pattern, "\n", {})) do
     if bundle ~= {} then
-      command "echohl ModeMsg"
-      command(string.format('echo "jdt.ls %s"', bundle))
-      command "echohl None"
       table.insert(bundles, bundle)
     end
   end
