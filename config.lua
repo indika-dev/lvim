@@ -1,7 +1,8 @@
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
-if "stefan" == user then
+vim.opt.wrap = true -- wrap lines
+if "stefan" == vim.env.USER then
   vim.opt.rtp:append "/usr/bin/fzf"
 else
   vim.opt.rtp:append "/home/linuxbrew/.linuxbrew/opt/fzf"
@@ -81,19 +82,20 @@ lvim.builtin.telescope.defaults.file_ignore_patterns = {
 
 local _time = os.date "*t"
 if _time.hour >= 6 and _time.hour < 20 then
-  -- lvim.colorscheme = "tokyonight-moon"
-  lvim.colorscheme = "kanagawa-lotus"
+  if "stefan" == vim.env.USER then
+    lvim.colorscheme = "kanagawa-lotus"
+  else
+    lvim.colorscheme = "kanagawa"
+  end
 else
   lvim.colorscheme = "kanagawa-dragon"
 end
-local user = vim.env.USER
 
 vim.keymap.set("n", "T", function()
   vim.lsp.buf.hover()
 end, { noremap = true, silent = true })
--- lvim.builtin.which_key.mappings["T"] = { "<cmd>lua vim.lsp.buf.hover()<cr>", "Show typeinfo" }
 lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
-lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+-- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["L"].K = { "<cmd>Telescope commands<CR>", "View commands" }
 lvim.builtin.which_key.mappings["L"].a = { "<cmd>Telescope autocommands<CR>", "View autocommands" }
 lvim.builtin.which_key.mappings["t"] = {
@@ -107,8 +109,15 @@ lvim.builtin.which_key.mappings["t"] = {
 }
 if lvim.builtin.inlay_hints.active then
   lvim.builtin.which_key.mappings["I"] = { "<cmd>lua require('lsp-inlayhints').toggle()<cr>", " Toggle Inlay" }
-  -- lvim.builtin.which_key.mappings["I"] = { "<cmd>lua require('vim.lsp._inlay_hint').refresh()<cr>", " Toggle Inlay" }
 end
+lvim.builtin.which_key.mappings["R"] = { "<cmd>Telescope registers<cr>", " Show Registers" }
+
+lvim.builtin.which_key.mappings["P"] = {
+  name = "Session",
+  c = { "<cmd>lua require('persistence').load()<cr>", "Restore last session for current dir" },
+  l = { "<cmd>lua require('persistence').load({ last = true })<cr>", "Restore last session" },
+  Q = { "<cmd>lua require('persistence').stop()<cr>", "Quit without saving session" },
+}
 
 lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "dap")
@@ -116,33 +125,15 @@ lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "neoclip")
   pcall(telescope.load_extension, "fzf")
   pcall(telescope.load_extension, "refactoring")
-  -- pcall(telescope.load_extension, "asynctasks")
-  --  pcall(telescope.load_extension, "noice")
   pcall(telescope.load_extension, "project")
 end
-
--- for some reasons, this is not working as I intended
--- lvim.builtin.dap.on_config_done = function(dap)
---   local dapui_status_ok, dapui = pcall(require, "dapui")
---   if not dapui_status_ok then
---     return
---   end
---   dap.listeners.after["event_initialized"]["dapui_config"] = function(session, body)
---     dapui.open()
---   end
---   dap.listeners.before["event_terminated"]["dapui_config"] = function(session, body)
---     dapui.close()
---   end
---   dap.listeners.before["event_exited"]["dapui_config"] = function(session, body)
---     dapui.close()
---   end
--- end
+vim.api.nvim_set_keymap("n", "g?", [[<Cmd>DiagWindowShow<CR>]], { noremap = true, silent = true })
 
 -- generic LSP settings
 vim.diagnostic.config { virtual_text = true }
 lvim.lsp.document_highlight = true
 lvim.lsp.code_lens_refresh = true
-lvim.lsp.installer.setup.automatic_installation = true
+-- lvim.lsp.installer.setup.automatic_installation = true
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "jdtls" })
 lvim.lsp.installer.setup.ensure_installed = {
   "rust_analyzer",
@@ -163,62 +154,56 @@ lvim.lsp.installer.setup.ensure_installed = {
   "marksman",
   "lemminx",
   "clangd",
-  "cmake",
 }
 
--- require("mason-lspconfig").setup_handlers {
---   function(server_name)
---     require("lspconfig")[server_name].setup {
---       on_attach = function(client, bufnr) end,
---       capabilities = require("cmp_nvim_lsp").default_capabilities(),
---     }
---   end,
---   ["jdtls"] = function() end,
--- }
-
--- local jdtls_ok, _ = pcall(require, "jdtls")
--- if jdtls_ok then
---   require("lspconfig").jdtls.setup = function() end
--- end
--- require("lspconfig").marksman.setup {}
-
--- require("mason-lspconfig").setup {
---   automatic_installation = true,
---   ensure_installed = {
---     "jdtls",
---     "tsserver",
---     "jsonls",
---     "lua_ls",
---     "bashls",
---     "cssls",
---     "dockerls",
---     "eslint",
---     "html",
---     "pyright",
---     "taplo",
---     "vimls",
---     "vuels",
---     "yamlls",
---     "marksman",
---     "lemminx",
---   },
--- }
 require("mason-lspconfig").setup_handlers {
   -- The first entry (without a key) will be the default handler
   -- and will be called for each installed server that doesn't have
   -- a dedicated handler.
-  function(server_name) -- default handler (optional)
-    if "jdtls" == server_name then
-      require("lspconfig")[server_name].setup = function() end
-    elseif "rust_analyzer" ~= server_name then
-      require("lspconfig")[server_name].setup {}
-    end
-  end,
+  -- function(server_name) -- default handler (optional)
+  --   if "jdtls" == server_name then
+  --     require("lspconfig")[server_name].setup = function() end
+  --     -- elseif "rust_analyzer" ~= server_name then
+  --     --   require("lspconfig")[server_name].setup {}
+  --   end
+  -- end,
+  ["jdtls"] = function() end,
   -- Next, you can provide a dedicated handler for specific servers.
   -- For example, a handler override for the `rust_analyzer`:
-  -- ["rust_analyzer"] = function()
-  --   require("rust-tools").setup {}
-  -- end,
+  ["rust_analyzer"] = function()
+    local status_ok, rustTools = pcall(require, "rust-tools")
+    if status_ok then
+      local opts = {
+        tools = { -- rust-tools options
+          autoSetHints = true,
+          hover_with_actions = true,
+          inlay_hints = {
+            show_parameter_hints = false,
+            parameter_hints_prefix = "",
+            other_hints_prefix = "",
+          },
+        },
+
+        -- all the opts to send to nvim-lspconfig
+        -- these override the defaults set by rust-tools.nvim
+        -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#rust_analyzer
+        server = {
+          -- on_attach is a callback called when the language server attachs to the buffer
+          -- on_attach = on_attach,
+          settings = {
+            -- to enable rust-analyzer settings visit:
+            -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
+            ["rust-analyzer"] = {
+              inlayHints = {
+                locationLinks = false,
+              },
+            },
+          },
+        },
+      }
+      rustTools.setup(opts)
+    end
+  end,
 }
 
 -- Installer
@@ -258,10 +243,6 @@ formatters.setup {
     name = "rustfmt",
     filetypes = { "rust" },
   },
-  -- {
-  --   name = "clang-format",
-  --   filetypes = { "c", "objc", "objcpp", "cpp" },
-  -- },
 }
 
 local linters = require "lvim.lsp.null-ls.linters"
@@ -321,8 +302,9 @@ code_actions.setup {
 
 -- Debugging
 -- =========================================
+local dap_config = require "user.dap"
 if lvim.builtin.dap.active then
-  require("user.dap").config()
+  dap_config.config()
 end
 
 -- Additional Plugins
@@ -342,17 +324,6 @@ lvim.plugins = {
       end
     end,
   },
-  -- {
-  --   "folke/tokyonight.nvim",
-  --   version = "*",
-  --   config = function()
-  --     vim.cmd [[colorscheme tokyonight-moon]]
-  --   end,
-  --   cond = function()
-  --     local _time = os.date "*t"
-  --     return (_time.hour >= 6 and _time.hour < 18)
-  --   end,
-  -- },
   {
     "rebelot/kanagawa.nvim",
     priority = 1000, -- Ensure it loads first
@@ -387,27 +358,26 @@ lvim.plugins = {
     config = function(_, opts)
       require("kanagawa").setup(opts)
     end,
-    -- cond = function()
-    --   local _time = os.date "*t"
-    --   return ((_time.hour >= 18 and _time.hour < 24) or (_time.hour >= 0 and _time.hour < 6))
-    -- end,
-  },
-  {
-    "olimorris/onedarkpro.nvim",
-    priority = 1000, -- Ensure it loads first
   },
   {
     "nvim-telescope/telescope-dap.nvim",
   },
   {
     "folke/trouble.nvim",
-    version = "^2.2.1",
     cmd = "TroubleToggle",
   },
   {
     "norcalli/nvim-colorizer.lua",
-    config = function(_, _)
-      require("colorizer").setup()
+    config = function()
+      require("colorizer").setup({ "css", "scss", "html", "javascript" }, {
+        RGB = true, -- #RGB hex codes
+        RRGGBB = true, -- #RRGGBB hex codes
+        RRGGBBAA = true, -- #RRGGBBAA hex codes
+        rgb_fn = true, -- CSS rgb() and rgba() functions
+        hsl_fn = true, -- CSS hsl() and hsla() functions
+        css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+        css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+      })
     end,
   },
   {
@@ -424,96 +394,8 @@ lvim.plugins = {
     enabled = false,
   },
   {
-    "skywind3000/asynctasks.vim",
-    dependencies = { "skywind3000/asyncbuild.vim" },
-    config = function(_, _)
-      vim.cmd [[
-          let g:asyncbuild_open = 8
-          let g:asynctask_template = '~/.config/lvim/task_template.ini'
-          let g:asynctasks_extra_config = ['~/.config/lvim/tasks.ini']
-        ]]
-      lvim.builtin.which_key.mappings["m"] = {
-        name = " Make",
-        f = { "<cmd>AsyncTask file-build<cr>", "File" },
-        p = { "<cmd>AsyncTask project-build<cr>", "Project" },
-        e = { "<cmd>AsyncTaskEdit<cr>", "Edit" },
-        l = { "<cmd>AsyncTaskList<cr>", "List" },
-      }
-      lvim.builtin.which_key.mappings["r"] = {
-        name = " build",
-        f = { "<cmd>AsyncTask file-build<cr>", "File" },
-        p = { "<cmd>AsyncTask project-build<cr>", "Project" },
-      }
-    end,
-    enabled = lvim.custom.async_tasks.active,
-  },
-  {
-    "GustavoKatel/telescope-asynctasks.nvim",
-    enabled = lvim.custom.async_tasks.active,
-  },
-  {
     "sindrets/diffview.nvim",
     event = "BufRead",
-  },
-  {
-    "folke/zen-mode.nvim",
-    version = "^1.1.1",
-    opts = {
-      window = {
-        backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
-        -- height and width can be:
-        -- * an absolute number of cells when > 1
-        -- * a percentage of the width / height of the editor when <= 1
-        -- * a function that returns the width or the height
-        width = 120, -- width of the Zen window
-        height = 1, -- height of the Zen window
-        -- by default, no options are changed for the Zen window
-        -- uncomment any of the options below, or add other vim.wo options you want to apply
-        options = {
-          -- signcolumn = "no", -- disable signcolumn
-          -- number = false, -- disable number column
-          -- relativenumber = false, -- disable relative numbers
-          -- cursorline = false, -- disable cursorline
-          -- cursorcolumn = false, -- disable cursor column
-          -- foldcolumn = "0", -- disable fold column
-          -- list = false, -- disable whitespace characters
-        },
-      },
-      plugins = {
-        -- disable some global vim options (vim.o...)
-        -- comment the lines to not apply the options
-        options = {
-          enabled = true,
-          ruler = false, -- disables the ruler text in the cmd line area
-          showcmd = false, -- disables the command in the last line of the screen
-        },
-        twilight = { enabled = true }, -- enable to start Twilight when zen mode opens
-        gitsigns = { enabled = false }, -- disables git signs
-        tmux = { enabled = false }, -- disables the tmux statusline
-        -- this will change the font size on kitty when in zen mode
-        -- to make this work, you need to set the following kitty options:
-        -- - allow_remote_control socket-only
-        -- - listen_on unix:/tmp/kitty
-        kitty = {
-          enabled = false,
-          font = "+4", -- font size increment
-        },
-        -- this will change the font size on alacritty when in zen mode
-        -- requires  Alacritty Version 0.10.0 or higher
-        -- uses `alacritty msg` subcommand to change font size
-        alacritty = {
-          enabled = false,
-          font = "14", -- font size
-        },
-      },
-      -- callback where you can add custom code when the Zen window opens
-      on_open = function(win) end,
-      -- callback where you can add custom code when the Zen window closes
-      on_close = function() end,
-    },
-    config = function(_, opts)
-      require("zen-mode").setup(opts)
-    end,
   },
   {
     "sidebar-nvim/sidebar.nvim",
@@ -560,35 +442,22 @@ lvim.plugins = {
     event = "BufRead",
     opts = {},
     config = function(_, opts)
-      -- -- remap to open the Telescope refactoring menu in visual mode
-      -- vim.api.nvim_set_keymap(
-      --   "v",
-      --   "<leader>rr",
-      --   "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
-      --   { noremap = true }
-      -- )
+      -- remap to open the Telescope refactoring menu in visual mode
+      vim.api.nvim_set_keymap(
+        "v",
+        "<leader>rr",
+        "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
+        { noremap = true }
+      )
       -- prompt for a refactor to apply when the remap is triggered
-      -- vim.api.nvim_set_keymap(
-      --   "v",
-      --   "<leader>rr",
-      --   "<Cmd>lua require('refactoring').select_refactor()<CR>",
-      --   { noremap = true, silent = true, expr = false }
-      -- )
+      vim.api.nvim_set_keymap(
+        "v",
+        "<leader>rr",
+        "<Cmd>lua require('refactoring').select_refactor()<CR>",
+        { noremap = true, silent = true, expr = false }
+      )
       require("refactoring").setup(opts)
     end,
-  },
-  {
-    "vim-pandoc/vim-pandoc",
-    enabled = false,
-  },
-  {
-    "vim-pandoc/vim-pandoc-syntax",
-    enabled = false,
-  },
-  {
-    "dhruvasagar/vim-table-mode",
-    commit = "9555a3e6e5bcf285ec181b7fc983eea90500feb4",
-    enabled = false,
   },
   {
     "kevinhwang91/nvim-bqf",
@@ -620,10 +489,6 @@ lvim.plugins = {
   },
   {
     "nvim-telescope/telescope-project.nvim",
-    -- event = "BufWinEnter",
-    -- config = function()
-    --   vim.cmd [[packadd telescope.nvim]]
-    -- end,
   },
   {
     "nvim-telescope/telescope-ui-select.nvim",
@@ -652,7 +517,6 @@ lvim.plugins = {
   },
   {
     "folke/persistence.nvim",
-    version = "*",
     event = "BufReadPre", -- this will only start session saving when an actual file was opened
     lazy = true,
     opts = {
@@ -663,90 +527,9 @@ lvim.plugins = {
       require("persistence").setup(opts)
     end,
   },
-  -- {
-  --   "jay-babu/mason-null-ls.nvim",
-  --   event = { "BufReadPre", "BufNewFile" },
-  --   dependencies = {
-  --     "williamboman/mason.nvim",
-  --     "jose-elias-alvarez/null-ls.nvim",
-  --   },
-  --   opts = {
-  --     ensure_installed = {
-  --       "shellcheck",
-  --       "shfmt",
-  --       "prettier",
-  --       "eslint_d",
-  --       "fixjson",
-  --     },
-  --     automatic_installation = false,
-  --     automatic_setup = true,
-  --   },
-  --   config = function(_, opts)
-  --     require("mason-null-ls").setup(opts)
-  --   end,
-  -- },
   {
     "mfussenegger/nvim-jdtls",
-    -- ft = { "java" },
-    -- config = function(_, _)
-    --   require("lspconfig").jdtls.setup = function() end
-    -- end,
   },
-  {
-    "AckslD/nvim-neoclip.lua",
-    dependencies = { { "tami5/sqlite.lua", module = "sqlite" } },
-    opts = {
-      history = 1000,
-      enable_persistent_history = false,
-      length_limit = 1048576,
-      continuous_sync = false,
-      db_path = vim.fn.stdpath "data" .. "/databases/neoclip.sqlite3",
-      filter = nil,
-      preview = true,
-      default_register = '"',
-      default_register_macros = "q",
-      enable_macro_history = true,
-      content_spec_column = false,
-      on_paste = {
-        set_reg = false,
-      },
-      on_replay = {
-        set_reg = false,
-      },
-      keys = {
-        telescope = {
-          i = {
-            select = "<cr>",
-            paste = "<c-p>",
-            paste_behind = "<c-k>",
-            replay = "<c-q>", -- replay a macro
-            delete = "<c-d>", -- delete an entry
-            custom = {},
-          },
-          n = {
-            select = "<cr>",
-            paste = "p",
-            paste_behind = "P",
-            replay = "q",
-            delete = "d",
-            custom = {},
-          },
-        },
-        fzf = {
-          select = "default",
-          paste = "ctrl-p",
-          paste_behind = "ctrl-k",
-          custom = {},
-        },
-      },
-    },
-    config = function(_, opts)
-      require("neoclip").setup(opts)
-    end,
-  },
-  -- {
-  --   "~/workspace/luvcron/",
-  -- },
   {
     "stevearc/dressing.nvim",
     opts = {
@@ -828,7 +611,7 @@ lvim.plugins = {
   {
     "ray-x/lsp_signature.nvim",
     version = "*",
-    event = "BufRead",
+    event = "VeryLazy",
     opts = {
       bind = true, -- This is mandatory, otherwise border config won't get registered.
       handler_opts = {
@@ -838,39 +621,12 @@ lvim.plugins = {
     config = function(_, opts)
       require("lsp_signature").setup(opts)
     end,
-  },
-  {
-    "gennaro-tedesco/nvim-peekup",
-    version = "*",
-  },
-  {
-    "ggandor/leap.nvim",
-    dependencies = { "tpope/vim-repeat" },
-    config = function(_, _)
-      local status_ok, leap = pcall(require, "leap")
-      if status_ok then
-        leap.add_default_mappings()
-      end
-    end,
-    enabled = false,
-  },
-  {
-    "ggandor/leap-ast.nvim",
-    config = function(_, _)
-      lvim.builtin.which_key.mappings.s.l = {
-        function()
-          require("leap-ast").leap()
-        end,
-        "Leap w AST",
-      }
-      -- vim.keymap.set({ "n", "x", "o" }, "<leader>s",
-      -- end, {})
-    end,
     enabled = false,
   },
   {
     "ellisonleao/glow.nvim",
     ft = { "markdown" },
+    cmd = "Glow",
     opts = {
       border = "shadow", -- floating window border config
       -- style = "dark|light", -- filled automatically with your current editor background, you can override using glow json style
@@ -891,6 +647,146 @@ lvim.plugins = {
     "fladson/vim-kitty",
   },
   {
+    "niuiic/dap-utils.nvim",
+    dependencies = {
+      "niuiic/core.nvim",
+      "mfussenegger/nvim-dap",
+      "rcarriga/nvim-dap-ui",
+      "nvim-telescope/telescope.nvim",
+    },
+    config = function(_, opts)
+      require("dap-utils").setup(opts)
+    end,
+    opts = {
+      -- filetype = function while returns dap config
+      -- java = function(run)
+      --   -- local core = require "core"
+      --   run {
+      --     {
+      --       type = "java",
+      --       request = "launch",
+      --       name = "Debug Shoo init on special repo",
+      --       cwd = "${workspaceFolder}/target/classes",
+      --       runtimeArgs = "-r /home/maassens/workspace/architecture-management/test-init init",
+      --       vmargs = "-Xms2G -Xmx2G",
+      --       mainClass = "de.creditreform.architecture.management.shoo.ShooMain",
+      --       projectName = "shoo",
+      --       console = "integratedTerminal",
+      --     },
+      -- {
+      --   name = "Launch cmd",
+      --   type = "pwa-node",
+      --   request = "launch",
+      --   cwd = core.file.root_path(),
+      --   runtimeExecutable = "pnpm",
+      --   runtimeArgs = {
+      --     "debug:cmd",
+      --   },
+      -- },
+      -- {
+      --   name = "Launch file",
+      --   type = "pwa-node",
+      --   request = "launch",
+      --   program = "${file}",
+      --   cwd = "${workspaceFolder}",
+      -- },
+      -- {
+      --   name = "Attach",
+      --   type = "pwa-node",
+      --   request = "attach",
+      --   processId = require("dap.utils").pick_process,
+      --   cwd = "${workspaceFolder}",
+      -- },
+      -- }
+      -- end,
+      -- rust = function(run)
+      --   -- nvim-dap start to work after call `run`
+      --   -- the arguments of `run` is same to `dap.run`, see :h dap-api.
+      --   local config = {
+      --     -- `name` is required for config
+      --     name = "Launch",
+      --     type = "lldb",
+      --     request = "launch",
+      --     program = nil,
+      --     cwd = "${workspaceFolder}",
+      --     stopOnEntry = false,
+      --     args = {},
+      --   }
+      --   local core = require "core"
+      --   vim.cmd "!cargo build"
+      --   local root_path = core.file.root_path()
+      --   local target_dir = root_path .. "/target/debug/"
+      --   if core.file.file_or_dir_exists(target_dir) then
+      --     local executable = {}
+      --     for path, path_type in vim.fs.dir(target_dir) do
+      --       if path_type == "file" then
+      --         local perm = vim.fn.getfperm(target_dir .. path)
+      --         if string.match(perm, "x", 3) then
+      --           table.insert(executable, path)
+      --         end
+      --       end
+      --     end
+      --     if #executable == 1 then
+      --       config.program = target_dir .. executable[1]
+      --       run(config)
+      --     else
+      --       vim.ui.select(executable, { prompt = "Select executable" }, function(choice)
+      --         if not choice then
+      --           return
+      --         end
+      --         config.program = target_dir .. choice
+      --         run(config)
+      --       end)
+      --     end
+      --   else
+      --     vim.ui.input({ prompt = "Path to executable: ", default = root_path .. "/target/debug/" }, function(input)
+      --       config.program = input
+      --       run(config)
+      --     end)
+      --   end
+      -- end,
+      -- javascript = function(run)
+      --   local core = require "core"
+      --   run {
+      --     {
+      --       name = "Launch project",
+      --       type = "pwa-node",
+      --       request = "launch",
+      --       cwd = "${workspaceFolder}",
+      --       runtimeExecutable = "pnpm",
+      --       runtimeArgs = {
+      --         "debug",
+      --       },
+      --     },
+      --     {
+      --       name = "Launch cmd",
+      --       type = "pwa-node",
+      --       request = "launch",
+      --       cwd = core.file.root_path(),
+      --       runtimeExecutable = "pnpm",
+      --       runtimeArgs = {
+      --         "debug:cmd",
+      --       },
+      --     },
+      --     {
+      --       name = "Launch file",
+      --       type = "pwa-node",
+      --       request = "launch",
+      --       program = "${file}",
+      --       cwd = "${workspaceFolder}",
+      --     },
+      --     {
+      --       name = "Attach",
+      --       type = "pwa-node",
+      --       request = "attach",
+      --       processId = require("dap.utils").pick_process,
+      --       cwd = "${workspaceFolder}",
+      --     },
+      --   }
+      -- end,
+    },
+  },
+  {
     "simrat39/rust-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "mfussenegger/nvim-dap" },
     opts = {
@@ -898,8 +794,14 @@ lvim.plugins = {
 
         -- how to execute terminal commands
         -- options right now: termopen / quickfix / toggleterm / vimux
-        executor = require("rust-tools.executors").termopen,
-
+        executor = pcall(function()
+          local status_ok, executors = pcall(require, "rust-tools.executors")
+          if not status_ok then
+            return nil
+          else
+            return executors.termopen
+          end
+        end),
         -- callback to execute once rust-analyzer is done initializing the workspace
         -- The callback receives one parameter indicating the `health` of the server: "ok" | "warning" | "error"
         on_initialized = nil,
@@ -1056,9 +958,13 @@ lvim.plugins = {
         -- standalone file support
         -- setting it to false may improve startup time
         standalone = true,
+        capabilities = require("lvim.lsp").common_capabilities(),
         settings = {
           ["rust-analyzer"] = {
             inlayHints = { locationLinks = false },
+            lens = {
+              enable = true,
+            },
           },
         },
         on_init = require("lvim.lsp").common_on_init,
@@ -1080,14 +986,14 @@ lvim.plugins = {
               nowait = true,
             }
 
-            local vopts = {
-              mode = "v",
-              prefix = "<leader>",
-              buffer = vim.fn.bufnr(),
-              silent = true,
-              noremap = true,
-              nowait = true,
-            }
+            -- local vopts = {
+            --   mode = "v",
+            --   prefix = "<leader>",
+            --   buffer = vim.fn.bufnr(),
+            --   silent = true,
+            --   noremap = true,
+            --   nowait = true,
+            -- }
 
             local mappings = {
               r = {
@@ -1124,59 +1030,30 @@ lvim.plugins = {
             -- }
 
             which_key.register(mappings, nopts)
-            which_key.register(vmappings, vopts)
+            -- which_key.register(vmappings, vopts)
           end
         end,
       }, -- rust-analyzer options
       -- debugging stuff
       dap = {
-        adapter = require("rust-tools.dap").get_codelldb_adapter(
-          vim.env.HOME .. "/.local/lib/codelldb/extension/adapter/codelldb",
-          vim.env.HOME .. "/.local/lib/codelldb/extension/lldb/lib/liblldb.so"
-        ),
+        adapter = pcall(function()
+          local status_ok, dap = pcall(require, "rust-tools.dap")
+          if not status_ok then
+            return nil
+          else
+            return dap.get_codelldb_adapter(
+              vim.env.HOME .. "/.local/lib/codelldb/extension/adapter/codelldb",
+              vim.env.HOME .. "/.local/lib/codelldb/extension/lldb/lib/liblldb.so"
+            )
+          end
+        end),
       },
-      -- dap = {
-      --   adapter = {
-      --     type = "executable",
-      --     command = "lldb-vscode",
-      --     name = "rt_lldb",
-      --   },
-      -- },
     },
     config = function(_, opts)
       local rt = require "rust-tools"
       rt.setup(opts)
     end,
-  },
-  {
-    "jackMort/ChatGPT.nvim",
-    version = "*",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim",
-    },
-    opts = {},
-    config = function(_, opts)
-      require("chatgpt").setup(opts)
-    end,
-  },
-  {
-    "dense-analysis/neural",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "elpiloto/significant.nvim",
-    },
-    opts = {
-      source = {
-        openai = {
-          api_key = vim.env.OPENAI_API_KEY,
-        },
-      },
-    },
-    config = function(_, opts)
-      require("neural").setup(opts)
-    end,
+    enabled = "stefan" == vim.env.USER,
   },
   {
     "ethanholz/nvim-lastplace",
@@ -1188,35 +1065,6 @@ lvim.plugins = {
     config = function(_, opts)
       require("nvim-lastplace").setup(opts)
     end,
-  },
-  {
-    "chikko80/error-lens.nvim",
-    event = "LspAttach",
-    opts = {
-      -- this setting tries to auto adjust the colors
-      -- based on the diagnostic-highlight groups and your
-      -- theme background color with a color blender
-      enabled = true,
-      auto_adjust = {
-        enable = false,
-        theme_bg = nil, -- mandatory if enable true (e.g. #281478)
-        step = 5, -- inc: colors should be brighter/darker
-        total = 30, -- steps of blender
-      },
-      prefix = 4, -- distance code <-> diagnostic message
-      -- default colors
-      colors = {
-        error_fg = "#FF6363", -- diagnostic font color
-        error_bg = "#4B252C", -- diagnostic line color
-        warn_fg = "#FA973A",
-        warn_bg = "#403733",
-        info_fg = "#5B38E8",
-        info_bg = "#281478",
-        hint_fg = "#25E64B",
-        hint_bg = "#147828",
-      },
-    },
-    enabled = false,
   },
   {
     "epwalsh/obsidian.nvim",
@@ -1260,7 +1108,7 @@ lvim.plugins = {
         end,
         use_advanced_uri = false,
       }
-      if user == "stefan" then
+      if "stefan" == vim.env.USER then
         options.dir = vim.env.HOME .. "/Dokumente/obsidian/my-vault"
         options.templates.subdir = "my-templates-folder"
       else
@@ -1290,7 +1138,6 @@ lvim.plugins = {
   {
     "mrjones2014/smart-splits.nvim",
     dependencies = {},
-    version = ">=1.0.0",
     build = "./kitty/install-kittens.bash",
     enabled = not vim.g.neovide,
     opts = {
@@ -1378,10 +1225,110 @@ lvim.plugins = {
   },
   {
     "lvimuser/lsp-inlayhints.nvim",
+    ft = { "java", "javascript", "javascriptreact", "typescript", "typescriptreact", "rust" },
     config = function()
       require("lsp-inlayhints").setup()
     end,
     -- enabled = lvim.builtin.inlay_hints.active,
+  },
+  {
+    "amitds1997/remote-nvim.nvim",
+    version = "*", -- This keeps it pinned to semantic releases
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+      -- This would be an optional dependency eventually
+      "nvim-telescope/telescope.nvim",
+    },
+    opts = {
+      -- Configuration for SSH connections made using this plugin
+      ssh_config = {
+        -- Binary with this name would be searched on your runtime path and would be
+        -- used to run SSH commands. Rename this if your SSH binary is something else
+        ssh_binary = "ssh",
+        -- Similar to `ssh_binary`, but for copying over files onto remote server
+        scp_binary = "scp",
+        -- All your SSH config file paths.
+        ssh_config_file_paths = { "$HOME/.ssh/config" },
+        -- This helps the plugin to understand when the underlying binary expects
+        -- input from user. This is useful for password-based authentication and
+        -- key-based authentication.
+        -- Explanation for each prompt:
+        -- match - string - This would be matched with the SSH output to decide if
+        -- SSH is waiting for input. This is a plain match (not a regex one)
+        -- type - string - Takes two values "secret" or "plain". "secret" indicates
+        -- that the value you would enter is a secret and should not be logged into
+        -- your input history
+        -- input_prompt - string - What is the input prompt that should be shown to
+        -- user when this match happens
+        -- value_type - string - Takes two values "static" and "dynamic". "static"
+        -- means that the value can be cached for the same prompt for future commands
+        -- (e.g. your password) so that you do not have to keep typing it again and
+        -- again. This is retained in-memory and is not logged anywhere. When you
+        -- close the editor, it is cleared from memory. "dynamic" is for something
+        -- like MFA codes which change every time.
+        ssh_prompts = {
+          {
+            match = "password:",
+            type = "secret",
+            input_prompt = "Enter password: ",
+            value_type = "static",
+            value = "",
+          },
+          {
+            match = "continue connecting (yes/no/[fingerprint])?",
+            type = "plain",
+            input_prompt = "Do you want to continue connection (yes/no)? ",
+            value_type = "static",
+            value = "",
+          },
+        },
+      },
+      -- Installation script location on local machine (If you have your own custom
+      -- installation script and you do not want to use the packaged install script.
+      -- It should accept the same inputs as the packaged install script though)
+      neovim_install_script_path = vim.fn.stdpath "config"
+        .. package.config:sub(1, 1)
+        .. "scripts"
+        .. package.config:sub(1, 1)
+        .. "neovim_install.sh",
+      -- Where is your personal Neovim config stored?
+      neovim_user_config_path = vim.fn.stdpath "config",
+      local_client_config = {
+        -- modify this function to override how your client launches
+        -- function should accept two arguments function(local_port, workspace_config)
+        -- local_port is the port on which the remote server is available locally
+        -- workspace_config contains the workspace config. For all attributes present
+        -- in it, see WorkspaceConfig in ./lua/remote-nvim/config.lua.
+        -- See examples of callback in https://github.com/amitds1997/remote-nvim.nvim/wiki/Configuration-recipes
+        callback = nil,
+        -- [Subject to change]: These values may be subject to change, so there
+        -- might be a breaking change. Right now, it uses the [plenary.nvim#win_float.percentage_range_window](https://github.com/nvim-lua/plenary.nvim/blob/267282a9ce242bbb0c5dc31445b6d353bed978bb/lua/plenary/window/float.lua#L138C25-L138C25)
+        default_client_config = {
+          col_percent = 0.9,
+          row_percent = 0.9,
+          win_opts = {
+            winblend = 0,
+          },
+          border_opts = {
+            topleft = "╭",
+            topright = "╮",
+            top = "─",
+            left = "│",
+            right = "│",
+            botleft = "╰",
+            botright = "╯",
+            bot = "─",
+          },
+        },
+      },
+    },
+    config = true, -- This calls the default setup(); make sure to call it
+  },
+  {
+    "cseickel/diagnostic-window.nvim",
+    dependencies = { "MunifTanjim/nui.nvim" },
   },
 }
 
@@ -1408,7 +1355,7 @@ if vim.g.neovide then
   -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
   -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
   -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
-  if "stefan" == user then
+  if "stefan" == vim.env.USER then
     vim.o.guifont = "FiraCode Nerd Font Mono:h16"
   else
     -- vim.o.guifont = "IntoneMono Nerd Font Mono:h14"
@@ -1433,7 +1380,7 @@ if vim.g.nvui then
   -- Configure nvui here
   vim.cmd [[NvuiCmdFontFamily FiraCode Nerd Font]]
   vim.cmd [[set linespace=1]]
-  if "stefan" == user then
+  if "stefan" == vim.env.USER then
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h16]]
   else
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
@@ -1464,7 +1411,7 @@ if vim.g.nvui then
 end
 
 if vim.g.fvim_loaded then
-  if "stefan" == user then
+  if "stefan" == vim.env.USER then
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h18]]
   else
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
