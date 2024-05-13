@@ -57,7 +57,7 @@ local workspace_dir = vim.fn.stdpath "cache" .. "/jdtls/workspace/" .. project_n
 -- load local settings
 local settings = nil
 if status_nlsp then
-  settings = nlsp.get_settings(root_dir, "jdtls")
+  settings = nlsp.get_settings("/home/stefan/.config/lvim/", "jdtls")
   command 'echo "loaded jdtls settings from nlsp"'
   if settings.java.configuration.runtimes == nil then
     settings.java.configuration.runtimes = {
@@ -91,7 +91,10 @@ end
 -- Debug bundle
 -- Run :MasonInstall java-debug-adapter
 local extra_bundles = vim.split(
-  vim.fn.glob(require("mason-registry").get_package("java-test"):get_install_path() .. "/extension/server/*.jar"),
+  vim.fn.glob(
+    require("mason-registry").get_package("java-test"):get_install_path()
+      .. "/extension/server/com.microsoft.java.test*.jar"
+  ),
   "\n",
   {}
 )
@@ -172,25 +175,25 @@ local config = {
       onCompletionItemSelectedCommand = "editor.action.triggerParameterHints",
     }, jdtls.extendedClientCapabilities),
   },
-  handlers = {
-    ["language/status"] = vim.schedule_wrap(function(_, s)
-      if "ServiceReady" == s.type then
-        -- command "LspSettings update jdtls"
-        require("jdtls.dap").setup_dap_main_class_configs {
-          verbose = true,
-          on_ready = function()
-            command "echohl ModeMsg"
-            command(string.format('echo "jdt.ls %s"', s.message))
-            command "echohl None"
-          end,
-        }
-      end
-    end),
-    ["$/progress"] = vim.schedule_wrap(function(_, result)
-      -- command "echohl ModeMsg"
-      -- command(string.format('echo "%s"', result.message))
-      -- command "echohl None"
-    end),
+  -- handlers = {
+  --   ["language/status"] = vim.schedule_wrap(function(_, s)
+  --     if "ServiceReady" == s.type then
+  --       -- command "LspSettings update jdtls"
+  --       require("jdtls.dap").setup_dap_main_class_configs {
+  --         verbose = true,
+  --         on_ready = function()
+  --           command "echohl ModeMsg"
+  --           command(string.format('echo "jdt.ls %s"', s.message))
+  --           command "echohl None"
+  --         end,
+  --       }
+  --     end
+  --   end),
+  --   ["$/progress"] = vim.schedule_wrap(function(_, result)
+  --     -- command "echohl ModeMsg"
+  --     -- command(string.format('echo "%s"', result.message))
+  --     -- command "echohl None"
+  --   end),
   },
   capabilities = {
     workspace = {

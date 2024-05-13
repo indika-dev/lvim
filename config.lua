@@ -1,12 +1,13 @@
 -- general
 lvim.log.level = "warn"
 vim.opt.relativenumber = true
-if "stefan" == user then
+if "stefan" == vim.env.USER then
   vim.opt.rtp:append "/usr/bin/fzf"
 else
   vim.opt.rtp:append "/home/linuxbrew/.linuxbrew/opt/fzf"
 end
 vim.opt.termguicolors = true
+vim.opt.wrap = true
 lvim.format_on_save = true
 lvim.leader = "space"
 lvim.builtin.alpha.active = true
@@ -86,16 +87,16 @@ if _time.hour >= 6 and _time.hour < 20 then
 else
   lvim.colorscheme = "kanagawa-dragon"
 end
-local user = vim.env.USER
 
 vim.keymap.set("n", "T", function()
   vim.lsp.buf.hover()
 end, { noremap = true, silent = true })
 -- lvim.builtin.which_key.mappings["T"] = { "<cmd>lua vim.lsp.buf.hover()<cr>", "Show typeinfo" }
 lvim.builtin.which_key.mappings.b.s = { "<cmd>Telescope buffers<cr>", "Open Bufferlist" }
-lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+-- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["L"].K = { "<cmd>Telescope commands<CR>", "View commands" }
 lvim.builtin.which_key.mappings["L"].a = { "<cmd>Telescope autocommands<CR>", "View autocommands" }
+lvim.builtin.which_key.mappings["R"] = { "<cmd>Telescope registers<CR>", " View registers" }
 lvim.builtin.which_key.mappings["t"] = {
   name = "+Trouble",
   r = { "<cmd>Trouble lsp_references<cr>", "References" },
@@ -107,8 +108,14 @@ lvim.builtin.which_key.mappings["t"] = {
 }
 if lvim.builtin.inlay_hints.active then
   lvim.builtin.which_key.mappings["I"] = { "<cmd>lua require('lsp-inlayhints').toggle()<cr>", " Toggle Inlay" }
-  -- lvim.builtin.which_key.mappings["I"] = { "<cmd>lua require('vim.lsp._inlay_hint').refresh()<cr>", " Toggle Inlay" }
 end
+
+lvim.builtin.which_key.mappings["P"] = {
+  name = " Session",
+  c = { "<cmd>lua require('persistence').load()<cr>", "Restore last session for current dir" },
+  l = { "<cmd>lua require('persistence').load({ last = true })<cr>", "Restore last session" },
+  Q = { "<cmd>lua require('persistence').stop()<cr>", "Quit without saving session" },
+}
 
 lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "dap")
@@ -116,8 +123,6 @@ lvim.builtin.telescope.on_config_done = function(telescope)
   pcall(telescope.load_extension, "neoclip")
   pcall(telescope.load_extension, "fzf")
   pcall(telescope.load_extension, "refactoring")
-  -- pcall(telescope.load_extension, "asynctasks")
-  --  pcall(telescope.load_extension, "noice")
   pcall(telescope.load_extension, "project")
 end
 
@@ -328,32 +333,6 @@ end
 -- Additional Plugins
 lvim.plugins = {
   {
-    "Shatur/neovim-ayu",
-    priority = 1000, -- Ensure it loads first
-    opts = {
-      options = {
-        theme = "ayu",
-      },
-    },
-    config = function(_, opts)
-      local status_ok, lualine = pcall(require, "lualine")
-      if status_ok then
-        lualine.setup(opts)
-      end
-    end,
-  },
-  -- {
-  --   "folke/tokyonight.nvim",
-  --   version = "*",
-  --   config = function()
-  --     vim.cmd [[colorscheme tokyonight-moon]]
-  --   end,
-  --   cond = function()
-  --     local _time = os.date "*t"
-  --     return (_time.hour >= 6 and _time.hour < 18)
-  --   end,
-  -- },
-  {
     "rebelot/kanagawa.nvim",
     priority = 1000, -- Ensure it loads first
     opts = {
@@ -387,171 +366,247 @@ lvim.plugins = {
     config = function(_, opts)
       require("kanagawa").setup(opts)
     end,
-    -- cond = function()
-    --   local _time = os.date "*t"
-    --   return ((_time.hour >= 18 and _time.hour < 24) or (_time.hour >= 0 and _time.hour < 6))
-    -- end,
-  },
-  {
-    "olimorris/onedarkpro.nvim",
-    priority = 1000, -- Ensure it loads first
   },
   {
     "nvim-telescope/telescope-dap.nvim",
   },
   {
     "folke/trouble.nvim",
-    version = "^2.2.1",
     cmd = "TroubleToggle",
+  },
+  { "MunifTanjim/nui.nvim" },
+  {
+    "stevearc/dressing.nvim",
+    opts = {
+      input = {
+        -- Set to false to disable the vim.ui.input implementation
+        enabled = true,
+
+        -- Default prompt string
+        default_prompt = "Input:",
+
+        -- Can be 'left', 'right', or 'center'
+        title_pos = "left",
+
+        -- When true, <Esc> will close the modal
+        insert_only = true,
+
+        -- When true, input will start in insert mode.
+        start_in_insert = true,
+
+        -- These are passed to nvim_open_win
+        border = "rounded",
+        -- 'editor' and 'win' will default to being centered
+        relative = "cursor",
+
+        -- These can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
+        prefer_width = 40,
+        width = nil,
+        -- min_width and max_width can be a list of mixed types.
+        -- min_width = {20, 0.2} means "the greater of 20 columns or 20% of total"
+        max_width = { 140, 0.9 },
+        min_width = { 20, 0.2 },
+
+        buf_options = {},
+        win_options = {
+          -- Window transparency (0-100)
+          winblend = 10,
+          -- Disable line wrapping
+          wrap = false,
+          -- Indicator for when text exceeds window
+          list = true,
+          listchars = "precedes:…,extends:…",
+          -- Increase this for more context when text scrolls off the window
+          sidescrolloff = 0,
+        },
+
+        -- Set to `false` to disable
+        mappings = {
+          n = {
+            ["<Esc>"] = "Close",
+            ["<CR>"] = "Confirm",
+          },
+          i = {
+            ["<C-c>"] = "Close",
+            ["<CR>"] = "Confirm",
+            ["<Up>"] = "HistoryPrev",
+            ["<Down>"] = "HistoryNext",
+          },
+        },
+
+        override = function(conf)
+          -- This is the config that will be passed to nvim_open_win.
+          -- Change values here to customize the layout
+          return conf
+        end,
+
+        -- see :help dressing_get_config
+        get_config = nil,
+      },
+      select = {
+        -- Set to false to disable the vim.ui.select implementation
+        enabled = true,
+
+        -- Priority list of preferred vim.select implementations
+        backend = { "telescope", "fzf_lua", "fzf", "builtin", "nui" },
+
+        -- Trim trailing `:` from prompt
+        trim_prompt = true,
+
+        -- Options for telescope selector
+        -- These are passed into the telescope picker directly. Can be used like:
+        -- telescope = require('telescope.themes').get_ivy({...})
+        telescope = nil,
+
+        -- Options for fzf selector
+        fzf = {
+          window = {
+            width = 0.5,
+            height = 0.4,
+          },
+        },
+
+        -- Options for fzf-lua
+        fzf_lua = {
+          -- winopts = {
+          --   height = 0.5,
+          --   width = 0.5,
+          -- },
+        },
+
+        -- Options for nui Menu
+        nui = {
+          position = "50%",
+          size = nil,
+          relative = "editor",
+          border = {
+            style = "rounded",
+          },
+          buf_options = {
+            swapfile = false,
+            filetype = "DressingSelect",
+          },
+          win_options = {
+            winblend = 10,
+          },
+          max_width = 80,
+          max_height = 40,
+          min_width = 40,
+          min_height = 10,
+        },
+
+        -- Options for built-in selector
+        builtin = {
+          -- Display numbers for options and set up keymaps
+          show_numbers = true,
+          -- These are passed to nvim_open_win
+          border = "rounded",
+          -- 'editor' and 'win' will default to being centered
+          relative = "editor",
+
+          buf_options = {},
+          win_options = {
+            -- Window transparency (0-100)
+            winblend = 10,
+            cursorline = true,
+            cursorlineopt = "both",
+          },
+
+          -- These can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
+          -- the min_ and max_ options can be a list of mixed types.
+          -- max_width = {140, 0.8} means "the lesser of 140 columns or 80% of total"
+          width = nil,
+          max_width = { 140, 0.8 },
+          min_width = { 40, 0.2 },
+          height = nil,
+          max_height = 0.9,
+          min_height = { 10, 0.2 },
+
+          -- Set to `false` to disable
+          mappings = {
+            ["<Esc>"] = "Close",
+            ["<C-c>"] = "Close",
+            ["<CR>"] = "Confirm",
+          },
+
+          override = function(conf)
+            -- This is the config that will be passed to nvim_open_win.
+            -- Change values here to customize the layout
+            return conf
+          end,
+        },
+
+        -- Used to override format_item. See :help dressing-format
+        format_item_override = {},
+
+        -- see :help dressing_get_config
+        get_config = nil,
+      },
+    },
+    config = function(_, opts)
+      require("dressing").setup(opts)
+    end,
   },
   {
     "norcalli/nvim-colorizer.lua",
+    opts = {
+      { "css", "scss", "html", "javascript" },
+      {
+        RGB = true, -- #RGB hex codes
+        RRGGBB = true, -- #RRGGBB hex codes
+        RRGGBBAA = true, -- #RRGGBBAA hex codes
+        rgb_fn = true, -- CSS rgb() and rgba() functions
+        hsl_fn = true, -- CSS hsl() and hsla() functions
+        css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+        css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+      },
+    },
     config = function(_, _)
       require("colorizer").setup()
     end,
-  },
-  {
-    "wfxr/minimap.vim",
-    build = "cargo install --locked code-minimap",
-    -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
-    config = function(_, _)
-      vim.cmd [[
-        let g:minimap_width = 10
-        let g:minimap_auto_start = 0
-        let g:minimap_auto_start_win_enter = 0
-      ]]
-    end,
-    enabled = false,
-  },
-  {
-    "skywind3000/asynctasks.vim",
-    dependencies = { "skywind3000/asyncbuild.vim" },
-    config = function(_, _)
-      vim.cmd [[
-          let g:asyncbuild_open = 8
-          let g:asynctask_template = '~/.config/lvim/task_template.ini'
-          let g:asynctasks_extra_config = ['~/.config/lvim/tasks.ini']
-        ]]
-      lvim.builtin.which_key.mappings["m"] = {
-        name = " Make",
-        f = { "<cmd>AsyncTask file-build<cr>", "File" },
-        p = { "<cmd>AsyncTask project-build<cr>", "Project" },
-        e = { "<cmd>AsyncTaskEdit<cr>", "Edit" },
-        l = { "<cmd>AsyncTaskList<cr>", "List" },
-      }
-      lvim.builtin.which_key.mappings["r"] = {
-        name = " build",
-        f = { "<cmd>AsyncTask file-build<cr>", "File" },
-        p = { "<cmd>AsyncTask project-build<cr>", "Project" },
-      }
-    end,
-    enabled = lvim.custom.async_tasks.active,
-  },
-  {
-    "GustavoKatel/telescope-asynctasks.nvim",
-    enabled = lvim.custom.async_tasks.active,
   },
   {
     "sindrets/diffview.nvim",
     event = "BufRead",
   },
   {
-    "folke/zen-mode.nvim",
-    version = "^1.1.1",
-    opts = {
-      window = {
-        backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
-        -- height and width can be:
-        -- * an absolute number of cells when > 1
-        -- * a percentage of the width / height of the editor when <= 1
-        -- * a function that returns the width or the height
-        width = 120, -- width of the Zen window
-        height = 1, -- height of the Zen window
-        -- by default, no options are changed for the Zen window
-        -- uncomment any of the options below, or add other vim.wo options you want to apply
-        options = {
-          -- signcolumn = "no", -- disable signcolumn
-          -- number = false, -- disable number column
-          -- relativenumber = false, -- disable relative numbers
-          -- cursorline = false, -- disable cursorline
-          -- cursorcolumn = false, -- disable cursor column
-          -- foldcolumn = "0", -- disable fold column
-          -- list = false, -- disable whitespace characters
-        },
-      },
-      plugins = {
-        -- disable some global vim options (vim.o...)
-        -- comment the lines to not apply the options
-        options = {
-          enabled = true,
-          ruler = false, -- disables the ruler text in the cmd line area
-          showcmd = false, -- disables the command in the last line of the screen
-        },
-        twilight = { enabled = true }, -- enable to start Twilight when zen mode opens
-        gitsigns = { enabled = false }, -- disables git signs
-        tmux = { enabled = false }, -- disables the tmux statusline
-        -- this will change the font size on kitty when in zen mode
-        -- to make this work, you need to set the following kitty options:
-        -- - allow_remote_control socket-only
-        -- - listen_on unix:/tmp/kitty
-        kitty = {
-          enabled = false,
-          font = "+4", -- font size increment
-        },
-        -- this will change the font size on alacritty when in zen mode
-        -- requires  Alacritty Version 0.10.0 or higher
-        -- uses `alacritty msg` subcommand to change font size
-        alacritty = {
-          enabled = false,
-          font = "14", -- font size
-        },
-      },
-      -- callback where you can add custom code when the Zen window opens
-      on_open = function(win) end,
-      -- callback where you can add custom code when the Zen window closes
-      on_close = function() end,
-    },
-    config = function(_, opts)
-      require("zen-mode").setup(opts)
-    end,
-  },
-  {
     "sidebar-nvim/sidebar.nvim",
     dependencies = { "sidebar-nvim/sections-dap" },
-    config = function(_, _)
+    opts = {
+      disable_default_keybindings = 0,
+      bindings = {
+        ["q"] = function()
+          require("sidebar-nvim").close()
+        end,
+      },
+      open = false,
+      side = "right",
+      initial_width = 35,
+      hide_statusline = true,
+      update_interval = 1000,
+      sections = { "todos", "git", "diagnostics", "containers", require "dap-sidebar-nvim.breakpoints" },
+      section_separator = { "", "-----", "" },
+      containers = {
+        icon = "",
+        attach_shell = "/usr/bin/sh",
+        use_podman = true,
+        show_all = true,
+        interval = 5000,
+      },
+      datetime = { icon = "", format = "%a %b %d, %H:%M", clocks = { { name = "local" } } },
+      todos = { icon = "", ignored_paths = { "~" } },
+      dap = {
+        breakpoints = {
+          icon = require("user.lsp_kind").icons.exit,
+        },
+      },
+    },
+    config = function(_, opts)
       lvim.builtin.which_key.mappings["S"] = {
         "<cmd>SidebarNvimToggle<CR>",
         require("user.lsp_kind").cmp_kind.Struct .. "Sidebar",
       }
-      require("sidebar-nvim").setup {
-        disable_default_keybindings = 0,
-        bindings = {
-          ["q"] = function()
-            require("sidebar-nvim").close()
-          end,
-        },
-        open = false,
-        side = "right",
-        initial_width = 35,
-        hide_statusline = true,
-        update_interval = 1000,
-        sections = { "todos", "git", "diagnostics", "containers", require "dap-sidebar-nvim.breakpoints" },
-        section_separator = { "", "-----", "" },
-        containers = {
-          icon = "",
-          attach_shell = "/usr/bin/sh",
-          use_podman = true,
-          show_all = true,
-          interval = 5000,
-        },
-        datetime = { icon = "", format = "%a %b %d, %H:%M", clocks = { { name = "local" } } },
-        todos = { icon = "", ignored_paths = { "~" } },
-        dap = {
-          breakpoints = {
-            icon = require("user.lsp_kind").icons.exit,
-          },
-        },
-      }
+      require("sidebar-nvim").setup(opts)
     end,
   },
   {
@@ -559,40 +614,31 @@ lvim.plugins = {
     ft = { "typescript", "javascript", "lua", "c", "cpp", "go", "python", "java", "php" },
     event = "BufRead",
     opts = {},
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    },
     config = function(_, opts)
-      -- -- remap to open the Telescope refactoring menu in visual mode
-      -- vim.api.nvim_set_keymap(
-      --   "v",
-      --   "<leader>rr",
-      --   "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
-      --   { noremap = true }
-      -- )
+      -- remap to open the Telescope refactoring menu in visual mode
+      vim.api.nvim_set_keymap(
+        "v",
+        "<leader>rr",
+        "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>",
+        { noremap = true }
+      )
       -- prompt for a refactor to apply when the remap is triggered
-      -- vim.api.nvim_set_keymap(
-      --   "v",
-      --   "<leader>rr",
-      --   "<Cmd>lua require('refactoring').select_refactor()<CR>",
-      --   { noremap = true, silent = true, expr = false }
-      -- )
+      vim.api.nvim_set_keymap(
+        "v",
+        "<leader>rr",
+        "<Cmd>lua require('refactoring').select_refactor()<CR>",
+        { noremap = true, silent = true, expr = false }
+      )
       require("refactoring").setup(opts)
     end,
   },
   {
-    "vim-pandoc/vim-pandoc",
-    enabled = false,
-  },
-  {
-    "vim-pandoc/vim-pandoc-syntax",
-    enabled = false,
-  },
-  {
-    "dhruvasagar/vim-table-mode",
-    commit = "9555a3e6e5bcf285ec181b7fc983eea90500feb4",
-    enabled = false,
-  },
-  {
     "kevinhwang91/nvim-bqf",
-    version = "*",
+    ft = { "qf" },
     event = { "BufRead", "BufNew" },
     opts = {
       auto_enable = true,
@@ -620,10 +666,6 @@ lvim.plugins = {
   },
   {
     "nvim-telescope/telescope-project.nvim",
-    -- event = "BufWinEnter",
-    -- config = function()
-    --   vim.cmd [[packadd telescope.nvim]]
-    -- end,
   },
   {
     "nvim-telescope/telescope-ui-select.nvim",
@@ -652,124 +694,17 @@ lvim.plugins = {
   },
   {
     "folke/persistence.nvim",
-    version = "*",
     event = "BufReadPre", -- this will only start session saving when an actual file was opened
     lazy = true,
-    opts = {
-      dir = vim.fn.expand(vim.fn.stdpath "config" .. "/session/"),
-      options = { "buffers", "curdir", "tabpages", "winsize" },
-    },
-    config = function(_, opts)
-      require("persistence").setup(opts)
+    config = function()
+      require("persistence").setup {
+        dir = vim.fn.expand(vim.fn.stdpath "config" .. "/session/"),
+        options = { "buffers", "curdir", "tabpages", "winsize" },
+      }
     end,
   },
-  -- {
-  --   "jay-babu/mason-null-ls.nvim",
-  --   event = { "BufReadPre", "BufNewFile" },
-  --   dependencies = {
-  --     "williamboman/mason.nvim",
-  --     "jose-elias-alvarez/null-ls.nvim",
-  --   },
-  --   opts = {
-  --     ensure_installed = {
-  --       "shellcheck",
-  --       "shfmt",
-  --       "prettier",
-  --       "eslint_d",
-  --       "fixjson",
-  --     },
-  --     automatic_installation = false,
-  --     automatic_setup = true,
-  --   },
-  --   config = function(_, opts)
-  --     require("mason-null-ls").setup(opts)
-  --   end,
-  -- },
   {
     "mfussenegger/nvim-jdtls",
-    -- ft = { "java" },
-    -- config = function(_, _)
-    --   require("lspconfig").jdtls.setup = function() end
-    -- end,
-  },
-  {
-    "AckslD/nvim-neoclip.lua",
-    dependencies = { { "tami5/sqlite.lua", module = "sqlite" } },
-    opts = {
-      history = 1000,
-      enable_persistent_history = false,
-      length_limit = 1048576,
-      continuous_sync = false,
-      db_path = vim.fn.stdpath "data" .. "/databases/neoclip.sqlite3",
-      filter = nil,
-      preview = true,
-      default_register = '"',
-      default_register_macros = "q",
-      enable_macro_history = true,
-      content_spec_column = false,
-      on_paste = {
-        set_reg = false,
-      },
-      on_replay = {
-        set_reg = false,
-      },
-      keys = {
-        telescope = {
-          i = {
-            select = "<cr>",
-            paste = "<c-p>",
-            paste_behind = "<c-k>",
-            replay = "<c-q>", -- replay a macro
-            delete = "<c-d>", -- delete an entry
-            custom = {},
-          },
-          n = {
-            select = "<cr>",
-            paste = "p",
-            paste_behind = "P",
-            replay = "q",
-            delete = "d",
-            custom = {},
-          },
-        },
-        fzf = {
-          select = "default",
-          paste = "ctrl-p",
-          paste_behind = "ctrl-k",
-          custom = {},
-        },
-      },
-    },
-    config = function(_, opts)
-      require("neoclip").setup(opts)
-    end,
-  },
-  -- {
-  --   "~/workspace/luvcron/",
-  -- },
-  {
-    "stevearc/dressing.nvim",
-    opts = {
-      input = {
-        get_config = function()
-          if vim.api.nvim_buf_get_option(0, "filetype") == "neo-tree" then
-            return { enabled = false }
-          end
-        end,
-      },
-      select = {
-        format_item_override = {
-          codeaction = function(action_tuple)
-            local title = action_tuple[2].title:gsub("\r\n", "\\r\\n")
-            local client = vim.lsp.get_client_by_id(action_tuple[1])
-            return string.format("%s\t[%s]", title:gsub("\n", "\\n"), client.name)
-          end,
-        },
-      },
-    },
-    config = function(_, opts)
-      require("dressing").setup(opts)
-    end,
   },
   {
     "liuchengxu/vista.vim",
@@ -828,7 +763,7 @@ lvim.plugins = {
   {
     "ray-x/lsp_signature.nvim",
     version = "*",
-    event = "BufRead",
+    event = "VeryLazy",
     opts = {
       bind = true, -- This is mandatory, otherwise border config won't get registered.
       handler_opts = {
@@ -840,37 +775,9 @@ lvim.plugins = {
     end,
   },
   {
-    "gennaro-tedesco/nvim-peekup",
-    version = "*",
-  },
-  {
-    "ggandor/leap.nvim",
-    dependencies = { "tpope/vim-repeat" },
-    config = function(_, _)
-      local status_ok, leap = pcall(require, "leap")
-      if status_ok then
-        leap.add_default_mappings()
-      end
-    end,
-    enabled = false,
-  },
-  {
-    "ggandor/leap-ast.nvim",
-    config = function(_, _)
-      lvim.builtin.which_key.mappings.s.l = {
-        function()
-          require("leap-ast").leap()
-        end,
-        "Leap w AST",
-      }
-      -- vim.keymap.set({ "n", "x", "o" }, "<leader>s",
-      -- end, {})
-    end,
-    enabled = false,
-  },
-  {
     "ellisonleao/glow.nvim",
     ft = { "markdown" },
+    cmd = "Glow",
     opts = {
       border = "shadow", -- floating window border config
       -- style = "dark|light", -- filled automatically with your current editor background, you can override using glow json style
@@ -893,6 +800,7 @@ lvim.plugins = {
   {
     "simrat39/rust-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "mfussenegger/nvim-dap" },
+    after = { "williamboman/mason.nvim" },
     opts = {
       tools = { -- rust-tools options
 
@@ -906,6 +814,9 @@ lvim.plugins = {
 
         -- automatically call RustReloadWorkspace when writing to a Cargo.toml file.
         reload_workspace_from_cargo_toml = true,
+        runnables = {
+          use_telescope = true,
+        },
 
         -- These apply to the default RustSetInlayHints command
         inlay_hints = {
@@ -1131,51 +1042,13 @@ lvim.plugins = {
       -- debugging stuff
       dap = {
         adapter = require("rust-tools.dap").get_codelldb_adapter(
-          vim.env.HOME .. "/.local/lib/codelldb/extension/adapter/codelldb",
-          vim.env.HOME .. "/.local/lib/codelldb/extension/lldb/lib/liblldb.so"
+          vim.env.HOME .. "/.local/share/nvim/mason/packages/codelldb/codelldb",
+          vim.env.HOME .. "/.local/share/nvim/mason/packages/codelldb/extension/lldb/lib/liblldb.so"
         ),
       },
-      -- dap = {
-      --   adapter = {
-      --     type = "executable",
-      --     command = "lldb-vscode",
-      --     name = "rt_lldb",
-      --   },
-      -- },
     },
     config = function(_, opts)
-      local rt = require "rust-tools"
-      rt.setup(opts)
-    end,
-  },
-  {
-    "jackMort/ChatGPT.nvim",
-    version = "*",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim",
-    },
-    opts = {},
-    config = function(_, opts)
-      require("chatgpt").setup(opts)
-    end,
-  },
-  {
-    "dense-analysis/neural",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "elpiloto/significant.nvim",
-    },
-    opts = {
-      source = {
-        openai = {
-          api_key = vim.env.OPENAI_API_KEY,
-        },
-      },
-    },
-    config = function(_, opts)
-      require("neural").setup(opts)
+      require("rust-tools").setup(opts)
     end,
   },
   {
@@ -1188,35 +1061,6 @@ lvim.plugins = {
     config = function(_, opts)
       require("nvim-lastplace").setup(opts)
     end,
-  },
-  {
-    "chikko80/error-lens.nvim",
-    event = "LspAttach",
-    opts = {
-      -- this setting tries to auto adjust the colors
-      -- based on the diagnostic-highlight groups and your
-      -- theme background color with a color blender
-      enabled = true,
-      auto_adjust = {
-        enable = false,
-        theme_bg = nil, -- mandatory if enable true (e.g. #281478)
-        step = 5, -- inc: colors should be brighter/darker
-        total = 30, -- steps of blender
-      },
-      prefix = 4, -- distance code <-> diagnostic message
-      -- default colors
-      colors = {
-        error_fg = "#FF6363", -- diagnostic font color
-        error_bg = "#4B252C", -- diagnostic line color
-        warn_fg = "#FA973A",
-        warn_bg = "#403733",
-        info_fg = "#5B38E8",
-        info_bg = "#281478",
-        hint_fg = "#25E64B",
-        hint_bg = "#147828",
-      },
-    },
-    enabled = false,
   },
   {
     "epwalsh/obsidian.nvim",
@@ -1260,7 +1104,7 @@ lvim.plugins = {
         end,
         use_advanced_uri = false,
       }
-      if user == "stefan" then
+      if "stefan" == vim.env.USER then
         options.dir = vim.env.HOME .. "/Dokumente/obsidian/my-vault"
         options.templates.subdir = "my-templates-folder"
       else
@@ -1408,10 +1252,9 @@ if vim.g.neovide then
   -- nnoremap <a-cr> :NeovideToggleFullscreen<cr>
   -- vim.o.guifont = "JetBrainsMono Nerd Font:h12"
   -- vim.o.guifont = "CaskaydiaCove Nerd Font:h14"
-  if "stefan" == user then
+  if "stefan" == vim.env.USER then
     vim.o.guifont = "FiraCode Nerd Font Mono:h16"
   else
-    -- vim.o.guifont = "IntoneMono Nerd Font Mono:h14"
     vim.o.guifont = "FiraCode Nerd Font Mono:h14"
   end
   -- vim.o.guifont ="GoMono NF:h16"
@@ -1433,7 +1276,7 @@ if vim.g.nvui then
   -- Configure nvui here
   vim.cmd [[NvuiCmdFontFamily FiraCode Nerd Font]]
   vim.cmd [[set linespace=1]]
-  if "stefan" == user then
+  if "stefan" == vim.env.USER then
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h16]]
   else
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
@@ -1464,7 +1307,7 @@ if vim.g.nvui then
 end
 
 if vim.g.fvim_loaded then
-  if "stefan" == user then
+  if "stefan" == vim.env.USER then
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h18]]
   else
     vim.cmd [[set guifont=FiraCode\ Nerd\ Font:h14]]
